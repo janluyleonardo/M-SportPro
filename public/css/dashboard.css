@@ -1,0 +1,40 @@
+.content-publishing-facebook{
+  width:500px;
+  height:463px;
+}
+.content-publishing-facebook-video{
+  width:500px;
+  height:279px;
+}
+.content-publishing-insta-video{
+  background-color: aquamarine;
+  align-items: center !important;
+  width:fit-content !important;
+  height:fit-content !important;
+}
+@media screen and (max-width:767px) {
+  .content-publishing-facebook{
+    width:100%;
+    height:333px;
+  }
+  .content-publishing-facebook-video{
+    width:100%;
+    height:175px;
+  }
+  .content-publishing-insta-video{
+    background-color: rgb(127, 191, 255);
+  }
+}
+@media (min-width:768px) and (max-width:1439px) {
+  .content-publishing-facebook{
+    width:100%;
+    height:333px;
+  }
+  .content-publishing-facebook-video{
+    width:100%;
+    height:142px;
+  }
+  .content-publishing-insta-video{
+    background-color: rgb(255, 127, 127);
+  }
+  }

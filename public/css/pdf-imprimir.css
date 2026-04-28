@@ -1,0 +1,80 @@
+@page {
+  margin: 0cm 0cm;
+  font-family: Arial;
+}
+
+header {
+  position: fixed;
+  top: 0cm;
+  left: 0cm;
+  right: 0cm;
+  height: 2cm;
+  /* background-color: #2a0927; */
+  color: #000;
+  text-align: center;
+  line-height: 30px;
+}
+
+footer {
+  position: fixed;
+  bottom: 0cm;
+  left: 0cm;
+  right: 0cm;
+  height: 2cm;
+  /* background-color: #2a0927; */
+  color: #000;
+  text-align: center;
+  line-height: 35px;
+}
+
+.tabla-datos {
+  background-color: rgba(255, 255, 255, 0.7);
+  margin-top: 8%;
+}
+
+.div-img {
+  display: block;
+  justify-content: left;
+  margin: 0 auto;
+}
+
+.photo{
+  width: 2cm;
+  height: 2.5cm;
+  border:2px solid #000;
+}
+
+div.firmas{
+  background-color: rgba(255, 255, 255, 0.7);
+  height: 8%;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: -15px !important;
+  border-bottom: 2px solid #000;
+}
+
+.h-pdf-left {
+  float: left;
+  margin-top: 1%;
+  margin-left:8%;
+}
+
+.h-pdf-center {
+  float: center;
+  width: 84%;
+  height: 100px;
+  margin-top: 1%;
+  margin-left: 8%;
+  margin-right: 8%;
+  z-index: -1;
+}
+
+.h-pdf-right {
+  margin-top: 1%;
+  margin-right: 8%;
+  float: right;
+}
+
+.resolucion{
+  font-size:10px;
+}

@@ -1,0 +1,39 @@
+.fondo{
+  background-color:rgb(192,192,192) !important;
+}
+
+.borde-left{
+  border-left:1px solid #000;
+}
+
+.borde-right{
+  border-right: 1px solid #000;
+}
+
+.borde-top{
+  border-top:1px solid #000;
+}
+
+.borde-bottom{
+  border-bottom:1px solid #000;
+}
+
+.b-t-l-r{
+  border-top-left-radius: 10px;
+}
+
+.b-b-l-r{
+  border-bottom-left-radius: 10px;
+}
+
+.b-t-r-r{
+  border-top-right-radius: 10px;
+}
+
+.b-b-r-r{
+  border-bottom-right-radius: 10px;
+}
+
+.margin-bottom{
+  margin-bottom:5px;
+}

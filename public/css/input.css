@@ -1,0 +1,7 @@
+.sombra {
+    box-shadow: 2px 2px 3px 0px #000 !important;
+}
+.color{
+    background-color:#fff !important;
+    /* filter:drop-shadow(0,0,0,1) */
+}

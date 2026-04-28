@@ -1,0 +1,55 @@
+.bn-100{
+    background-color: rgba(0,0,0,0.1) !important;
+}
+.bn-200{
+    background-color: rgba(0,0,0,0.2) !important;
+}
+.bn-300{
+    background-color: rgba(0,0,0,0.3) !important;
+}
+.bn-500{
+    background-color: rgba(0,0,0,0.5) !important;
+}
+.bn-600{
+    background-color: rgba(0,0,0,0.6) !important;
+}
+.bn-700{
+    background-color: rgba(0,0,0,0.7) !important;
+}
+.bn-800{
+    background-color: rgba(0,0,0,0.8) !important;
+}
+.bn-900{
+    background-color: rgba(0,0,0,0.9) !important;
+}
+.bn-1{
+    background-color: rgba(0,0,0,1) !important;
+}
+
+.bg-100{
+    background-color: rgba(192,192,192,0.1) !important;
+}
+.bg-200{
+    background-color: rgba(192,192,192,0.2) !important;
+}
+.bg-300{
+    background-color: rgba(192,192,192,0.3) !important;
+}
+.bg-500{
+    background-color: rgba(192,192,192,0.5) !important;
+}
+.bg-600{
+    background-color: rgba(192,192,192,0.6) !important;
+}
+.bg-700{
+    background-color: rgba(192,192,192,0.7) !important;
+}
+.bg-800{
+    background-color: rgba(192,192,192,0.8) !important;
+}
+.bg-900{
+    background-color: rgba(192,192,192,0.9) !important;
+}
+.bg-1{
+    background-color: rgba(192,192,192,1) !important;
+}
