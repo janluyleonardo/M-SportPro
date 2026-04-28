@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fix for Tailwind/Bootstrap .collapse conflict */
+.collapse.show {
+    visibility: visible;
+}

@@ -3,7 +3,7 @@
     <div class="container">
       <div class="row">
         <div class="col-md-1">
-          <x-jet-application-mark/>
+          <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
         </div>
         <div class="col-md-11">
           <h2 class="font-semibold text-xl text-gray-800 leading-tight">

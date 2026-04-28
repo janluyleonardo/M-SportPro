@@ -14,7 +14,6 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
 
         <!-- Styles -->
-        @livewireStyles
         <!-- Styles -->
         <link rel="stylesheet" href="{{ asset('css/app.css?v='.now()->format('H.s')) }}">
         <link rel="stylesheet" href="{{ asset('css/bootstrap.css?v='.now()->format('H.s')) }}">
@@ -28,7 +27,6 @@
         {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
     </head>
     <body class="font-sans antialiased">
-        <x-jet-banner />
 
         <div class="min-h-screen bg-gray-800">
             {{-- @livewire('navigation-menu') --}}
@@ -50,7 +48,7 @@
 
         @stack('modals')
 
-        @livewireScripts
+
         <script src="{{ asset('js/app.js') }}"></script>
         <script src="{{ asset('js/formulario.js') }}"></script>
         <script src="{{ asset('js/bootstrap.js') }}"></script>

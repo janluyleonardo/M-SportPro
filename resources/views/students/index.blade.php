@@ -1,154 +1,218 @@
 <x-app-layout>
   <x-slot name="header">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-      {{ __('Athletes list') }}
-    </h2>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
+        {{ __('Athletes Directory') }}
+      </h2>
+      <a href="{{ route('students.create') }}" class="inline-flex items-center px-4 py-2.5 bg-blue-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-200 shadow-md hover:shadow-lg">
+        <i class="bi bi-person-plus-fill mr-2 text-lg"></i> {{ __('Add Athlete') }}
+      </a>
+    </div>
   </x-slot>
 
-  <div class="py-3">
+  <div class="py-8">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-      <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-        <div class="container">
-          <div class="row py-0">
-            <div class="col-md-12 mx-auto py-4">
-              <div class="card bg-light ">
-                <div class="card-header">
-                  <div class="row">
-                    <div class="col-md-4 py-2">
-                      <strong>{{__('Records in database'). count($studentsCount)}}</strong>
-                    </div>
-                      <div class="col-md-4 my-auto">
-                        <a class="sombra btn btn-success ml-4" width="50%" href="{{ route('export') }}">{{__('Export Directory')}}</a>
-                      </div>
-                    <div class="col-md-4 flex-row-reverse">
-                      <a title="Regresar" href="{{ route('students.create') }}" class="sombra btn btn-secondary">Agregar deportista</a>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table align-middle table-striped table-hover table-sm">
-                      @if (count($students) <= 0)
-                        <thead>
-                          <tr>
-                            <th colspan="6" align="center">
-                              <center>El estudiante que esta buscando no existe en la base de datos</center>
-                            </th>
-                          </tr>
-                        </thead>
-                      @else
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>{{ __('Name') }}</th>
-                            <th>{{ __('DocumentNumber') }}</th>
-                            <th>{{ __('Category') }}</th>
-                            <th>{{ __('Actions') }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <?php $i = 1; ?>
-                          @foreach ($students as $student)
-                            <tr>
-                              <td>{{ $i }}</td>
-                              <td>{{ Str::title($student->nomDeportista) }}</td>
-                              <td>{{ $student->numDocumento }}</td>
-                              <td>{{ $student->Categoria }}</td>
-                              <td>
-                                <div class="btn-group" role="group" aria-label="Basic example">
-                                  <a title="Show" href="#showModal{{$student->id}}" class="sombra btn btn-info" data-bs-toggle="modal">{{__('See')}}</a>
-                                  <a title="Editar" href="{{ route('students.edit', $student) }}" class="sombra btn btn-warning" >{{__('Edit')}}</a>
-                                  <a title="Eliminar" href="#deleteModal{{$student->id}}" class="sombra btn btn-danger" data-bs-toggle="modal">{{__('Delete')}}</a>
-                                </div>
-                              </td>
-                            </tr>
-                          <?php $i += +1; ?>
-                          <!-- Modal show-->
-                          <div class="modal fade" id="showModal{{$student->id}}" tabindex="-1" aria-labelledby="showModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                              <div class="modal-content sombra bg-white">
-                                <div class="modal-header sombra bn-100">
-                                  <h1 class="modal-title fs-5 mx-auto" id="exampleModalLabel">{{ Str::upper($student->nomDeportista)}}</h1>
-                                  <button type="button" class="btn-close sombra" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body sombra">
-                                    <div class="row">
-                                        <div class="col-md-5">Categoria:</div><div class="col-md-7">{{ $student->Categoria}}</div>
-                                        <div class="col-md-5">Fecha de inscripcion:</div><div class="col-md-7">{{ $student->fechaInscripcion}}</div>
-                                        <div class="col-md-5">Numero documento:</div><div class="col-md-7">{{ $student->numDocumento}}</div>
-                                        <div class="col-md-5">Genero:</div><div class="col-md-7">{{ $student->genero}}</div>
-                                        <div class="col-md-5">Peso:</div><div class="col-md-7">{{ $student->PesoDeportista}}</div>
-                                        <div class="col-md-5">Estatura:</div><div class="col-md-7">{{ $student->EstaturaDeportista}}</div>
-                                        <div class="col-md-5">RH:</div><div class="col-md-7">{{ $student->RHDeportista}}</div>
-                                        <div class="col-md-5">Fecha de nacimiento:</div><div class="col-md-7">{{ $student->fechaNacimiento}}</div>
-                                        <div class="col-md-5">Ciudad:</div><div class="col-md-7">{{ $student->Ciudad}}</div>
-                                        <div class="col-md-5">Departamento:</div><div class="col-md-7">{{ $student->Departamento}}</div>
-                                        <div class="col-md-5">EPS:</div><div class="col-md-7">{{ $student->EPS}}</div>
-                                        <div class="col-md-5">Colegio:</div><div class="col-md-7">{{ $student->Colegio}}</div>
-                                        <div class="col-md-5">Curso:</div><div class="col-md-7">{{ $student->Curso}}</div>
-                                        <div class="col-md-5">Telefono:</div><div class="col-md-7">{{ $student->numTelefonico}}</div>
-                                        <div class="col-md-5">Telefono dos:</div><div class="col-md-7">{{ $student->numTelefonicoUno}}</div>
-                                        <div class="col-md-5">Telefono tres:</div><div class="col-md-7">{{ $student->numTelefonicoDos}}</div>
-                                        <div class="col-md-5">Direccion:</div><div class="col-md-7">{{ $student->direccionDeportista}}</div>
-                                        <div class="col-md-5">Barrio:</div><div class="col-md-7">{{ $student->barrio}}</div>
-                                        <div class="col-md-5">Localidad:</div><div class="col-md-7">{{ $student->localidad}}</div>
-                                        <div class="col-md-5">Nombre mama:</div><div class="col-md-7">{{ $student->nombreMama}}</div>
-                                        <div class="col-md-5">Documento mama:</div><div class="col-md-7">{{ $student->documentoMama}}</div>
-                                        <div class="col-md-5">Telefono mama:</div><div class="col-md-7">{{ $student->telefonoMama}}</div>
-                                        <div class="col-md-5">Direccion mama:</div><div class="col-md-7">{{ $student->direccionMama}}</div>
-                                        <div class="col-md-5">Correo mama:</div><div class="col-md-7">{{ $student->correoMama}}</div>
-                                        <div class="col-md-5">Nombre papa:</div><div class="col-md-7">{{ $student->nombrePapa}}</div>
-                                        <div class="col-md-5">Documento papa:</div><div class="col-md-7">{{ $student->documentoPapa}}</div>
-                                        <div class="col-md-5">Telefono papa:</div><div class="col-md-7">{{ $student->telefonoPapa}}</div>
-                                        <div class="col-md-5">Direccion papa:</div><div class="col-md-7">{{ $student->direccionPapa}}</div>
-                                        <div class="col-md-5">Correo papa:</div><div class="col-md-7">{{ $student->correoPapa}}</div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer bn-100">
-                                  <button type="button" class=" sombra btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <!-- Modal delete-->
-                          <div class="modal fade" id="deleteModal{{$student->id}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                              <div class="modal-content sombra bg-white">
-                                <div class="modal-header sombra bn-100">
-                                  <h1 class="modal-title fs-5 mx-auto" id="exampleModalLabel">{{ Str::upper($student->nomDeportista)}}</h1>
-                                  <button type="button" class="btn-close sombra" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body sombra">
-                                  esta seguro(a) de eliminar el registro de: <strong>{{ Str::upper($student->nomDeportista)}}</strong>
-                                </div>
-                                <div class="modal-footer bn-100">
-                                  <button type="button" class=" sombra btn btn-warning" data-bs-dismiss="modal">Close</button>
-                                  <form action="{{ route('students.destroy', $student) }}" method="post">
-                                    @csrf
-                                    @method('delete')
-                                    <button type="submit" class=" sombra btn btn-danger">
-                                      Eliminar registro
-                                    </button>
-                                  </form>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                            @endforeach
-                        </tbody>
-                      @endif
-                    </table>
-                  </div>
-                </div>
-                <div class="card-footer">
-                  {{$students->links()}}
-                </div>
-              </div>
-            </div>
+      
+      <!-- Stats / Actions Row -->
+      <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center space-x-3">
+          <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
+            <i class="bi bi-people-fill text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 font-medium">{{ __('Total Athletes') }}</p>
+            <p class="text-2xl font-bold text-gray-900 leading-none">{{ count($studentsCount) }}</p>
           </div>
         </div>
+        <div>
+          <a href="{{ route('export') }}" class="inline-flex items-center px-4 py-2 bg-emerald-500 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-emerald-600 transition-colors duration-200 shadow-sm">
+            <i class="bi bi-file-earmark-excel-fill mr-2"></i> {{ __('Export Directory') }}
+          </a>
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50/80">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">#</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{{ __('Name') }}</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{{ __('DocumentNumber') }}</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{{ __('Category') }}</th>
+                <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              @forelse ($students as $index => $student)
+                <tr class="hover:bg-blue-50/50 transition-colors duration-200" x-data="{ showModal: false, deleteModal: false }">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
+                    {{ $students->firstItem() + $index }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="h-10 w-10 flex-shrink-0">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white font-bold text-lg shadow-inner">
+                          {{ substr($student->nomDeportista, 0, 1) }}
+                        </div>
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-semibold text-gray-900">{{ Str::title($student->nomDeportista) }}</div>
+                        <div class="text-xs text-gray-500">{{ $student->correoMama ?? $student->correoPapa ?? 'Sin correo' }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {{ $student->numDocumento }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                      {{ $student->Categoria }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="flex justify-end space-x-2">
+                      <button @click="showModal = true" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors border border-blue-100" title="{{__('See')}}">
+                        <i class="bi bi-eye-fill"></i>
+                      </button>
+                      <a href="{{ route('students.edit', $student) }}" class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg transition-colors border border-amber-100" title="{{__('Edit')}}">
+                        <i class="bi bi-pencil-fill"></i>
+                      </a>
+                      @role('Admin')
+                        <button @click="deleteModal = true" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors border border-red-100" title="{{__('Delete')}}">
+                          <i class="bi bi-trash-fill"></i>
+                        </button>
+                      @endrole
+                    </div>
+
+                    <!-- Alpine View Modal -->
+                    <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
+                      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="showModal = false" aria-hidden="true"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+                          <div class="bg-white px-4 pt-5 pb-4 sm:p-8">
+                            <div class="sm:flex sm:items-start">
+                              <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+                                  <h3 class="text-2xl font-bold text-gray-900" id="modal-title">
+                                    {{ Str::upper($student->nomDeportista) }}
+                                  </h3>
+                                  <button @click="showModal = false" class="text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition-colors">
+                                    <i class="bi bi-x-lg"></i>
+                                  </button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                  <!-- Athlete Info -->
+                                  <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 h-full">
+                                    <h4 class="font-bold text-blue-600 mb-4 uppercase text-xs tracking-wider flex items-center">
+                                        <i class="bi bi-person-badge mr-2"></i> Información Personal
+                                    </h4>
+                                    <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-gray-700">
+                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Categoría</span> <span class="font-semibold text-sm break-all">{{ $student->Categoria }}</span></div>
+                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Documento</span> <span class="font-semibold text-sm break-all">{{ $student->numDocumento }}</span></div>
+                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Nacimiento</span> <span class="font-semibold text-sm break-all">{{ $student->fechaNacimiento }}</span></div>
+                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Género</span> <span class="font-semibold text-sm break-all">{{ $student->genero }}</span></div>
+                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">RH</span> <span class="font-semibold text-sm break-all">{{ $student->RHDeportista }}</span></div>
+                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Peso</span> <span class="font-semibold text-sm break-all">{{ $student->PesoDeportista }} kg</span></div>
+                                      <div class="col-span-2"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Estatura</span> <span class="font-semibold text-sm break-all">{{ $student->EstaturaDeportista }} cm</span></div>
+                                    </div>
+                                  </div>
+                                  
+                                  <!-- Contact Info -->
+                                  <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 h-full">
+                                    <h4 class="font-bold text-blue-600 mb-4 uppercase text-xs tracking-wider flex items-center">
+                                        <i class="bi bi-geo-alt-fill mr-2"></i> Contacto & Ubicación
+                                    </h4>
+                                    <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-gray-700">
+                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Ciudad</span> <span class="font-semibold text-sm break-all">{{ $student->Ciudad }}</span></div>
+                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Teléfono</span> <span class="font-semibold text-sm break-all">{{ $student->numTelefonico }}</span></div>
+                                      <div class="col-span-2 border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Localidad</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->localidad }}</span></div>
+                                      <div class="col-span-2 border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Barrio</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->barrio }}</span></div>
+                                      <div class="col-span-2 border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Dirección</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->direccionDeportista }}</span></div>
+                                      <div class="col-span-2 border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Colegio</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->Colegio }}</span></div>
+                                      <div class="col-span-2"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">EPS</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->EPS }}</span></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    @role('Admin')
+                      <!-- Alpine Delete Modal -->
+                      <div x-show="deleteModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
+                        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                          <div x-show="deleteModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="deleteModal = false" aria-hidden="true"></div>
+                          <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                          <div x-show="deleteModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                              <div class="sm:flex sm:items-start">
+                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                  <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                  <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
+                                    Eliminar Deportista
+                                  </h3>
+                                  <div class="mt-2">
+                                    <p class="text-sm text-gray-500">
+                                      ¿Estás seguro de eliminar el registro de <strong class="text-gray-900">{{ Str::upper($student->nomDeportista) }}</strong>? Esta acción no se puede deshacer.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                              <form action="{{ route('students.destroy', $student) }}" method="post" class="inline-block w-full sm:w-auto">
+                                @csrf
+                                @method('delete')
+                                <button type="submit" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                                  Eliminar registro
+                                </button>
+                              </form>
+                              <button type="button" @click="deleteModal = false" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    @endrole
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="5" class="px-6 py-16 text-center text-gray-500">
+                    <div class="flex flex-col items-center justify-center">
+                      <div class="bg-gray-100 rounded-full p-4 mb-4">
+                        <i class="bi bi-inbox text-4xl text-gray-400"></i>
+                      </div>
+                      <h3 class="text-lg font-medium text-gray-900 mb-1">No hay deportistas</h3>
+                      <p class="text-sm text-gray-500 max-w-sm mx-auto">{{ __('El estudiante que esta buscando no existe en la base de datos o aún no hay registros.') }}</p>
+                      <a href="{{ route('students.create') }}" class="mt-4 inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-50 shadow-sm transition-colors">
+                        <i class="bi bi-plus-lg mr-2"></i> Crear primero
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        @if ($students->hasPages())
+          <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+            {{ $students->links() }}
+          </div>
+        @endif
       </div>
     </div>
   </div>
-
 </x-app-layout>

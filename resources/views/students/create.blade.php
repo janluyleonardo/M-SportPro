@@ -1,296 +1,326 @@
 <x-app-layout>
   <x-slot name="header">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-      {{ __('Manage Incomes') }}
-    </h2>
+    <div class="flex items-center space-x-3">
+      <a href="{{ route('students.index') }}" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <i class="bi bi-arrow-left-circle-fill text-2xl"></i>
+      </a>
+      <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
+        {{ __('Add Athlete') }}
+      </h2>
+    </div>
   </x-slot>
-  <div class="container my-auto">
-    <div class="row py-0">
-      <div class="col-md-6 mx-auto py-1">
-        <div class="card shadow">
-          <div class="form-body">
-            <form action="{{ route('students.store') }}" method="post" class="requires-validation" enctype="multipart/form-data" novalidate>
-              @csrf
-              <div class="container mt-2 mb-2">
-                <div class="row">
-                  <div class="col-md-12 col-sm-12 col-lg-12">
-                    <div class="accordion" id="accordionExample">
-                      <div class="accordion-item">
-                        <h2 class="accordion-header">
-                          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                            {{ __('Athlete Information') }}
-                          </button>
-                        </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-                          <div class="accordion-body">
-                            <div class="row">
-                              <div class="col-md-4 mx-auto mt-2 text-center">
-                                <input class="form-control form-control-sm" type="date" name="fechaNacimiento" id="fechaNacimiento" required>
-                                <span style="font-size: 0.75em;">Fecha de nacimiento</span>
-                                <div class="valid-feedback mv-up">You selected a fecha de nacimiento!</div>
-                                <div class="invalid-feedback mv-up">Please select a fecha de nacimiento!</div>
-                              </div>
-                              <div class="col-md-4 mb-1 mt-2 text-center">
-                                <input class="form-control form-control-sm" type="date" name="fechaInscripcion" required>
-                                <span style="font-size: 0.75em;">Fecha de {{ __('Registration') }}</span>
-                                <div class="valid-feedback mv-up">You selected a fecha de matricula!</div>
-                                <div class="invalid-feedback mv-up">Please select a fecha de matricula!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto mt-2 text-center" >
-                                <input type="radio" class="btn-check mx-auto" name="genero" id="masc" value="Masculino" required>
-                                <label class="btn btn-sm btn-outline-secondary" for="masc">
-                                  <i>
-                                    <img src="{{asset('images/icono-niño.png')}}" alt="icono-niño" width="24px">
-                                  </i>
-                                </label>
-                                <input type="radio" class="btn-check mx-auto" name="genero" id="fem" value="Femenino" required>
-                                <label class="btn btn-sm btn-outline-secondary" for="fem">
-                                  <i>
-                                    <img src="{{asset('images/icono-niña.png')}}" alt="icono-niña" width="24px">
-                                  </i>
-                                </label><br>
-                                <span style="font-size: 0.75em;">Genero</span>
-                                <div class="valid-feedback">Gender field is valid!</div>
-                                <div class="invalid-feedback">Gender field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-12">
-                                  <input class="form-control form-control-sm mt-2" type="file" name="Photo" accept="image/png, image/jpeg" required>
-                                  <div class="valid-feedback">UserPhoto field is valid!</div>
-                                  <div class="invalid-feedback">UserPhoto field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-12">
-                                  <input class="form-control form-control-sm mt-2" type="text" name="nomDeportista" placeholder="{{ __('Full Name') }}" required>
-                                  <div class="valid-feedback">Username field is valid!</div>
-                                  <div class="invalid-feedback">Username field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-3 mx-auto mt-2">
-                                <input class="form-control form-control-sm" type="number" name="numDocumento" placeholder="N° documento" required>
-                                <div class="valid-feedback">Numero de documento field is valid!</div>
-                                <div class="invalid-feedback">Numero de documento field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-2 mx-auto mt-2">
-                                <input class="form-control form-control-sm" type="text" name="PesoDeportista" id="PesoDeportista" placeholder="Peso" required>
-                                <div class="valid-feedback">Peso field is valid!</div>
-                                <div class="invalid-feedback">Peso field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-2 mx-auto mt-2 ">
-                                <input class="form-control form-control-sm" type="text" name="EstaturaDeportista" id="EstaturaDeportista" placeholder="Estatura" required>
-                                <div class="valid-feedback">Estatura field is valid!</div>
-                                <div class="invalid-feedback">Estatura field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-2 mx-auto mt-2">
-                                <input class="form-control form-control-sm" type="text" name="RHDeportista" id="RHDeportista" placeholder="RH" required>
-                                <div class="valid-feedback">RH field is valid!</div>
-                                <div class="invalid-feedback">RH field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-3 mx-auto mt-2">
-                                <input class="form-control form-control-sm" type="text" name="EPS" placeholder="EPS" required>
-                                <div class="valid-feedback">Eps field is valid!</div>
-                                <div class="invalid-feedback">Eps field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto mt-2">
-                                <input class="form-control form-control-sm" type="text" name="Ciudad" placeholder="Ciudad" required>
-                                <div class="valid-feedback">Ciudad field is valid!</div>
-                                <div class="invalid-feedback">Ciudad field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto mt-2">
-                                <input class="form-control form-control-sm" type="text" name="Departamento" placeholder="Departamento" required>
-                                <div class="valid-feedback">Departamento field is valid!</div>
-                                <div class="invalid-feedback">Departamento field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mb-1 mt-2 text-center">
-                                <select class="form-control form-control-sm" name="Categoria" id="Categoria" required>
-                                  <option value="">Año nacimiento</option>
-                                  <option value="2018">2018</option>
-                                  <option value="2017">2017</option>
-                                  <option value="2016">2016</option>
-                                  <option value="2014">2014</option>
-                                  <option value="2013">2013</option>
-                                  <option value="2012">2012</option>
-                                  <option value="2011">2011</option>
-                                  <option value="2010">2010</option>
-                                  <option value="2009">2009</option>
-                                  <option value="2008">2008</option>
-                                  <option value="2007">2007</option>
-                                  <option value="2006">2006</option>
-                                  <option value="2005">2005</option>
-                                </select>
-                                <div class="valid-feedback mv-up">You selected a Categoria!</div>
-                                <div class="invalid-feedback mv-up">Please select a Categoria!</div>
-                              </div>
-                              <div class="col-md-6 mx-auto mt-2">
-                                <input class="form-control form-control-sm" type="text" name="Colegio" placeholder="Colegio" required>
-                                <div class="valid-feedback">Colegio field is valid!</div>
-                                <div class="invalid-feedback">Colegio field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-6 mx-auto mt-2">
-                                <input class="form-control form-control-sm" type="number" name="Curso" placeholder="Curso" required>
-                                <div class="valid-feedback">Curso field is valid!</div>
-                                <div class="invalid-feedback">Curso field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto mt-2">
-                                  <input class="form-control form-control-sm" type="number" name="numTelefonico" placeholder="N° telefono" required>
-                                  <div class="valid-feedback">Telefono field is valid!</div>
-                                  <div class="invalid-feedback">Telefono field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto mt-2 mr-1">
-                                  <input class="form-control form-control-sm" type="number" name="numTelefonicoUno" placeholder="N° telefono">
-                                  <div class="valid-feedback">Telefono field is valid!</div>
-                                  <div class="invalid-feedback">Telefono field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto mt-2 ">
-                                  <input class="form-control form-control-sm" type="number" name="numTelefonicoDos" placeholder="N° telefono">
-                                  <div class="valid-feedback">Telefono field is valid!</div>
-                                  <div class="invalid-feedback">Telefono field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-12 mt-2">
-                                  <input class="form-control" type="text" name="direccionDeportista"placeholder="Direccion" required>
-                                  <div class="valid-feedback">Direccion field is valid!</div>
-                                  <div class="invalid-feedback">Direccion field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-6 mx-auto mt-2">
-                                  <input class="form-control" type="text" name="barrio"placeholder="Barrio" required>
-                                  <div class="valid-feedback">Barrio field is valid!</div>
-                                  <div class="invalid-feedback">Barrio field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-6 mx-auto mt-2">
-                                  <input class="form-control" type="text" name="localidad"placeholder="Localidad" required>
-                                  <div class="valid-feedback">Localidad field is valid!</div>
-                                  <div class="invalid-feedback">Localidad field cannot be blank!</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="accordion-item">
-                        <h2 class="accordion-header">
-                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            {{ __('Mother Information') }}
-                          </button>
-                        </h2>
-                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                          <div class="accordion-body">
-                            <div class="row">
-                              <div class="col-md-8 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="text" name="nombreMama" placeholder="Nombre completo" required>
-                                <div class="valid-feedback">Nombre field is valid!</div>
-                                <div class="invalid-feedback">Nombre field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="number" name="documentoMama"placeholder="Nº documento" required>
-                                <div class="valid-feedback">Nº documento mama field is valid!</div>
-                                <div class="invalid-feedback">Nº documento mama field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-8 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="email" name="correoMama"placeholder="Correo electronico" required>
-                                <div class="valid-feedback">Correo field is valid!</div>
-                                <div class="invalid-feedback">Correo field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="number" name="telefonoMama" placeholder="Nº telefonico" required>
-                                <div class="valid-feedback">Telefono field is valid!</div>
-                                <div class="invalid-feedback">Telefono field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-12 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="text" name="direccionMama"placeholder="Direccion" required>
-                                <div class="valid-feedback">Direccion field is valid!</div>
-                                <div class="invalid-feedback">Direccion field cannot be blank!</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="accordion-item">
-                        <h2 class="accordion-header">
-                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            {{ __('Father Information') }}
-                          </button>
-                        </h2>
-                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                          <div class="accordion-body">
-                            <div class="row">
-                              <div class="col-md-8 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="text" name="nombrePapa" placeholder="Nombre completo" required>
-                                <div class="valid-feedback">Nombre field is valid!</div>
-                                <div class="invalid-feedback">Nombre field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="number" name="documentoPapa"placeholder="Nº documento" required>
-                                <div class="valid-feedback">Nº documento mama field is valid!</div>
-                                <div class="invalid-feedback">Nº documento mama field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-8 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="email" name="correoPapa"placeholder="Correo electronico" required>
-                                <div class="valid-feedback">Correo field is valid!</div>
-                                <div class="invalid-feedback">Correo field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-4 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="number" name="telefonoPapa" placeholder="Nº telefonico" required>
-                                <div class="valid-feedback">Telefono field is valid!</div>
-                                <div class="invalid-feedback">Telefono field cannot be blank!</div>
-                              </div>
-                              <div class="col-md-12 mx-auto">
-                                <input class="form-control form-control-sm mt-2" type="text" name="direccionPapa"placeholder="Direccion" required>
-                                <div class="valid-feedback">Direccion field is valid!</div>
-                                <div class="invalid-feedback">Direccion field cannot be blank!</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="accordion-item">
-                        <h2 class="accordion-header">
-                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                            {{ __('Medical history') }}
-                          </button>
-                        </h2>
-                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                          <div class="accordion-body">
-                            <div class="col-md-12 col-sm-12 col-lg-12">
-                              <input class="form-control form-control-sm mt-2" type="text" name="enfermedades" placeholder="Enfermedades que padece" required>
-                              <div class="valid-feedback">Enfermedades 1er responsable field is valid!</div>
-                              <div class="invalid-feedback">Enfermedades 1er responsable field cannot be blank!</div>
-                            </div>
-                            <div class="col-md-12 col-sm-12 col-lg-12">
-                              <input class="form-control form-control-sm mt-2" type="text" name="medicamento" placeholder="Usa algun medicamento" required>
-                              <div class="valid-feedback">Medicamento 1er responsable field is valid!</div>
-                              <div class="invalid-feedback">Medicamento 1er responsable field cannot be blank!</div>
-                            </div>
-                            <div class="col-md-12 col-sm-12 col-lg-12">
-                              <input class="form-control form-control-sm mt-2" type="text" name="lesion" placeholder="Tiene alguna lesion congenita" required>
-                              <div class="valid-feedback">Lesion 1er responsable field is valid!</div>
-                              <div class="invalid-feedback">Lesion 1er responsable field cannot be blank!</div>
-                            </div>
-                            <div class="col-md-12 col-sm-12 col-lg-12">
-                              <input class="form-control form-control-sm mt-2" type="text" name="Cirugia" placeholder="Tiene alguna cirugia" required>
-                              <div class="valid-feedback">Cirugia 1er responsable field is valid!</div>
-                              <div class="invalid-feedback">Cirugia 1er responsable field cannot be blank!</div>
-                            </div>
-                            <div class="col-md-12 col-sm-12 col-lg-12">
-                              <input class="form-control form-control-sm mt-2" type="text" name="impedimento" placeholder="Algo que le impida pracvticar algun deporte" required>
-                              <div class="valid-feedback">Impedimento 1er responsable field is valid!</div>
-                              <div class="invalid-feedback">Impedimento 1er responsable field cannot be blank!</div>
-                            </div>
-                            <div class="col-md-12 col-sm-12 col-lg-12">
-                              <input class="form-control form-control-sm mt-2" type="text" name="lesionOM" placeholder="Tiene alguna lesion oseo muscular" required>
-                              <div class="valid-feedback">Lesion oseo muscular 1er responsable field is valid!</div>
-                              <div class="invalid-feedback">Lesion oseo muscular 1er responsable field cannot be blank!</div>
-                            </div>
-                            <div class="col-md-4 col-sm-4 col-lg-4 mx-auto">
-                              <div class="form-button mt-2 ">
-                                <button id="submit" type="submit" class="sombra btn btn-secondary">{{__('Add Athlete')}}</button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+
+  <div class="py-8">
+    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+      <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
+        
+        <form action="{{ route('students.store') }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8" x-data="{ 
+            activeTab: 'athlete',
+            athleteComplete: false,
+            motherComplete: false,
+            fatherComplete: false,
+            medicalComplete: false
+        }">
+          @csrf
+
+          <!-- Progress/Tabs Bar -->
+          <div class="flex border-b border-gray-200 mb-8 overflow-x-auto hide-scrollbar">
+            <button type="button" @click="activeTab = 'athlete'" :class="{'border-blue-500 text-blue-600': activeTab === 'athlete', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'athlete'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
+              <i class="bi bi-person-badge mr-2"></i> {{ __('Athlete Info') }}
+            </button>
+            <button type="button" @click="activeTab = 'mother'" :class="{'border-blue-500 text-blue-600': activeTab === 'mother', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'mother'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
+              <i class="bi bi-person-hearts mr-2"></i> {{ __('Mother Info') }}
+            </button>
+            <button type="button" @click="activeTab = 'father'" :class="{'border-blue-500 text-blue-600': activeTab === 'father', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'father'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
+              <i class="bi bi-person-fill mr-2"></i> {{ __('Father Info') }}
+            </button>
+            <button type="button" @click="activeTab = 'medical'" :class="{'border-blue-500 text-blue-600': activeTab === 'medical', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'medical'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
+              <i class="bi bi-clipboard2-pulse mr-2"></i> {{ __('Medical History') }}
+            </button>
+          </div>
+
+          <!-- Tab Content: Athlete Information -->
+          <div x-show="activeTab === 'athlete'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información Principal del Deportista</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+              <!-- Foto -->
+              <div class="lg:col-span-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Foto del Deportista <span class="text-red-500">*</span></label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-400 transition-colors bg-gray-50">
+                  <div class="space-y-1 text-center">
+                    <i class="bi bi-camera text-4xl text-gray-400"></i>
+                    <div class="flex text-sm text-gray-600 justify-center">
+                      <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2">
+                        <span>Subir un archivo</span>
+                        <input id="file-upload" name="Photo" type="file" accept="image/png, image/jpeg" class="sr-only" required>
+                      </label>
                     </div>
+                    <p class="text-xs text-gray-500">PNG, JPG hasta 2MB</p>
                   </div>
                 </div>
               </div>
-            </form>
+
+              <!-- Nombres -->
+              <div class="lg:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">{{ __('Full Name') }} <span class="text-red-500">*</span></label>
+                <input type="text" name="nomDeportista" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+
+              <!-- Documento -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">N° Documento <span class="text-red-500">*</span></label>
+                <input type="number" name="numDocumento" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+
+              <!-- Fechas -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Nacimiento <span class="text-red-500">*</span></label>
+                <input type="date" name="fechaNacimiento" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Inscripción <span class="text-red-500">*</span></label>
+                <input type="date" name="fechaInscripcion" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              
+              <!-- Categoria -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría (Año) <span class="text-red-500">*</span></label>
+                <select name="Categoria" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+                  <option value="">Seleccione...</option>
+                  @for ($year = 2025; $year >= 2005; $year--)
+                    <option value="{{ $year }}">{{ $year }}</option>
+                  @endfor
+                </select>
+              </div>
+
+              <!-- Género -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Género <span class="text-red-500">*</span></label>
+                <div class="flex space-x-4">
+                  <label class="flex items-center space-x-2 cursor-pointer p-2 border border-gray-200 rounded-lg hover:bg-gray-50 flex-1 justify-center">
+                    <input type="radio" name="genero" value="Masculino" required class="text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <span class="text-sm font-medium text-gray-700"><i class="bi bi-gender-male text-blue-500 mr-1"></i> Masculino</span>
+                  </label>
+                  <label class="flex items-center space-x-2 cursor-pointer p-2 border border-gray-200 rounded-lg hover:bg-gray-50 flex-1 justify-center">
+                    <input type="radio" name="genero" value="Femenino" required class="text-pink-600 focus:ring-pink-500 border-gray-300">
+                    <span class="text-sm font-medium text-gray-700"><i class="bi bi-gender-female text-pink-500 mr-1"></i> Femenino</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Físico -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Peso (kg) <span class="text-red-500">*</span></label>
+                <input type="text" name="PesoDeportista" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Estatura (cm) <span class="text-red-500">*</span></label>
+                <div class="flex space-x-2">
+                  <input type="text" name="EstaturaDeportista" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+                  <input type="text" name="RHDeportista" placeholder="RH" required class="block w-24 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+                </div>
+              </div>
+
+              <!-- Ubicación -->
+              <div class="lg:col-span-3">
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 mt-4">Ubicación y Contacto</h4>
+              </div>
+
+              <div class="lg:col-span-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Dirección <span class="text-red-500">*</span></label>
+                <input type="text" name="direccionDeportista" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Barrio <span class="text-red-500">*</span></label>
+                <input type="text" name="barrio" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Localidad <span class="text-red-500">*</span></label>
+                <input type="text" name="localidad" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad <span class="text-red-500">*</span></label>
+                <input type="text" name="Ciudad" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono Principal <span class="text-red-500">*</span></label>
+                <input type="number" name="numTelefonico" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono Opcional 1</label>
+                <input type="number" name="numTelefonicoUno" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono Opcional 2</label>
+                <input type="number" name="numTelefonicoDos" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+
+              <!-- Otros -->
+              <div class="lg:col-span-3">
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 mt-4">Académico & Salud</h4>
+              </div>
+
+              <div class="lg:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Colegio <span class="text-red-500">*</span></label>
+                <input type="text" name="Colegio" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Curso <span class="text-red-500">*</span></label>
+                <input type="number" name="Curso" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Departamento</label>
+                <input type="text" name="Departamento" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              <div class="lg:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">EPS <span class="text-red-500">*</span></label>
+                <input type="text" name="EPS" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+
+            </div>
+            
+            <div class="mt-8 flex justify-end">
+              <button type="button" @click="activeTab = 'mother'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-gray-800 border border-transparent rounded-lg font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                Siguiente: Info Madre <i class="bi bi-arrow-right ml-2"></i>
+              </button>
+            </div>
           </div>
-        </div>
+
+          <!-- Tab Content: Mother Information -->
+          <div x-show="activeTab === 'mother'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;" class="space-y-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información de la Madre</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo <span class="text-red-500">*</span></label>
+                <input type="text" name="nombreMama" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nº Documento <span class="text-red-500">*</span></label>
+                <input type="number" name="documentoMama" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
+                <input type="number" name="telefonoMama" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 transition-all">
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico <span class="text-red-500">*</span></label>
+                <input type="email" name="correoMama" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 transition-all">
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Dirección <span class="text-red-500">*</span></label>
+                <input type="text" name="direccionMama" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 transition-all">
+              </div>
+            </div>
+
+            <div class="mt-8 flex justify-between">
+              <button type="button" @click="activeTab = 'athlete'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-white border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                <i class="bi bi-arrow-left mr-2"></i> Atrás
+              </button>
+              <button type="button" @click="activeTab = 'father'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-gray-800 border border-transparent rounded-lg font-semibold text-white hover:bg-gray-700 transition-colors">
+                Siguiente: Info Padre <i class="bi bi-arrow-right ml-2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Content: Father Information -->
+          <div x-show="activeTab === 'father'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;" class="space-y-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información del Padre</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo <span class="text-red-500">*</span></label>
+                <input type="text" name="nombrePapa" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nº Documento <span class="text-red-500">*</span></label>
+                <input type="number" name="documentoPapa" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
+                <input type="number" name="telefonoPapa" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico <span class="text-red-500">*</span></label>
+                <input type="email" name="correoPapa" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Dirección <span class="text-red-500">*</span></label>
+                <input type="text" name="direccionPapa" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+              </div>
+            </div>
+
+            <div class="mt-8 flex justify-between">
+              <button type="button" @click="activeTab = 'mother'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-white border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                <i class="bi bi-arrow-left mr-2"></i> Atrás
+              </button>
+              <button type="button" @click="activeTab = 'medical'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-gray-800 border border-transparent rounded-lg font-semibold text-white hover:bg-gray-700 transition-colors">
+                Siguiente: Historial Médico <i class="bi bi-arrow-right ml-2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Content: Medical History -->
+          <div x-show="activeTab === 'medical'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;" class="space-y-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Historial Médico del Deportista</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-red-50 p-6 rounded-xl border border-red-100">
+              
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-800 mb-1">Enfermedades que padece <span class="text-red-500">*</span></label>
+                <input type="text" name="enfermedades" placeholder="Ej: Asma, Ninguna..." required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
+              </div>
+              
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-800 mb-1">Medicamentos actuales <span class="text-red-500">*</span></label>
+                <input type="text" name="medicamento" placeholder="Ej: Inhalador, Ninguno..." required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-1">¿Lesiones congénitas? <span class="text-red-500">*</span></label>
+                <input type="text" name="lesion" placeholder="Ej: Sí (Especificar), No" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-semibold text-gray-800 mb-1">¿Cirugías previas? <span class="text-red-500">*</span></label>
+                <input type="text" name="Cirugia" placeholder="Ej: Apendicitis, No" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
+              </div>
+              
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-800 mb-1">¿Impedimentos físicos para el deporte? <span class="text-red-500">*</span></label>
+                <input type="text" name="impedimento" placeholder="Ej: Ninguno" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
+              </div>
+              
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-800 mb-1">¿Lesiones óseo musculares? <span class="text-red-500">*</span></label>
+                <input type="text" name="lesionOM" placeholder="Ej: Esguince tobillo derecho, Ninguna" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
+              </div>
+
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center bg-gray-50 -mx-6 -mb-6 p-6 rounded-b-2xl">
+              <button type="button" @click="activeTab = 'father'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-white border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                <i class="bi bi-arrow-left mr-2"></i> Atrás
+              </button>
+              <button type="submit" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 border border-transparent rounded-xl font-bold text-lg text-white hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform hover:scale-105 shadow-lg">
+                <i class="bi bi-check2-circle mr-2 text-2xl"></i> {{__('Add Athlete')}}
+              </button>
+            </div>
+          </div>
+
+        </form>
       </div>
     </div>
   </div>

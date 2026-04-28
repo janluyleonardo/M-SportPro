@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Estudent;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -48,7 +48,7 @@ class AdminController extends Controller
      */
     public function show(Request $request)
     {
-        TODO://verificar esta funcionalidad en el controlador de estudiantes ya que toda la funcionalidad se migro alli
+        // TODO: verificar esta funcionalidad en el controlador de estudiantes ya que toda la funcionalidad se migro alli
         $student = trim($request->get('texto'));
         $students = DB::table('students')
         // ->select('name','email','program','updated_at') //co esta linea se traen columnas especificas de la tabla

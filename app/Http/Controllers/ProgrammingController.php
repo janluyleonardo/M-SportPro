@@ -17,13 +17,20 @@ class ProgrammingController extends Controller
     public function index(Request $request)
     {
 
-      $studentList = Student::select('nomDeportista')
+      $studentList = Student::select('id', 'nomDeportista', 'Categoria')
       ->orderByDesc('id')
       ->get();
       $texto = trim($request->get('texto'));
-      // $students = Student::orderBy('nomAlumno', 'asc')->paginate(10)->get();
-      $programming = programming::orderBy('hora')->paginate(5);
-      return view('Programming.index', compact('texto','programming','studentList'));
+      
+      // Get all programming records ordered by date and time for the Calendar
+      $programming = programming::orderBy('fecha')->orderBy('hora')->get();
+      
+      // Group by date for easier parsing in frontend
+      $eventsByDate = $programming->groupBy('fecha')->map(function($items) {
+          return $items->toArray();
+      })->toJson();
+
+      return view('Programming.index', compact('texto','programming','studentList', 'eventsByDate'));
     }
 
     /**
@@ -48,18 +55,18 @@ class ProgrammingController extends Controller
       $newProgramming->torneo = $request->torneo;
       $newProgramming->cancha = $request->cancha;
       $newProgramming->categoriaUno = $request->categoriaUno;
-      $newProgramming->categoriaDos = $request->categoriaDos;
+      $newProgramming->categoriaDos = $request->categoriaDos ?? '';
       $newProgramming->eLocal = $request->eLocal;
       $newProgramming->eVisitante = $request->eVisitante;
       $newProgramming->hora = $request->hora;
       $newProgramming->fecha = $request->fecha;
-      $newProgramming->jugadores_convocados = implode(',',$request->jugadores_convocados);
+      $newProgramming->jugadores_convocados = implode(',', $request->jugadores_convocados ?? []);
 
       try {
-      $newProgramming->save();
-      return redirect()->route('programming.index', $programming)->banner('Registro creado correctamente.');
+        $newProgramming->save();
+        return redirect()->route('programming.index')->with('success', 'Registro creado correctamente.');
       } catch (\Throwable $th) {
-        return redirect()->route('programming.index', $programming)->dangerBanner('no se pudo crear nuevo registro => '.$th->getMessage());
+        return back()->withInput()->with('error', 'No se pudo crear nuevo registro => '.$th->getMessage());
       }
     }
 
@@ -96,11 +103,13 @@ class ProgrammingController extends Controller
     {
       $programming = programming::findOrFail($id);
       try {
-        $programming->update($request->all());
+        $data = $request->all();
+        $data['categoriaDos'] = $data['categoriaDos'] ?? '';
+        $programming->update($data);
+        return redirect()->route('programming.index')->with('success', 'Registro actualizado correctamente.');
       } catch (\Throwable $th) {
-        return redirect()->route('programming.index', $programming)->dangerBanner('no se pudo actualizar registro por que => '.$th->getMessage());
+        return back()->withInput()->with('error', 'No se pudo actualizar registro porque => '.$th->getMessage());
       }
-      return redirect()->route('programming.index', $programming)->banner('Registro actualizar correctamente.');
     }
 
     /**
@@ -114,9 +123,9 @@ class ProgrammingController extends Controller
       $programming = programming::findOrFail($id);
       try {
         $programming->delete();
+        return redirect()->route('programming.index')->with('success', 'Registro eliminado correctamente.');
       } catch (\Throwable $th) {
-        return redirect()->route('programming.index', $programming)->dangerBanner('no se pudo eliminar registro por que => '.$th->getMessage());
+        return redirect()->route('programming.index')->with('error', 'No se pudo eliminar registro porque => '.$th->getMessage());
       }
-      return redirect()->route('programming.index', $programming)->banner('Registro eliminado correctamente.');
     }
 }

@@ -6,8 +6,7 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StudentsExport;
-
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentsController extends Controller
 {
@@ -89,14 +88,12 @@ class StudentsController extends Controller
       $newStudent->lesionOM = $request->lesionOM;
 
       try {
-        //code...
         $newStudent->save();
       } catch (\Throwable $th) {
-        // throw $th;
-        return redirect()->route('students.show', $newStudent)->bannerdanger('no se pudo agregar nuevo registro => '.$th);
+        return back()->withInput()->with('error', 'No se pudo agregar nuevo registro => '.$th->getMessage());
       }
-      // $student = Student::create($request->all());
-      return redirect()->route('students.show', $newStudent)->banner('Registro creado correctamente.');
+      
+      return redirect()->route('students.index')->with('success', 'Registro creado correctamente.');
     }
 
     /**
@@ -108,7 +105,7 @@ class StudentsController extends Controller
     public function imprimir($id)
     {
       $student = Student::findOrFail($id);
-      $pdf = PDF::loadView('students.pdf', compact('student'));
+      $pdf = Pdf::loadView('students.pdf', compact('student'));
       return $pdf->stream($student->nomDeportista.'.pdf');
     }
 
@@ -194,9 +191,9 @@ class StudentsController extends Controller
 
       try {
         $student->update();
-        return redirect()->route('students.show', compact('student'))->banner('Registro actualizado correctamente.');
+        return redirect()->route('students.index')->with('success', 'Registro actualizado correctamente.');
       } catch (\Throwable $th) {
-        return redirect()->route('students.show')->dangerBanner('No pudimos actualizar el registro por favor valide los datos ingresados '.$th);
+        return back()->withInput()->with('error', 'No pudimos actualizar el registro por favor valide los datos ingresados: '.$th->getMessage());
       }
     }
 
@@ -208,9 +205,8 @@ class StudentsController extends Controller
      */
     public function destroy(Student $student)
     {
-      return $student;
-      // return redirect()->route('students.index', $student);
-      return redirect()->route('students.index', compact('student'))->banner('Registro eliminado correctamente.');
+      $student->delete();
+      return redirect()->route('students.index')->with('success', 'Registro eliminado correctamente.');
     }
 
     public function export()
@@ -218,7 +214,7 @@ class StudentsController extends Controller
       try {
         return Excel::download(new StudentsExport, 'Registros.xlsx');
       } catch (\Throwable $th) {
-        return redirect()->route('students.show')->bannerdanger('no se pudo generar registro excel => '.$th);
+        return redirect()->route('dashboard')->with('error', 'no se pudo generar registro excel => '.$th);
       }
     }
 }
