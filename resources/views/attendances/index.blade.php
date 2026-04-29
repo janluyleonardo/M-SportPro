@@ -20,19 +20,19 @@
             
             <div class="space-y-6">
                 @forelse($schedules as $schedule)
-                    <div class="bg-white overflow-hidden shadow-sm rounded-[2rem] border border-gray-100 hover:shadow-xl transition-all duration-500 group">
-                        <div class="p-8 flex items-center justify-between">
-                            <div class="flex items-center space-x-6">
+                    <div class="bg-white overflow-hidden shadow-sm rounded-[2.5rem] border border-gray-100 hover:shadow-xl transition-all duration-500 group">
+                        <div class="p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                            <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-6 w-full sm:w-auto">
                                 <!-- Time Badge -->
-                                <div class="bg-club-primary text-white p-4 rounded-3xl text-center min-w-[100px] border-b-4 border-club-secondary shadow-lg shadow-blue-100">
+                                <div class="bg-club-primary text-white p-4 rounded-[2rem] text-center min-w-[110px] border-b-4 border-club-secondary shadow-lg shadow-blue-100 transform group-hover:scale-105 transition-transform">
                                     <div class="text-[10px] font-black uppercase opacity-60 mb-1">Inicia</div>
-                                    <div class="text-xl font-black">{{ date('g:i', strtotime($schedule->start_time)) }}</div>
+                                    <div class="text-2xl font-black leading-none">{{ date('g:i', strtotime($schedule->start_time)) }}</div>
                                     <div class="text-[10px] font-black uppercase opacity-60 mt-1">{{ date('A', strtotime($schedule->start_time)) }}</div>
                                 </div>
 
                                 <div>
-                                    <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tight">Categoría {{ $schedule->category }}</h3>
-                                    <div class="flex items-center mt-2 space-x-4">
+                                    <h3 class="text-xl sm:text-2xl font-black text-gray-900 uppercase tracking-tight">Categoría {{ $schedule->category }}</h3>
+                                    <div class="flex flex-wrap items-center justify-center sm:justify-start mt-2 gap-x-4 gap-y-2">
                                         <span class="flex items-center text-xs font-bold text-gray-400">
                                             <i class="bi bi-person-badge mr-2 text-indigo-500"></i> {{ $schedule->teacher->name }}
                                         </span>
@@ -45,7 +45,7 @@
                                 </div>
                             </div>
 
-                            <a href="{{ route('attendances.show', $schedule) }}" class="inline-flex items-center px-8 py-4 bg-gray-50 text-gray-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-club-primary hover:text-white transition-all shadow-sm border border-gray-100">
+                            <a href="{{ route('attendances.show', $schedule) }}" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-gray-50 text-gray-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-club-primary hover:text-white transition-all shadow-sm border border-gray-100 active:scale-95">
                                 Tomar Lista <i class="bi bi-arrow-right ml-3"></i>
                             </a>
                         </div>
