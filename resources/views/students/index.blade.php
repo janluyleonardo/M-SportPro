@@ -31,9 +31,11 @@
         </div>
       </div>
 
-      <!-- Table Card -->
+      <!-- Table / Cards Container -->
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
-        <div class="overflow-x-auto">
+        
+        <!-- Desktop Table (Visible from sm up) -->
+        <div class="hidden sm:block overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50/80">
               <tr>
@@ -89,110 +91,7 @@
                         </button>
                       @endrole
                     </div>
-
-                    <!-- Alpine View Modal -->
-                    <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
-                      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                        <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="showModal = false" aria-hidden="true"></div>
-                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                        <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
-                          <div class="bg-white px-4 pt-5 pb-4 sm:p-8">
-                            <div class="sm:flex sm:items-start">
-                              <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                                <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
-                                  <h3 class="text-2xl font-bold text-gray-900" id="modal-title">
-                                    {{ Str::upper($student->nomDeportista) }}
-                                  </h3>
-                                  <button @click="showModal = false" class="text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition-colors">
-                                    <i class="bi bi-x-lg"></i>
-                                  </button>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                                  <!-- Athlete Info -->
-                                  <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 h-full">
-                                    <h4 class="font-bold text-club-primary mb-4 uppercase text-xs tracking-wider flex items-center">
-                                        <i class="bi bi-person-badge mr-2"></i> Información Personal
-                                    </h4>
-                                    @if($student->Photo)
-                                      <div class="mb-5 flex justify-center">
-                                        <img src="{{ asset($student->Photo) }}" class="h-32 w-32 rounded-2xl object-cover shadow-lg border-2 border-white ring-1 ring-gray-200" alt="{{ $student->nomDeportista }}">
-                                      </div>
-                                    @endif
-                                    <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-gray-700">
-                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Categoría</span> <span class="font-semibold text-sm break-all">{{ $student->Categoria }}</span></div>
-                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Documento</span> <span class="font-semibold text-sm break-all">{{ $student->numDocumento }}</span></div>
-                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Nacimiento</span> <span class="font-semibold text-sm break-all">{{ $student->fechaNacimiento }}</span></div>
-                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Género</span> <span class="font-semibold text-sm break-all">{{ $student->genero }}</span></div>
-                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">RH</span> <span class="font-semibold text-sm break-all">{{ $student->RHDeportista }}</span></div>
-                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Peso</span> <span class="font-semibold text-sm break-all">{{ $student->PesoDeportista }} kg</span></div>
-                                      <div class="col-span-2"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Estatura</span> <span class="font-semibold text-sm break-all">{{ $student->EstaturaDeportista }} cm</span></div>
-                                    </div>
-                                  </div>
-                                  
-                                  <!-- Contact Info -->
-                                  <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 h-full">
-                                    <h4 class="font-bold text-club-primary mb-4 uppercase text-xs tracking-wider flex items-center">
-                                        <i class="bi bi-geo-alt-fill mr-2"></i> Contacto & Ubicación
-                                    </h4>
-                                    <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-gray-700">
-                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Ciudad</span> <span class="font-semibold text-sm break-all">{{ $student->Ciudad }}</span></div>
-                                      <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Teléfono</span> <span class="font-semibold text-sm break-all">{{ $student->numTelefonico }}</span></div>
-                                      <div class="col-span-2 border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Localidad</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->localidad }}</span></div>
-                                      <div class="col-span-2 border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Barrio</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->barrio }}</span></div>
-                                      <div class="col-span-2 border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Dirección</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->direccionDeportista }}</span></div>
-                                      <div class="col-span-2 border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Colegio</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->Colegio }}</span></div>
-                                      <div class="col-span-2"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">EPS</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->EPS }}</span></div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    @role('Admin')
-                      <!-- Alpine Delete Modal -->
-                      <div x-show="deleteModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
-                        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                          <div x-show="deleteModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="deleteModal = false" aria-hidden="true"></div>
-                          <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                          <div x-show="deleteModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                              <div class="sm:flex sm:items-start">
-                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                  <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
-                                </div>
-                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                  <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
-                                    Eliminar Deportista
-                                  </h3>
-                                  <div class="mt-2">
-                                    <p class="text-sm text-gray-500">
-                                      ¿Estás seguro de eliminar el registro de <strong class="text-gray-900">{{ Str::upper($student->nomDeportista) }}</strong>? Esta acción no se puede deshacer.
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
-                              <form action="{{ route('students.destroy', $student) }}" method="post" class="inline-block w-full sm:w-auto">
-                                @csrf
-                                @method('delete')
-                                <button type="submit" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                                  Eliminar registro
-                                </button>
-                              </form>
-                              <button type="button" @click="deleteModal = false" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                                Cancelar
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    @endrole
+                    @include('students.partials.modals')
                   </td>
                 </tr>
               @empty
@@ -213,6 +112,58 @@
               @endforelse
             </tbody>
           </table>
+        </div>
+
+        <!-- Mobile Cards View (Visible only on mobile) -->
+        <div class="sm:hidden divide-y divide-gray-100">
+          @forelse ($students as $student)
+            <div class="p-4 bg-white hover:bg-gray-50 transition-colors" x-data="{ showModal: false, deleteModal: false }">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="h-12 w-12 flex-shrink-0">
+                    @if($student->Photo)
+                      <img class="h-12 w-12 rounded-xl object-cover border border-gray-200 shadow-sm" src="{{ asset($student->Photo) }}" alt="{{ $student->nomDeportista }}">
+                    @else
+                      <div class="h-12 w-12 rounded-xl bg-club-primary flex items-center justify-center text-white font-bold text-xl shadow-inner">
+                        {{ substr($student->nomDeportista, 0, 1) }}
+                      </div>
+                    @endif
+                  </div>
+                  <div class="ml-3">
+                    <div class="text-sm font-bold text-gray-900 leading-tight">{{ Str::title($student->nomDeportista) }}</div>
+                    <div class="text-[10px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Categoría {{ $student->Categoria }}</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                   <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Documento</div>
+                   <div class="text-xs font-mono font-bold text-gray-600">{{ $student->numDocumento }}</div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between bg-gray-50 p-2 rounded-xl border border-gray-100">
+                <div class="text-[10px] text-gray-500 flex items-center italic truncate max-w-[150px]">
+                  <i class="bi bi-envelope-at mr-1.5 text-club-primary"></i>
+                  {{ $student->correoMama ?? $student->correoPapa ?? 'Sin correo' }}
+                </div>
+                <div class="flex space-x-1.5">
+                  <button @click="showModal = true" class="w-8 h-8 flex items-center justify-center text-club-primary bg-white hover:bg-blue-50 rounded-lg transition-colors shadow-sm border border-gray-100">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                  <a href="{{ route('students.edit', $student) }}" class="w-8 h-8 flex items-center justify-center text-amber-600 bg-white hover:bg-amber-50 rounded-lg transition-colors shadow-sm border border-gray-100">
+                    <i class="bi bi-pencil-fill"></i>
+                  </a>
+                  @role('Admin')
+                    <button @click="deleteModal = true" class="w-8 h-8 flex items-center justify-center text-red-600 bg-white hover:bg-red-50 rounded-lg transition-colors shadow-sm border border-gray-100">
+                      <i class="bi bi-trash-fill"></i>
+                    </button>
+                  @endrole
+                </div>
+              </div>
+              @include('students.partials.modals')
+            </div>
+          @empty
+            <div class="p-8 text-center text-gray-500 italic">No hay deportistas registrados.</div>
+          @endforelse
         </div>
         
         <!-- Pagination -->

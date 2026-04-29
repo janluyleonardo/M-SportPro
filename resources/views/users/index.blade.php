@@ -28,93 +28,155 @@
                 </button>
             </div>
 
-            <!-- Tabla de Usuarios -->
+            <!-- Table / Cards Container -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
-                <div class="p-0">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Usuario</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Rol Actual</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Cambiar Rol</th>
-                                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-100">
-                                @forelse($users as $user)
-                                <tr class="hover:bg-gray-50/50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="h-10 w-10 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-club-primary font-bold">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-bold text-gray-900">{{ $user->name }}</div>
-                                                <div class="text-xs text-gray-400">Desde el {{ $user->created_at->format('d/m/Y') }}</div>
-                                            </div>
+                
+                <!-- Desktop View (Table) -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Usuario</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Rol Actual</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Cambiar Rol</th>
+                                <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            @forelse($users as $user)
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-club-primary font-bold border border-blue-100">
+                                            {{ strtoupper(substr($user->name, 0, 1)) }}
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        {{ $user->email }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @foreach($user->roles as $role)
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full 
-                                                @if($role->name == 'Admin') bg-club-secondary text-gray-900 
-                                                @elseif($role->name == 'Profesor') bg-blue-50 text-club-primary 
-                                                @elseif($role->name == 'Deportista') bg-indigo-50 text-indigo-700
-                                                @elseif($role->name == 'Padre') bg-green-50 text-green-800
-                                                @else bg-gray-100 text-gray-800 @endif">
-                                                {{ $role->name }}
-                                            </span>
-                                        @endforeach
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <form action="{{ route('users.update', $user) }}" method="POST" class="flex items-center space-x-2">
+                                        <div class="ml-4">
+                                            <div class="text-sm font-bold text-gray-900 leading-tight">{{ $user->name }}</div>
+                                            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Desde {{ $user->created_at->format('d/m/Y') }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    {{ $user->email }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @foreach($user->roles as $role)
+                                        <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-black rounded-full uppercase tracking-wider border
+                                            @if($role->name == 'Admin') bg-club-secondary text-gray-900 border-club-secondary/30
+                                            @elseif($role->name == 'Profesor') bg-blue-50 text-club-primary border-blue-100
+                                            @elseif($role->name == 'Deportista') bg-indigo-50 text-indigo-700 border-indigo-100
+                                            @elseif($role->name == 'Padre') bg-green-50 text-green-800 border-green-100
+                                            @else bg-gray-50 text-gray-600 border-gray-100 @endif">
+                                            {{ $role->name }}
+                                        </span>
+                                    @endforeach
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <form action="{{ route('users.update', $user) }}" method="POST" class="flex items-center space-x-2">
+                                        @csrf
+                                        @method('PATCH')
+                                        <select name="role" class="text-[10px] font-bold rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 pl-2 pr-8 transition-all bg-gray-50">
+                                            @foreach($roles as $role)
+                                                <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                                    {{ $role->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <button type="submit" class="p-1.5 bg-club-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    @if(auth()->id() !== $user->id)
+                                        <form action="{{ route('users.destroy', $user) }}" method="POST"
+                                              onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar usuario', '¿Estás seguro de eliminar a este usuario? Esta acción no se puede deshacer.')"
+                                              class="inline">
                                             @csrf
-                                            @method('PATCH')
-                                            <select name="role" class="text-xs rounded-lg border-gray-300 focus:ring-club-primary focus:border-club-primary py-1 pl-2 pr-8 transition-all">
-                                                @foreach($roles as $role)
-                                                    <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
-                                                        {{ $role->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <button type="submit" class="p-1.5 bg-blue-50 text-club-primary rounded-lg hover:bg-blue-100 transition-colors">
-                                                <i class="bi bi-arrow-repeat text-lg"></i>
+                                            @method('DELETE')
+                                            <button type="submit" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100">
+                                                <i class="bi bi-trash-fill text-lg"></i>
                                             </button>
                                         </form>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        @if(auth()->id() !== $user->id)
-                                            <form action="{{ route('users.destroy', $user) }}" method="POST"
-                                                  onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar usuario', '¿Estás seguro de eliminar a este usuario? Esta acción no se puede deshacer.')"
-                                                  class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
-                                                    <i class="bi bi-trash text-lg"></i>
-                                                </button>
-                                            </form>
-                                        @else
-                                            <span class="text-xs text-gray-400 italic">Eres tú</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-10 text-center text-gray-500 italic">
-                                        No se encontraron usuarios con esos criterios.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                                    @else
+                                        <span class="text-[10px] font-black text-gray-400 bg-gray-50 px-3 py-1 rounded-full uppercase border border-gray-100 tracking-widest">Eres tú</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-500 italic">No se encontraron usuarios.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-                
+
+                <!-- Mobile View (Cards) -->
+                <div class="sm:hidden divide-y divide-gray-100">
+                    @forelse($users as $user)
+                        <div class="p-5 bg-white space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-club-primary font-black text-lg border border-blue-100 shadow-sm">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-black text-gray-900 leading-tight">{{ $user->name }}</h4>
+                                        <p class="text-[10px] font-bold text-gray-400 truncate max-w-[150px]">{{ $user->email }}</p>
+                                    </div>
+                                </div>
+                                @if(auth()->id() !== $user->id)
+                                    <form action="{{ route('users.destroy', $user) }}" method="POST"
+                                          onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar usuario', '¿Estás seguro de eliminar a este usuario?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-2.5 text-red-500 bg-red-50 rounded-xl border border-red-100 transition-colors">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                                <div>
+                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Rol Actual</p>
+                                    @foreach($user->roles as $role)
+                                        <span class="px-2.5 py-0.5 inline-flex text-[9px] font-black rounded-lg uppercase tracking-wider border bg-white shadow-sm
+                                            @if($role->name == 'Admin') text-amber-600 border-amber-100
+                                            @elseif($role->name == 'Profesor') text-club-primary border-blue-100
+                                            @else text-gray-600 border-gray-200 @endif">
+                                            {{ $role->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Registro</p>
+                                    <p class="text-[10px] font-bold text-gray-600">{{ $user->created_at->format('d/m/Y') }}</p>
+                                </div>
+                            </div>
+
+                            <form action="{{ route('users.update', $user) }}" method="POST" class="flex gap-2">
+                                @csrf
+                                @method('PATCH')
+                                <select name="role" class="flex-1 text-[11px] font-black rounded-xl border-gray-200 bg-white focus:ring-club-primary focus:border-club-primary py-2.5 pl-3 transition-all uppercase tracking-tighter">
+                                    @foreach($roles as $role)
+                                        <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                            Cambiar a {{ $role->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="px-5 bg-club-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100 active:scale-95 transition-all">
+                                    OK
+                                </button>
+                            </form>
+                        </div>
+                    @empty
+                        <div class="p-10 text-center text-gray-400 italic">No hay usuarios registrados.</div>
+                    @endforelse
+                </div>
+            </div>                
                 <!-- Paginación -->
                 @if($users->hasPages())
                     <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">

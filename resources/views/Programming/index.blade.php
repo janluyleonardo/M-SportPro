@@ -16,23 +16,23 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
       
       <!-- Top Action Bar -->
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
         <!-- Month Navigation -->
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center justify-center space-x-2 sm:space-x-4 w-full md:w-auto">
             <button @click="prevMonth" class="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
                 <i class="bi bi-chevron-left text-lg"></i>
             </button>
-            <h3 class="text-xl font-bold text-gray-900 w-48 text-center capitalize" x-text="monthNames[month] + ' ' + year"></h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 w-32 sm:w-48 text-center capitalize" x-text="monthNames[month] + ' ' + year"></h3>
             <button @click="nextMonth" class="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
                 <i class="bi bi-chevron-right text-lg"></i>
             </button>
-            <button @click="goToToday" class="px-4 py-2 text-sm font-semibold text-club-primary hover:bg-blue-50 rounded-lg transition-colors border border-blue-100">
+            <button @click="goToToday" class="px-3 py-1.5 text-xs sm:text-sm font-semibold text-club-primary hover:bg-blue-50 rounded-lg transition-colors border border-blue-100">
                 Hoy
             </button>
         </div>
 
         @hasanyrole('Admin|Profesor')
-          <button @click="openCreateModal = true" class="inline-flex items-center px-6 py-3 bg-club-primary border border-transparent rounded-xl font-bold text-sm text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          <button @click="openCreateModal = true" class="w-full md:w-auto inline-flex items-center justify-center px-6 py-3 bg-club-primary border border-transparent rounded-xl font-bold text-sm text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
             <i class="bi bi-plus-circle mr-2 text-lg"></i> {{__('Nueva Programación')}}
           </button>
         @endhasanyrole
@@ -122,62 +122,110 @@
             </template>
 
             <template x-if="selectedEvents.length > 0">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Hora</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Torneo & Cancha</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Categoría</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Encuentro</th>
-                                <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-100">
-                            <template x-for="item in selectedEvents" :key="item.id">
-                                <tr class="hover:bg-indigo-50/30 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-bold text-club-primary bg-blue-50 inline-flex px-3 py-1 rounded-full"><i class="bi bi-clock mr-1"></i> <span x-text="item.hora"></span></div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-bold text-gray-900" x-text="item.torneo"></div>
-                                        <div class="text-xs text-gray-500 flex items-center mt-1">
-                                            <i class="bi bi-geo-alt-fill text-indigo-400 mr-1"></i> <span x-text="item.cancha"></span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-blue-100 text-blue-800" x-text="item.categoriaUno + (item.categoriaDos ? ' / ' + item.categoriaDos : '')"></span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center space-x-2 text-sm font-semibold">
-                                            <span class="text-gray-900" x-text="item.eLocal"></span>
-                                            <span class="text-gray-400 text-xs px-2 py-0.5 bg-gray-100 rounded">VS</span>
-                                            <span class="text-red-600 font-bold" x-text="item.eVisitante"></span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex items-center justify-end space-x-2">
-                                            <button @click="openShow(item)" title="Ver Detalles" class="p-2 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors focus:outline-none">
-                                                <i class="bi bi-eye text-lg"></i>
-                                            </button>
-                                            
-                                            @hasanyrole('Admin|Profesor')
-                                                <button @click="openEdit(item)" title="Editar" class="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors focus:outline-none">
-                                                    <i class="bi bi-pencil-square text-lg"></i>
-                                                </button>
-                                            @endhasanyrole
-
-                                            @hasrole('Admin')
-                                                <button @click="openDelete(item)" title="Eliminar" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors focus:outline-none">
-                                                    <i class="bi bi-trash text-lg"></i>
-                                                </button>
-                                            @endrole
-                                        </div>
-                                    </td>
+                <div>
+                    <!-- Desktop Table -->
+                    <div class="hidden md:block overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Hora</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Torneo & Cancha</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Categoría</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Encuentro</th>
+                                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-100">
+                                <template x-for="item in selectedEvents" :key="item.id">
+                                    <tr class="hover:bg-indigo-50/30 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-bold text-club-primary bg-blue-50 inline-flex px-3 py-1 rounded-full"><i class="bi bi-clock mr-1"></i> <span x-text="item.hora"></span></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-bold text-gray-900" x-text="item.torneo"></div>
+                                            <div class="text-xs text-gray-500 flex items-center mt-1">
+                                                <i class="bi bi-geo-alt-fill text-indigo-400 mr-1"></i> <span x-text="item.cancha"></span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-blue-100 text-blue-800" x-text="item.categoriaUno + (item.categoriaDos ? ' / ' + item.categoriaDos : '')"></span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center space-x-2 text-sm font-semibold">
+                                                <span class="text-gray-900" x-text="item.eLocal"></span>
+                                                <span class="text-gray-400 text-xs px-2 py-0.5 bg-gray-100 rounded">VS</span>
+                                                <span class="text-red-600 font-bold" x-text="item.eVisitante"></span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center justify-end space-x-2">
+                                                <button @click="openShow(item)" title="Ver Detalles" class="p-2 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors focus:outline-none">
+                                                    <i class="bi bi-eye text-lg"></i>
+                                                </button>
+                                                
+                                                @hasanyrole('Admin|Profesor')
+                                                    <button @click="openEdit(item)" title="Editar" class="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors focus:outline-none">
+                                                        <i class="bi bi-pencil-square text-lg"></i>
+                                                    </button>
+                                                @endhasanyrole
+
+                                                @hasrole('Admin')
+                                                    <button @click="openDelete(item)" title="Eliminar" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors focus:outline-none">
+                                                        <i class="bi bi-trash text-lg"></i>
+                                                    </button>
+                                                @endrole
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Cards -->
+                    <div class="md:hidden divide-y divide-gray-100">
+                        <template x-for="item in selectedEvents" :key="item.id">
+                            <div class="p-4 space-y-4">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="bg-club-primary text-white p-2 rounded-xl shadow-sm">
+                                            <i class="bi bi-clock-fill"></i>
+                                        </div>
+                                        <div class="text-lg font-black text-club-primary" x-text="item.hora"></div>
+                                    </div>
+                                    <span class="px-3 py-1 text-[10px] font-black uppercase rounded-lg bg-club-secondary text-gray-900 border border-club-secondary/30" x-text="item.categoriaUno + (item.categoriaDos ? ' / ' + item.categoriaDos : '')"></span>
+                                </div>
+
+                                <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1" x-text="item.torneo"></div>
+                                    <div class="flex items-center space-x-3 justify-center py-2">
+                                        <span class="text-sm font-black text-gray-900" x-text="item.eLocal"></span>
+                                        <span class="text-[10px] font-black bg-white px-2 py-1 rounded-lg border border-gray-100 shadow-sm text-gray-400">VS</span>
+                                        <span class="text-sm font-black text-red-600" x-text="item.eVisitante"></span>
+                                    </div>
+                                    <div class="mt-2 flex items-center justify-center text-[10px] font-bold text-gray-500 bg-white/50 rounded-full py-1">
+                                        <i class="bi bi-geo-alt-fill mr-1 text-club-primary"></i> <span x-text="item.cancha"></span>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button @click="openShow(item)" class="flex-1 flex items-center justify-center py-2.5 bg-blue-50 text-club-primary rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
+                                        <i class="bi bi-eye mr-2"></i> Detalles
+                                    </button>
+                                    @hasanyrole('Admin|Profesor')
+                                        <button @click="openEdit(item)" class="flex-1 flex items-center justify-center py-2.5 bg-amber-50 text-amber-600 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border border-amber-100">
+                                            <i class="bi bi-pencil mr-2"></i> Editar
+                                        </button>
+                                    @endhasanyrole
+                                    @hasrole('Admin')
+                                        <button @click="openDelete(item)" class="p-2.5 bg-red-50 text-red-500 rounded-xl transition-all border border-red-100">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    @endrole
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </template>
         </div>
