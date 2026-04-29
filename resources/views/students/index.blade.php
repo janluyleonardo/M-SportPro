@@ -53,9 +53,13 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="h-10 w-10 flex-shrink-0">
-                        <div class="h-10 w-10 rounded-full bg-club-primary flex items-center justify-center text-white font-bold text-lg shadow-inner">
-                          {{ substr($student->nomDeportista, 0, 1) }}
-                        </div>
+                        @if($student->Photo)
+                          <img class="h-10 w-10 rounded-full object-cover border border-gray-200 shadow-sm" src="{{ asset($student->Photo) }}" alt="{{ $student->nomDeportista }}">
+                        @else
+                          <div class="h-10 w-10 rounded-full bg-club-primary flex items-center justify-center text-white font-bold text-lg shadow-inner">
+                            {{ substr($student->nomDeportista, 0, 1) }}
+                          </div>
+                        @endif
                       </div>
                       <div class="ml-4">
                         <div class="text-sm font-semibold text-gray-900">{{ Str::title($student->nomDeportista) }}</div>
@@ -110,6 +114,11 @@
                                     <h4 class="font-bold text-club-primary mb-4 uppercase text-xs tracking-wider flex items-center">
                                         <i class="bi bi-person-badge mr-2"></i> Información Personal
                                     </h4>
+                                    @if($student->Photo)
+                                      <div class="mb-5 flex justify-center">
+                                        <img src="{{ asset($student->Photo) }}" class="h-32 w-32 rounded-2xl object-cover shadow-lg border-2 border-white ring-1 ring-gray-200" alt="{{ $student->nomDeportista }}">
+                                      </div>
+                                    @endif
                                     <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-gray-700">
                                       <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Categoría</span> <span class="font-semibold text-sm break-all">{{ $student->Categoria }}</span></div>
                                       <div class="border-b border-gray-200/50 pb-1"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Documento</span> <span class="font-semibold text-sm break-all">{{ $student->numDocumento }}</span></div>

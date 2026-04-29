@@ -18,7 +18,7 @@
             activeTab: 'athlete'
         }">
           @csrf
-          @method('put')
+          @method('PATCH')
 
           <!-- Progress/Tabs Bar -->
           <div class="flex border-b border-gray-200 mb-8 overflow-x-auto hide-scrollbar">
@@ -43,27 +43,62 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               
               <!-- Foto -->
-              <div class="lg:col-span-3">
+              <div class="lg:col-span-3" x-data="{ 
+                  preview: @json($student->Photo ? asset($student->Photo) : null),
+                  fileName: '',
+                  isNew: false,
+                  handleFile(event) {
+                      const file = event.target.files[0];
+                      if (file) {
+                          this.fileName = file.name;
+                          this.isNew = true;
+                          const reader = new FileReader();
+                          reader.onload = (e) => { this.preview = e.target.result; };
+                          reader.readAsDataURL(file);
+                      }
+                  }
+              }">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Foto del Deportista</label>
-                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-400 transition-colors bg-gray-50">
+                
+                <!-- Estado: Sin imagen (ni actual ni nueva) -->
+                <div x-show="!preview" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-club-primary/50 transition-colors bg-gray-50 cursor-pointer" @click="$refs.photoInput.click()">
                   <div class="space-y-1 text-center">
-                    @if($student->Photo)
-                      <div class="mb-4">
-                        <p class="text-sm text-gray-500 mb-2">Foto actual:</p>
-                        <img src="{{ asset($student->Photo) }}" alt="Foto" class="h-24 w-24 object-cover rounded-full mx-auto shadow-md">
-                      </div>
-                    @else
-                      <i class="bi bi-camera text-4xl text-gray-400"></i>
-                    @endif
+                    <i class="bi bi-camera text-4xl text-gray-400"></i>
                     <div class="flex text-sm text-gray-600 justify-center">
-                      <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2">
-                        <span>Actualizar archivo</span>
-                        <input id="file-upload" name="Photo" type="file" accept="image/png, image/jpeg" class="sr-only">
-                      </label>
+                      <span class="font-medium text-club-primary hover:opacity-80">Seleccionar foto</span>
                     </div>
-                    <p class="text-xs text-gray-500">PNG, JPG hasta 2MB. Dejar vacío si no se cambia.</p>
+                    <p class="text-xs text-gray-500">PNG, JPG hasta 2MB</p>
                   </div>
                 </div>
+
+                <!-- Estado: Con imagen (actual o nueva) -->
+                <div x-show="preview" x-cloak class="mt-1 flex items-center space-x-4 p-4 border-2 border-dashed rounded-xl"
+                     :class="isNew ? 'border-green-300 bg-green-50/50' : 'border-gray-300 bg-gray-50'">
+                  <div class="h-20 w-20 rounded-2xl overflow-hidden border-2 border-white shadow-lg flex-shrink-0">
+                    <img :src="preview" class="h-full w-full object-cover" alt="Preview">
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <template x-if="isNew">
+                      <div>
+                        <p class="text-sm font-bold text-green-700 flex items-center">
+                          <i class="bi bi-check-circle-fill mr-1.5"></i> Nueva imagen seleccionada
+                        </p>
+                        <p class="text-xs text-gray-500 truncate mt-0.5" x-text="fileName"></p>
+                      </div>
+                    </template>
+                    <template x-if="!isNew">
+                      <p class="text-sm font-semibold text-gray-600 flex items-center">
+                        <i class="bi bi-image mr-1.5"></i> Foto actual
+                      </p>
+                    </template>
+                    <button type="button" @click="$refs.photoInput.click()" class="mt-2 text-xs font-semibold text-club-primary hover:underline">
+                      <i class="bi bi-arrow-repeat mr-1"></i> <span x-text="isNew ? 'Elegir otra' : 'Cambiar foto'"></span>
+                    </button>
+                  </div>
+                </div>
+
+                <input x-ref="photoInput" name="Photo" type="file" accept="image/png, image/jpeg" class="hidden" @change="handleFile($event)">
+                <p class="text-xs text-gray-400 mt-1.5 italic"><i class="bi bi-info-circle mr-0.5"></i> Dejar vacío si no desea cambiar la foto.</p>
               </div>
 
               <!-- Nombres -->
