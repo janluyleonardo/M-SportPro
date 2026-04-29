@@ -4,7 +4,7 @@
       <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
         {{ __('Athletes Directory') }}
       </h2>
-      <a href="{{ route('students.create') }}" class="inline-flex items-center px-4 py-2.5 bg-blue-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-200 shadow-md hover:shadow-lg">
+      <a href="{{ route('students.create') }}" class="inline-flex items-center px-4 py-2.5 bg-club-primary border border-transparent rounded-lg font-semibold text-sm text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition ease-in-out duration-200 shadow-md hover:shadow-lg">
         <i class="bi bi-person-plus-fill mr-2 text-lg"></i> {{ __('Add Athlete') }}
       </a>
     </div>
@@ -16,7 +16,7 @@
       <!-- Stats / Actions Row -->
       <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div class="flex items-center space-x-3">
-          <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
+          <div class="p-3 bg-blue-50 text-club-primary">
             <i class="bi bi-people-fill text-xl"></i>
           </div>
           <div>
@@ -46,14 +46,14 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-100">
               @forelse ($students as $index => $student)
-                <tr class="hover:bg-blue-50/50 transition-colors duration-200" x-data="{ showModal: false, deleteModal: false }">
+                <tr class="hover:bg-blue-50/30 transition-colors duration-200" x-data="{ showModal: false, deleteModal: false }">
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
                     {{ $students->firstItem() + $index }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="h-10 w-10 flex-shrink-0">
-                        <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white font-bold text-lg shadow-inner">
+                        <div class="h-10 w-10 rounded-full bg-club-primary flex items-center justify-center text-white font-bold text-lg shadow-inner">
                           {{ substr($student->nomDeportista, 0, 1) }}
                         </div>
                       </div>
@@ -67,13 +67,13 @@
                     {{ $student->numDocumento }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-club-secondary text-gray-900 border border-club-secondary/30">
                       {{ $student->Categoria }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div class="flex justify-end space-x-2">
-                      <button @click="showModal = true" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors border border-blue-100" title="{{__('See')}}">
+                      <button @click="showModal = true" class="text-club-primary hover:text-club-primary/80 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors border border-blue-100" title="{{__('See')}}">
                         <i class="bi bi-eye-fill"></i>
                       </button>
                       <a href="{{ route('students.edit', $student) }}" class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg transition-colors border border-amber-100" title="{{__('Edit')}}">
@@ -107,7 +107,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                                   <!-- Athlete Info -->
                                   <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 h-full">
-                                    <h4 class="font-bold text-blue-600 mb-4 uppercase text-xs tracking-wider flex items-center">
+                                    <h4 class="font-bold text-club-primary mb-4 uppercase text-xs tracking-wider flex items-center">
                                         <i class="bi bi-person-badge mr-2"></i> Información Personal
                                     </h4>
                                     <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-gray-700">
@@ -123,7 +123,7 @@
                                   
                                   <!-- Contact Info -->
                                   <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 h-full">
-                                    <h4 class="font-bold text-blue-600 mb-4 uppercase text-xs tracking-wider flex items-center">
+                                    <h4 class="font-bold text-club-primary mb-4 uppercase text-xs tracking-wider flex items-center">
                                         <i class="bi bi-geo-alt-fill mr-2"></i> Contacto & Ubicación
                                     </h4>
                                     <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-gray-700">

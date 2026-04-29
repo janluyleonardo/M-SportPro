@@ -25,16 +25,16 @@
 
           <!-- Progress/Tabs Bar -->
           <div class="flex border-b border-gray-200 mb-8 overflow-x-auto hide-scrollbar">
-            <button type="button" @click="activeTab = 'athlete'" :class="{'border-blue-500 text-blue-600': activeTab === 'athlete', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'athlete'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
+            <button type="button" @click="activeTab = 'athlete'" :class="{'border-club-primary text-club-primary': activeTab === 'athlete', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'athlete'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
               <i class="bi bi-person-badge mr-2"></i> {{ __('Athlete Info') }}
             </button>
-            <button type="button" @click="activeTab = 'mother'" :class="{'border-blue-500 text-blue-600': activeTab === 'mother', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'mother'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
+            <button type="button" @click="activeTab = 'mother'" :class="{'border-club-primary text-club-primary': activeTab === 'mother', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'mother'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
               <i class="bi bi-person-hearts mr-2"></i> {{ __('Mother Info') }}
             </button>
-            <button type="button" @click="activeTab = 'father'" :class="{'border-blue-500 text-blue-600': activeTab === 'father', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'father'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
+            <button type="button" @click="activeTab = 'father'" :class="{'border-club-primary text-club-primary': activeTab === 'father', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'father'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
               <i class="bi bi-person-fill mr-2"></i> {{ __('Father Info') }}
             </button>
-            <button type="button" @click="activeTab = 'medical'" :class="{'border-blue-500 text-blue-600': activeTab === 'medical', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'medical'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
+            <button type="button" @click="activeTab = 'medical'" :class="{'border-club-primary text-club-primary': activeTab === 'medical', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'medical'}" class="whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors">
               <i class="bi bi-clipboard2-pulse mr-2"></i> {{ __('Medical History') }}
             </button>
           </div>
@@ -46,26 +46,55 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               
               <!-- Foto -->
-              <div class="lg:col-span-3">
+              <div class="lg:col-span-3" x-data="{ 
+                  preview: null, 
+                  fileName: '',
+                  handleFile(event) {
+                      const file = event.target.files[0];
+                      if (file) {
+                          this.fileName = file.name;
+                          const reader = new FileReader();
+                          reader.onload = (e) => { this.preview = e.target.result; };
+                          reader.readAsDataURL(file);
+                      }
+                  }
+              }">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Foto del Deportista <span class="text-red-500">*</span></label>
-                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-400 transition-colors bg-gray-50">
+                
+                <!-- Estado: Sin imagen -->
+                <div x-show="!preview" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-club-primary/50 transition-colors bg-gray-50 cursor-pointer" @click="$refs.photoInput.click()">
                   <div class="space-y-1 text-center">
                     <i class="bi bi-camera text-4xl text-gray-400"></i>
                     <div class="flex text-sm text-gray-600 justify-center">
-                      <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-2">
-                        <span>Subir un archivo</span>
-                        <input id="file-upload" name="Photo" type="file" accept="image/png, image/jpeg" class="sr-only" required>
-                      </label>
+                      <span class="font-medium text-club-primary hover:opacity-80">Seleccionar foto</span>
                     </div>
                     <p class="text-xs text-gray-500">PNG, JPG hasta 2MB</p>
                   </div>
                 </div>
+
+                <!-- Estado: Con imagen preview -->
+                <div x-show="preview" x-cloak class="mt-1 flex items-center space-x-4 p-4 border-2 border-green-300 border-dashed rounded-xl bg-green-50/50">
+                  <div class="h-20 w-20 rounded-2xl overflow-hidden border-2 border-white shadow-lg flex-shrink-0">
+                    <img :src="preview" class="h-full w-full object-cover" alt="Preview">
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-green-700 flex items-center">
+                      <i class="bi bi-check-circle-fill mr-1.5"></i> Imagen cargada
+                    </p>
+                    <p class="text-xs text-gray-500 truncate mt-0.5" x-text="fileName"></p>
+                    <button type="button" @click="$refs.photoInput.click()" class="mt-2 text-xs font-semibold text-club-primary hover:underline">
+                      <i class="bi bi-arrow-repeat mr-1"></i> Cambiar foto
+                    </button>
+                  </div>
+                </div>
+
+                <input x-ref="photoInput" name="Photo" type="file" accept="image/png, image/jpeg" class="hidden" required @change="handleFile($event)">
               </div>
 
               <!-- Nombres -->
               <div class="lg:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">{{ __('Full Name') }} <span class="text-red-500">*</span></label>
-                <input type="text" name="nomDeportista" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+                <input type="text" name="nomDeportista" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-club-primary focus:ring focus:ring-club-primary/20 transition-all">
               </div>
 
               <!-- Documento -->
@@ -184,7 +213,7 @@
             </div>
             
             <div class="mt-8 flex justify-end">
-              <button type="button" @click="activeTab = 'mother'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-gray-800 border border-transparent rounded-lg font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+              <button type="button" @click="activeTab = 'mother'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-club-primary border border-transparent rounded-lg font-semibold text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition-colors">
                 Siguiente: Info Madre <i class="bi bi-arrow-right ml-2"></i>
               </button>
             </div>
@@ -314,7 +343,7 @@
               <button type="button" @click="activeTab = 'father'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-white border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                 <i class="bi bi-arrow-left mr-2"></i> Atrás
               </button>
-              <button type="submit" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 border border-transparent rounded-xl font-bold text-lg text-white hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform hover:scale-105 shadow-lg">
+              <button type="submit" class="inline-flex items-center px-8 py-4 bg-club-primary border border-transparent rounded-xl font-bold text-lg text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition-all transform hover:scale-105 shadow-lg">
                 <i class="bi bi-check2-circle mr-2 text-2xl"></i> {{__('Add Athlete')}}
               </button>
             </div>

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center space-x-3">
-            <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
+            <div class="p-2 bg-blue-50 rounded-lg text-club-primary">
                 <i class="bi bi-images text-xl"></i>
             </div>
             <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
@@ -17,7 +17,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100 hover:shadow-md transition-shadow duration-300">
                 <div class="p-6 sm:px-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                     <h3 class="text-xl font-bold text-gray-900 flex items-center">
-                        <i class="bi bi-camera-fill text-blue-500 mr-3 text-2xl"></i> 
+                        <i class="bi bi-camera-fill text-club-primary mr-3 text-2xl"></i> 
                         {{__('Galery_photos')}}
                     </h3>
                     <p class="text-sm text-gray-500 mt-1 ml-9">{{__('Facebook_photos_subtitle')}}</p>

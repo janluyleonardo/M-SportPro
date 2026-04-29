@@ -6,6 +6,10 @@ use App\Http\Controllers\StudentsController;
 use App\Http\Controllers\ProgrammingController;
 use App\Http\Controllers\generalController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ClassScheduleController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\LocationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,7 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 1. Dashboard: Acceso para todos los roles definidos
     Route::get('/dashboard', function () {
         return view('dashboard');
-    })->name('dashboard')->middleware('role:Admin|Profesor|Padre');
+    })->name('dashboard')->middleware('role:Admin|Profesor|Padre|Deportista');
 
     // 2. Módulo de Estudiantes (Solo Admin y Profesor)
     Route::middleware(['role:Admin|Profesor'])->group(function () {
@@ -29,17 +33,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/export', [StudentsController::class, 'export'])->name('export');
     });
 
-    // Solo Admin puede gestionar usuarios
-    Route::middleware(['role:Admin'])->group(function () {
-        Route::resource('/users', UserController::class);
-        Route::delete('/students/{student}', [StudentsController::class, 'destroy'])->name('students.destroy');
-        Route::delete('/programming/{programming}', [ProgrammingController::class, 'destroy'])->name('programming.destroy');
-    });
+        // Rutas de Mensualidades y Asistencias (Lectura: Admin, Profesor, Padre, Deportista)
+        Route::middleware(['role:Admin|Profesor|Padre|Deportista'])->group(function () {
+            Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+            Route::get('payments/student/{student}', [PaymentController::class, 'show'])->name('payments.show');
+            
+            // Visualización de Horarios para todos
+            Route::get('schedules', [ClassScheduleController::class, 'index'])->name('schedules.index');
+        });
+
+        // Rutas de Asistencia (Solo Profesores y Admin para tomar lista)
+        Route::middleware(['role:Admin|Profesor'])->group(function () {
+            Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
+            Route::get('attendances/class/{schedule}', [AttendanceController::class, 'show'])->name('attendances.show');
+            Route::post('attendances', [AttendanceController::class, 'store'])->name('attendances.store');
+        });
+
+        // Rutas de Gestión (Solo Admin)
+        Route::middleware(['role:Admin'])->group(function () {
+            Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
+            Route::put('payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+            Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+            
+            // Rutas de Horarios (Solo Admin para crear/eliminar)
+            Route::post('schedules', [ClassScheduleController::class, 'store'])->name('schedules.store');
+            Route::delete('schedules/{classSchedule}', [ClassScheduleController::class, 'destroy'])->name('schedules.destroy');
+            
+            Route::resource('users', UserController::class);
+            Route::resource('locations', LocationController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::delete('/students/{student}', [StudentsController::class, 'destroy'])->name('students.destroy');
+            Route::delete('/programming/{programming}', [ProgrammingController::class, 'destroy'])->name('programming.destroy');
+        });
 
     // 3. Módulo de Programación
     // Lectura: Para todos
-    Route::get('/programming', [ProgrammingController::class, 'index'])->name('programming.index')->middleware('role:Admin|Profesor|Padre');
-    Route::get('/programming/{programming}', [ProgrammingController::class, 'show'])->name('programming.show')->middleware('role:Admin|Profesor|Padre');
+    Route::get('/programming', [ProgrammingController::class, 'index'])->name('programming.index')->middleware('role:Admin|Profesor|Padre|Deportista');
+    Route::get('/programming/{programming}', [ProgrammingController::class, 'show'])->name('programming.show')->middleware('role:Admin|Profesor|Padre|Deportista');
 
     // Escritura (Crear/Editar): Admin y Profesor
     Route::middleware(['role:Admin|Profesor'])->group(function () {

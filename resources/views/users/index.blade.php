@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                <div class="p-2 bg-blue-50 rounded-lg text-club-primary">
                     <i class="bi bi-people-fill text-xl"></i>
                 </div>
                 <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
@@ -20,10 +20,10 @@
                 <form action="{{ route('users.index') }}" method="GET" class="w-full md:w-1/2 relative">
                     <i class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                     <input type="text" name="search" value="{{ $search }}" placeholder="Buscar por nombre, correo o rol..." 
-                           class="w-full pl-11 pr-4 py-2.5 rounded-xl border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all text-sm">
+                           class="w-full pl-11 pr-4 py-2.5 rounded-xl border-gray-200 focus:border-club-primary focus:ring focus:ring-club-primary/20 transition-all text-sm">
                 </form>
 
-                <button @click="openCreateModal = true" class="w-full md:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <button @click="openCreateModal = true" class="w-full md:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-club-primary text-white font-bold text-sm rounded-xl hover:opacity-90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                     <i class="bi bi-person-plus-fill mr-2 text-lg"></i> {{ __('Nuevo Usuario Manual') }}
                 </button>
             </div>
@@ -47,7 +47,7 @@
                                 <tr class="hover:bg-gray-50/50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <div class="h-10 w-10 flex-shrink-0 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                                            <div class="h-10 w-10 flex-shrink-0 rounded-full bg-blue-50 flex items-center justify-center text-club-primary font-bold">
                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                                             </div>
                                             <div class="ml-4">
@@ -62,9 +62,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @foreach($user->roles as $role)
                                             <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full 
-                                                @if($role->name == 'Admin') bg-purple-100 text-purple-800 
-                                                @elseif($role->name == 'Profesor') bg-blue-100 text-blue-800 
-                                                @else bg-green-100 text-green-800 @endif">
+                                                @if($role->name == 'Admin') bg-club-secondary text-gray-900 
+                                                @elseif($role->name == 'Profesor') bg-blue-50 text-club-primary 
+                                                @elseif($role->name == 'Deportista') bg-indigo-50 text-indigo-700
+                                                @elseif($role->name == 'Padre') bg-green-50 text-green-800
+                                                @else bg-gray-100 text-gray-800 @endif">
                                                 {{ $role->name }}
                                             </span>
                                         @endforeach
@@ -73,21 +75,23 @@
                                         <form action="{{ route('users.update', $user) }}" method="POST" class="flex items-center space-x-2">
                                             @csrf
                                             @method('PATCH')
-                                            <select name="role" class="text-xs rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 py-1 pl-2 pr-8 transition-all">
+                                            <select name="role" class="text-xs rounded-lg border-gray-300 focus:ring-club-primary focus:border-club-primary py-1 pl-2 pr-8 transition-all">
                                                 @foreach($roles as $role)
                                                     <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
                                                         {{ $role->name }}
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            <button type="submit" class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors">
+                                            <button type="submit" class="p-1.5 bg-blue-50 text-club-primary rounded-lg hover:bg-blue-100 transition-colors">
                                                 <i class="bi bi-arrow-repeat text-lg"></i>
                                             </button>
                                         </form>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         @if(auth()->id() !== $user->id)
-                                            <form action="{{ route('users.destroy', $user) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar a este usuario?')" class="inline">
+                                            <form action="{{ route('users.destroy', $user) }}" method="POST"
+                                                  onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar usuario', '¿Estás seguro de eliminar a este usuario? Esta acción no se puede deshacer.')"
+                                                  class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
@@ -165,7 +169,7 @@
                         </div>
                         
                         <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse rounded-b-2xl border-t border-gray-100">
-                            <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2.5 bg-indigo-600 text-base font-bold text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-all transform hover:scale-105">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2.5 bg-club-primary text-base font-bold text-white hover:opacity-90 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-all transform hover:scale-105">
                                 Crear Usuario
                             </button>
                             <button type="button" @click="openCreateModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">

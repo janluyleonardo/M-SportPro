@@ -2,7 +2,7 @@
   <x-slot name="header">
     <div class="flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+        <div class="p-2 bg-blue-50 rounded-lg text-club-primary">
           <i class="bi bi-calendar-event text-xl"></i>
         </div>
         <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
@@ -26,13 +26,13 @@
             <button @click="nextMonth" class="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
                 <i class="bi bi-chevron-right text-lg"></i>
             </button>
-            <button @click="goToToday" class="px-4 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-100">
+            <button @click="goToToday" class="px-4 py-2 text-sm font-semibold text-club-primary hover:bg-blue-50 rounded-lg transition-colors border border-blue-100">
                 Hoy
             </button>
         </div>
 
         @hasanyrole('Admin|Profesor')
-          <button @click="openCreateModal = true" class="inline-flex items-center px-6 py-3 bg-indigo-600 border border-transparent rounded-xl font-bold text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          <button @click="openCreateModal = true" class="inline-flex items-center px-6 py-3 bg-club-primary border border-transparent rounded-xl font-bold text-sm text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
             <i class="bi bi-plus-circle mr-2 text-lg"></i> {{__('Nueva Programación')}}
           </button>
         @endhasanyrole
@@ -58,17 +58,17 @@
             <template x-for="day in days">
                 <div @click="selectDay(day)" 
                      class="bg-white min-h-[100px] p-2 cursor-pointer transition-colors relative group"
-                     :class="{'ring-2 ring-inset ring-indigo-500 bg-indigo-50': isSelected(day), 'hover:bg-gray-50': !isSelected(day)}">
+                     :class="{'ring-2 ring-inset ring-club-primary bg-blue-50/30': isSelected(day), 'hover:bg-gray-50': !isSelected(day)}">
                     
                     <div class="flex justify-between items-start">
                         <span class="w-7 h-7 flex items-center justify-center rounded-full text-sm font-semibold"
-                              :class="{'bg-indigo-600 text-white': isToday(day), 'text-gray-700': !isToday(day)}">
+                              :class="{'bg-club-primary text-white': isToday(day), 'text-gray-700': !isToday(day)}">
                             <span x-text="day"></span>
                         </span>
                         
                         <!-- Event Indicator Badge -->
                         <template x-if="hasEvents(day)">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-club-secondary text-gray-900 border border-club-secondary/30">
                                 <span x-text="getEventsCount(day)"></span> <i class="bi bi-controller ml-1"></i>
                             </span>
                         </template>
@@ -100,12 +100,12 @@
       <!-- Selected Day Details (Shows only when a day is selected) -->
       <div x-show="selectedDate" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white overflow-hidden shadow-md sm:rounded-2xl border border-gray-100" style="display: none;">
         
-        <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center">
+        <div class="bg-club-primary px-6 py-4 flex justify-between items-center border-b-4 border-club-secondary">
             <h3 class="text-xl font-bold text-white flex items-center">
                 <i class="bi bi-calendar-check mr-2"></i> 
                 Programación para el <span x-text="formatDateHuman(selectedDate)" class="ml-1"></span>
             </h3>
-            <button @click="selectedDate = null; selectedEvents = []" class="text-indigo-200 hover:text-white transition-colors">
+            <button @click="selectedDate = null; selectedEvents = []" class="text-white/70 hover:text-white transition-colors">
                 <i class="bi bi-x-circle-fill text-2xl"></i>
             </button>
         </div>
@@ -137,7 +137,7 @@
                             <template x-for="item in selectedEvents" :key="item.id">
                                 <tr class="hover:bg-indigo-50/30 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-bold text-indigo-600 bg-indigo-50 inline-flex px-3 py-1 rounded-full"><i class="bi bi-clock mr-1"></i> <span x-text="item.hora"></span></div>
+                                        <div class="text-sm font-bold text-club-primary bg-blue-50 inline-flex px-3 py-1 rounded-full"><i class="bi bi-clock mr-1"></i> <span x-text="item.hora"></span></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-bold text-gray-900" x-text="item.torneo"></div>
