@@ -1,4 +1,5 @@
 <x-app-layout>
+  <style>[x-cloak] { display: none !important; }</style>
   <x-slot name="header">
     <div class="flex items-center space-x-3">
       <a href="{{ route('students.index') }}" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -16,11 +17,12 @@
         
         <form action="{{ route('students.store') }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8" x-data="{ 
             activeTab: 'athlete',
+            submitting: false,
             athleteComplete: false,
             motherComplete: false,
             fatherComplete: false,
             medicalComplete: false
-        }">
+        }" @submit="submitting = true">
           @csrf
 
           <!-- Progress/Tabs Bar -->
@@ -47,22 +49,14 @@
               
               <!-- Foto -->
               <div class="lg:col-span-3" x-data="{ 
-                  preview: null, 
+                  preview: '', 
                   fileName: '',
-                  handleFile(event) {
-                      const file = event.target.files[0];
-                      if (file) {
-                          this.fileName = file.name;
-                          const reader = new FileReader();
-                          reader.onload = (e) => { this.preview = e.target.result; };
-                          reader.readAsDataURL(file);
-                      }
-                  }
+                  isNew: false
               }">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Foto del Deportista <span class="text-red-500">*</span></label>
                 
                 <!-- Estado: Sin imagen -->
-                <div x-show="!preview" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-club-primary/50 transition-colors bg-gray-50 cursor-pointer" @click="$refs.photoInput.click()">
+                <div x-show="!preview || preview === ''" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-club-primary/50 transition-colors bg-gray-50 cursor-pointer" @click="$refs.photoInput.click()">
                   <div class="space-y-1 text-center">
                     <i class="bi bi-camera text-4xl text-gray-400"></i>
                     <div class="flex text-sm text-gray-600 justify-center">
@@ -73,7 +67,7 @@
                 </div>
 
                 <!-- Estado: Con imagen preview -->
-                <div x-show="preview" x-cloak class="mt-1 flex items-center space-x-4 p-4 border-2 border-green-300 border-dashed rounded-xl bg-green-50/50">
+                <div x-show="preview && preview !== ''" x-cloak class="mt-1 flex items-center space-x-4 p-4 border-2 border-green-300 border-dashed rounded-xl bg-green-50/50">
                   <div class="h-20 w-20 rounded-2xl overflow-hidden border-2 border-white shadow-lg flex-shrink-0">
                     <img :src="preview" class="h-full w-full object-cover" alt="Preview">
                   </div>
@@ -88,7 +82,17 @@
                   </div>
                 </div>
 
-                <input x-ref="photoInput" name="Photo" type="file" accept="image/png, image/jpeg" class="hidden" required @change="handleFile($event)">
+                <input x-ref="photoInput" name="Photo" type="file" accept="image/png, image/jpeg" class="hidden" required 
+                       @change="
+                          const file = $event.target.files[0];
+                          if (file) {
+                              fileName = file.name;
+                              isNew = true;
+                              const reader = new FileReader();
+                              reader.onload = (e) => { preview = e.target.result; };
+                              reader.readAsDataURL(file);
+                          }
+                       ">
               </div>
 
               <!-- Nombres -->
@@ -343,8 +347,20 @@
               <button type="button" @click="activeTab = 'father'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-white border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                 <i class="bi bi-arrow-left mr-2"></i> Atrás
               </button>
-              <button type="submit" class="inline-flex items-center px-8 py-4 bg-club-primary border border-transparent rounded-xl font-bold text-lg text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition-all transform hover:scale-105 shadow-lg">
-                <i class="bi bi-check2-circle mr-2 text-2xl"></i> {{__('Add Athlete')}}
+              <button type="submit" 
+                      :disabled="submitting"
+                      :class="submitting ? 'opacity-75 cursor-not-allowed' : 'hover:scale-105'"
+                      class="inline-flex items-center px-8 py-4 bg-club-primary border border-transparent rounded-xl font-bold text-lg text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition-all shadow-lg">
+                <template x-if="!submitting">
+                    <i class="bi bi-check2-circle mr-2 text-2xl"></i>
+                </template>
+                <template x-if="submitting">
+                    <svg class="animate-spin -ml-1 mr-2 h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </template>
+                <span x-text="submitting ? 'Guardando...' : '{{__('Add Athlete')}}'"></span>
               </button>
             </div>
           </div>

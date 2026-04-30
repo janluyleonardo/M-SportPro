@@ -76,6 +76,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/programming', [ProgrammingController::class, 'store'])->name('programming.store');
         Route::get('/programming/{programming}/edit', [ProgrammingController::class, 'edit'])->name('programming.edit');
         Route::patch('/programming/{programming}', [ProgrammingController::class, 'update'])->name('programming.update');
+        Route::get('/programming/imprimir/{date}', [ProgrammingController::class, 'imprimir'])->name('programming.imprimir');
     });
 
     // 4. Perfil

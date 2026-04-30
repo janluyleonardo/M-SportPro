@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Ficha de inscripcion de: {{ Str::title($student->nomDeportista)}}</title>
-  <link href="{{ env('APP_URL') }}css/pdf-imprimir.css" rel="stylesheet">
+  <link href="{{ public_path('css/pdf-imprimir.css') }}" rel="stylesheet">
   <style>
     body {
-      background-image: url("{{ env('APP_URL') }}images/logo/LOGO.png");
+      background-image: url("{{ public_path('images/logo/LOGO.png') }}");
       background-repeat: no-repeat;
       background-size:100%;
       background-position: 50% 50%;
@@ -20,7 +20,7 @@
 <body>
   <header>
     <div class="h-pdf-left">
-      <img src="{{ env('APP_URL') }}images/logo/LOGO.png" alt="LOGO-jackeline" width="100">
+      <img src="{{ public_path('images/logo/LOGO.png') }}" alt="LOGO-jackeline" width="100">
     </div>
     <div class="h-pdf-center">
       <h2 style="text-shadow: 2px 2px #FF0000 !important;">{{__('CLUB DEPORTIVO JACKELINE FS A.F.A')}}</h2>
@@ -33,7 +33,7 @@
     </div>
     <div class="h-pdf-right">
       <div class="div-img">
-        <img class="photo" src="{{env('APP_URL').$student->Photo}}" alt="foto-deportista">
+        <img class="photo" src="{{ public_path($student->Photo) }}" alt="foto-deportista">
       </div>
     </div>
   </header>
@@ -46,7 +46,7 @@
         <td style="background-color:rgba(1, 142, 203,0.7);text-align:center;" colspan="2"><b>Categoria:</b></td>
       </tr>
       <tr>
-        <td align="center">{{ \Carbon\Carbon::parse(strtotime($student->fechaInscripcion))->formatLocalized('%d-%m-%Y') }}</td>
+        <td align="center">{{ \Carbon\Carbon::parse($student->fechaInscripcion)->format('d-m-Y') }}</td>
         <td colspan="2" align="center"><b>{{$student->nomDeportista}}</b></td>
         <td colspan="2" align="center">{{ $student->Categoria}}</td>
       </tr>
@@ -74,7 +74,7 @@
         <td style="background-color:rgba(1, 142, 203,0.7);text-align:center;"><b>Departamento:</b> </td>
       </tr>
       <tr>
-        <td align="center">{{ \Carbon\Carbon::parse(strtotime($student->fechaNacimiento))->formatLocalized('%d-%m-%Y') }}</td>
+        <td align="center">{{ \Carbon\Carbon::parse($student->fechaNacimiento)->format('d-m-Y') }}</td>
         <td align="center">{{ $student->Ciudad}}</td>
         <td align="center">{{ $student->Departamento}}</td>
         <td align="center" colspan="2">{{ $student->EPS}}</td>

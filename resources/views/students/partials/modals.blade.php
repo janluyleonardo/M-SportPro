@@ -16,7 +16,7 @@
               </button>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm mb-6">
               <!-- Athlete Info -->
               <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 h-full">
                 <h4 class="font-bold text-club-primary mb-4 uppercase text-xs tracking-wider flex items-center">
@@ -53,6 +53,12 @@
                   <div class="col-span-2"><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">EPS</span> <span class="font-semibold text-sm break-words whitespace-normal">{{ $student->EPS }}</span></div>
                 </div>
               </div>
+            </div>
+
+            <div class="flex justify-end pt-4 border-t border-gray-100">
+                <a href="{{ route('imprimir', $student) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors shadow-sm">
+                    <i class="bi bi-printer-fill mr-2"></i> {{ __('Print Registration') }}
+                </a>
             </div>
           </div>
         </div>

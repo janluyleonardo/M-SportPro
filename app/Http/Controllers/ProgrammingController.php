@@ -6,9 +6,23 @@ use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\programming;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class ProgrammingController extends Controller
 {
+    public function imprimir($date)
+    {
+        $programming = programming::where('fecha', $date)->orderBy('hora')->get();
+        
+        if ($programming->isEmpty()) {
+            return back()->with('error', 'No hay programación para esta fecha.');
+        }
+
+        $pdf = Pdf::loadView('Programming.pdf', compact('programming', 'date'));
+        return $pdf->stream('Programacion_'.$date.'.pdf');
+    }
+
     /**
      * Display a listing of the resource.
      *

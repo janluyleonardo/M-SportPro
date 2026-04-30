@@ -15,12 +15,24 @@ class StudentsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-      $mensaje = "";
-      $students = Student::orderBy('id', 'DESC')->paginate(5);
-      $studentsCount = Student::all();
-      return view('students.index', compact('students','mensaje','studentsCount'));
+      $search = $request->input('search');
+      
+      $query = Student::orderBy('id', 'DESC');
+      
+      if ($search) {
+          $query->where(function($q) use ($search) {
+              $q->where('nomDeportista', 'LIKE', "%{$search}%")
+                ->orWhere('Categoria', 'LIKE', "%{$search}%")
+                ->orWhere('numDocumento', 'LIKE', "%{$search}%");
+          });
+      }
+      
+      $students = $query->paginate(5)->withQueryString();
+      $studentsCount = Student::count(); 
+      
+      return view('students.index', compact('students', 'studentsCount', 'search'));
     }
 
     /**
@@ -93,7 +105,7 @@ class StudentsController extends Controller
         return back()->withInput()->with('error', 'No se pudo agregar nuevo registro => '.$th->getMessage());
       }
       
-      return redirect()->route('students.index')->with('success', 'Registro creado correctamente.');
+      return redirect()->route('imprimir', $newStudent->id);
     }
 
     /**
@@ -141,15 +153,13 @@ class StudentsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Student $student)
     {
-      $student = Student::findOrFail($id);
-
-      if($request->hasfile('Photo')){
+      if($request->hasFile('Photo')){
         $file = $request->file('Photo');
         $pathUrl = 'images/Photos/';
         $fileName = time()."-".$file->getClientOriginalName();
-        $uploadSuccess = $request->file('Photo')->move($pathUrl, $fileName);
+        $file->move(public_path($pathUrl), $fileName);
         $student->Photo = $pathUrl . $fileName;
       }
       $student->Categoria = $request->Categoria;
@@ -190,10 +200,10 @@ class StudentsController extends Controller
       $student->lesionOM = $request->lesionOM;
 
       try {
-        $student->update();
+        $student->save();
         return redirect()->route('students.index')->with('success', 'Registro actualizado correctamente.');
       } catch (\Throwable $th) {
-        return back()->withInput()->with('error', 'No pudimos actualizar el registro por favor valide los datos ingresados: '.$th->getMessage());
+        return back()->withInput()->with('error', 'No pudimos actualizar el registro: '.$th->getMessage());
       }
     }
 

@@ -14,19 +14,52 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
       
       <!-- Stats / Actions Row -->
-      <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex items-center space-x-3">
-          <div class="p-3 bg-blue-50 text-club-primary">
+      <div class="mb-6 flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center space-x-3 w-full lg:w-auto">
+          <div class="p-3 bg-blue-50 text-club-primary rounded-lg">
             <i class="bi bi-people-fill text-xl"></i>
           </div>
           <div>
             <p class="text-sm text-gray-500 font-medium">{{ __('Total Athletes') }}</p>
-            <p class="text-2xl font-bold text-gray-900 leading-none">{{ count($studentsCount) }}</p>
+            <p class="text-2xl font-bold text-gray-900 leading-none">{{ $studentsCount }}</p>
           </div>
         </div>
-        <div>
-          <a href="{{ route('export') }}" class="inline-flex items-center px-4 py-2 bg-emerald-500 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-emerald-600 transition-colors duration-200 shadow-sm">
-            <i class="bi bi-file-earmark-excel-fill mr-2"></i> {{ __('Export Directory') }}
+
+        <!-- Search Bar -->
+        <div class="w-full lg:flex-1 lg:max-w-md">
+            <form action="{{ route('students.index') }}" method="GET" class="relative group">
+                <input type="text" 
+                       name="search" 
+                       value="{{ $search ?? '' }}" 
+                       placeholder="Buscar por nombre, categoría o documento..." 
+                       class="w-full pl-10 pr-10 py-2.5 bg-gray-50 border-gray-200 rounded-xl text-sm focus:ring-club-primary focus:border-club-primary transition-all duration-200 group-hover:bg-white"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="bi bi-search text-gray-400 group-hover:text-club-primary transition-colors duration-200"></i>
+                </div>
+                @if($search)
+                    <a href="{{ route('students.index') }}" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-red-500 transition-colors" title="Limpiar búsqueda">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </a>
+                @endif
+            </form>
+        </div>
+
+        <div class="w-full lg:w-auto" x-data="{ exporting: false }">
+          <a href="{{ route('export') }}" 
+             @click="exporting = true; setTimeout(() => exporting = false, 3000)"
+             :class="exporting ? 'opacity-75 cursor-not-allowed pointer-events-none' : ''"
+             class="w-full lg:w-auto inline-flex items-center justify-center px-4 py-2 bg-emerald-500 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-emerald-600 transition-colors duration-200 shadow-sm">
+            <template x-if="!exporting">
+                <i class="bi bi-file-earmark-excel-fill mr-2"></i>
+            </template>
+            <template x-if="exporting">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </template>
+            <span x-text="exporting ? 'Generando...' : '{{ __('Export Directory') }}'"></span>
           </a>
         </div>
       </div>
@@ -79,6 +112,9 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div class="flex justify-end space-x-2">
+                      <a href="{{ route('imprimir', $student) }}" target="_blank" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors border border-blue-100" title="{{__('Print')}}">
+                        <i class="bi bi-printer-fill"></i>
+                      </a>
                       <button @click="showModal = true" class="text-club-primary hover:text-club-primary/80 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors border border-blue-100" title="{{__('See')}}">
                         <i class="bi bi-eye-fill"></i>
                       </button>
@@ -146,6 +182,9 @@
                   {{ $student->correoMama ?? $student->correoPapa ?? 'Sin correo' }}
                 </div>
                 <div class="flex space-x-1.5">
+                  <a href="{{ route('imprimir', $student) }}" target="_blank" class="w-8 h-8 flex items-center justify-center text-blue-600 bg-white hover:bg-blue-50 rounded-lg transition-colors shadow-sm border border-gray-100">
+                    <i class="bi bi-printer-fill"></i>
+                  </a>
                   <button @click="showModal = true" class="w-8 h-8 flex items-center justify-center text-club-primary bg-white hover:bg-blue-50 rounded-lg transition-colors shadow-sm border border-gray-100">
                     <i class="bi bi-eye-fill"></i>
                   </button>
