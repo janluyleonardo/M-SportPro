@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Asignar rol de Admin
-        $admin->assignRole('client');
+        $admin->assignRole('Admin');
 
         // Crear estudiantes de prueba (Demo)
         $this->call(StudentSeeder::class);
@@ -37,5 +37,13 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
         $testUser->assignRole('Admin'); // También le damos admin para la demo
+
+        // Crear usuario Cliente (Demo restringida)
+        $client = User::factory()->create([
+            'name' => 'Padre de Familia',
+            'email' => 'padre@example.com',
+            'password' => bcrypt('password'),
+        ]);
+        $client->assignRole('client');
     }
 }

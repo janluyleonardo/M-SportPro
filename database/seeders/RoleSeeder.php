@@ -58,8 +58,12 @@ class RoleSeeder extends Seeder
             'view programming',
         ]);
 
-        // CLIENT: (Agregado para soportar el cambio en DatabaseSeeder)
+        // CLIENT: Acceso limitado (Solo lectura)
         $roleClient = Role::firstOrCreate(['name' => 'client']);
-        $roleClient->syncPermissions(Permission::all()); // Por ahora le damos todo para la demo
+        $roleClient->syncPermissions([
+            'view dashboard',
+            'view programming',
+            'view students',
+        ]);
     }
 }
