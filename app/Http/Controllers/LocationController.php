@@ -31,9 +31,23 @@ class LocationController extends Controller
 
     public function update(Request $request, Location $location)
     {
-        $location->update(['active' => !$location->active]);
-        $estado = $location->active ? 'activada' : 'desactivada';
-        return back()->with('success', "Cancha \"{$location->name}\" {$estado}.");
+        if ($request->has('toggle_active')) {
+            $location->update(['active' => !$location->active]);
+            $estado = $location->active ? 'activada' : 'desactivada';
+            return back()->with('success', "Cancha \"{$location->name}\" {$estado}.");
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:100|unique:locations,name,' . $location->id,
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $location->update([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+
+        return back()->with('success', 'Cancha actualizada correctamente.');
     }
 
     public function destroy(Location $location)
