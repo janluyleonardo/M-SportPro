@@ -155,9 +155,22 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase">Monto ($)</label>
-                            <input type="number" name="amount" value="50000" class="w-full border-gray-200 rounded-xl mt-1 p-4 font-black text-xl text-black" required>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-gray-400 uppercase">Monto ($)</label>
+                                <input type="number" name="amount" value="50000" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-black text-lg text-black" required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-400 uppercase">Fecha de Pago</label>
+                                <input type="date" name="paid_at" value="{{ date('Y-m-d') }}" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-bold text-black" required>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-100">
+                            <p class="text-[10px] text-yellow-700 font-bold leading-tight">
+                                <i class="bi bi-info-circle-fill mr-1"></i>
+                                Los pagos realizados después del día {{ env('PAYMENT_LATE_DAY_THRESHOLD', 10) }} tienen un recargo automático del {{ env('PAYMENT_LATE_FEE_PERCENTAGE', 10) }}% sobre el valor base.
+                            </p>
                         </div>
 
                         <div class="flex gap-3 mt-8">

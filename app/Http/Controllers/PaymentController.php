@@ -47,10 +47,23 @@ class PaymentController extends Controller
             'year' => 'required|integer',
             'amount' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
+            'paid_at' => 'nullable|date',
         ]);
 
+        $paidAt = $request->paid_at ? \Carbon\Carbon::parse($request->paid_at) : now();
+        $dayThreshold = env('PAYMENT_LATE_DAY_THRESHOLD', 10);
+        $feePercentage = env('PAYMENT_LATE_FEE_PERCENTAGE', 10);
+        $extraMessage = '';
+
+        // Regla de Negocio: Recargo por pago tardío
+        if ($paidAt->day > $dayThreshold) {
+            $extra = $validated['amount'] * ($feePercentage / 100);
+            $validated['amount'] += $extra;
+            $extraMessage = " (Se aplicó un recargo del {$feePercentage}% por pago tardío)";
+        }
+
         $validated['status'] = 'paid';
-        $validated['paid_at'] = now();
+        $validated['paid_at'] = $paidAt;
 
         // Evitar duplicados
         $exists = Payment::where('student_id', $request->student_id)
@@ -65,7 +78,7 @@ class PaymentController extends Controller
         Payment::create($validated);
 
         return redirect()->route('payments.show', $request->student_id)
-            ->with('success', 'Pago registrado correctamente.');
+            ->with('success', 'Pago registrado correctamente.' . $extraMessage);
     }
     public function update(Request $request, Payment $payment)
     {
