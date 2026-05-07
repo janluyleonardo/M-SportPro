@@ -6,6 +6,7 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StudentsExport;
+use App\Imports\StudentsImport;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentsController extends Controller
@@ -226,5 +227,19 @@ class StudentsController extends Controller
       } catch (\Throwable $th) {
         return redirect()->route('dashboard')->with('error', 'no se pudo generar registro excel => '.$th);
       }
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            Excel::import(new StudentsImport, $request->file('file'));
+            return back()->with('success', 'Deportistas importados correctamente.');
+        } catch (\Throwable $th) {
+            return back()->with('error', 'Error al importar deportistas: ' . $th->getMessage());
+        }
     }
 }

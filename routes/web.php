@@ -23,14 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // 2. Módulo de Estudiantes (Solo Admin y Profesor)
     Route::middleware(['role:Admin|Profesor'])->group(function () {
-        Route::get('/students', [StudentsController::class, 'index'])->name('students.index');
-        Route::get('/students/create', [StudentsController::class, 'create'])->name('students.create');
-        Route::post('/students', [StudentsController::class, 'store'])->name('students.store');
-        Route::get('/students/{student}/edit', [StudentsController::class, 'edit'])->name('students.edit');
-        Route::patch('/students/{student}', [StudentsController::class, 'update'])->name('students.update');
-        Route::get('/students/{student}', [StudentsController::class, 'show'])->name('students.show');
+        Route::resource('students', StudentsController::class)->except(['destroy']);
         Route::get('/imprimir/{id}', [StudentsController::class, 'imprimir'])->name('imprimir');
-        Route::get('/export', [StudentsController::class, 'export'])->name('export');
     });
 
         // Rutas de Mensualidades y Asistencias (Lectura: Admin, Profesor, Padre, Deportista)
@@ -63,26 +57,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('locations', LocationController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::delete('/students/{student}', [StudentsController::class, 'destroy'])->name('students.destroy');
             Route::delete('/programming/{programming}', [ProgrammingController::class, 'destroy'])->name('programming.destroy');
+            Route::get('/export', [StudentsController::class, 'export'])->name('export');
+            Route::post('/import', [StudentsController::class, 'import'])->name('import');
         });
 
     // 3. Módulo de Programación
     // Lectura: Para todos
-    Route::get('/programming', [ProgrammingController::class, 'index'])->name('programming.index')->middleware('role:Admin|Profesor|Padre|Deportista');
-    Route::get('/programming/{programming}', [ProgrammingController::class, 'show'])->name('programming.show')->middleware('role:Admin|Profesor|Padre|Deportista');
+    Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|Profesor|Padre|Deportista');
 
     // Escritura (Crear/Editar): Admin y Profesor
     Route::middleware(['role:Admin|Profesor'])->group(function () {
-        Route::get('/programming/create', [ProgrammingController::class, 'create'])->name('programming.create');
-        Route::post('/programming', [ProgrammingController::class, 'store'])->name('programming.store');
-        Route::get('/programming/{programming}/edit', [ProgrammingController::class, 'edit'])->name('programming.edit');
-        Route::patch('/programming/{programming}', [ProgrammingController::class, 'update'])->name('programming.update');
+        Route::resource('programming', ProgrammingController::class)->except(['index', 'show', 'destroy']);
         Route::get('/programming/imprimir/{date}', [ProgrammingController::class, 'imprimir'])->name('programming.imprimir');
     });
 
     // 4. Perfil
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile', 'edit')->name('profile.edit');
+        Route::patch('/profile', 'update')->name('profile.update');
+        Route::delete('/profile', 'destroy')->name('profile.destroy');
+    });
 });
 
 Route::get('/index', [generalController::class, 'index'])->name('index');
