@@ -55,11 +55,28 @@ class PaymentController extends Controller
         $feePercentage = env('PAYMENT_LATE_FEE_PERCENTAGE', 10);
         $extraMessage = '';
 
-        // Regla de Negocio: Recargo por pago tardío
-        if ($paidAt->day > $dayThreshold) {
+        // Determinar si es pago tardío basado en mes/año y día
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $selectedMonth = (int)$validated['month'];
+        $selectedYear = (int)$validated['year'];
+
+        $isLate = false;
+        if ($selectedYear < $currentYear) {
+            $isLate = true;
+        } elseif ($selectedYear == $currentYear) {
+            if ($selectedMonth < $currentMonth) {
+                $isLate = true;
+            } elseif ($selectedMonth == $currentMonth && $paidAt->day > $dayThreshold) {
+                $isLate = true;
+            }
+        }
+
+        // Aplicar recargo si es tarde
+        if ($isLate) {
             $extra = $validated['amount'] * ($feePercentage / 100);
             $validated['amount'] += $extra;
-            $extraMessage = " (Se aplicó un recargo del {$feePercentage}% por pago tardío)";
+            $extraMessage = " (Se aplicó un recargo del {$feePercentage}% por pago extemporáneo)";
         }
 
         $validated['status'] = 'paid';

@@ -1,7 +1,4 @@
 <x-app-layout>
-    <!-- Script de emergencia para Alpine.js -->
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
     <x-slot name="header">
         <div class="flex items-center space-x-3">
             <a href="{{ route('payments.index') }}" class="p-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-gray-300 transition-colors">
@@ -13,7 +10,7 @@
         </div>
     </x-slot>
 
-    <div class="py-8">
+    <div class="py-8" x-data="{}">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             
             <!-- Perfil Simple -->
@@ -44,7 +41,7 @@
                 <!-- Botón de Acción Directo (Solo Admin) -->
                 @role('Admin')
                 <button 
-                    onclick="document.getElementById('modal-pago').style.display = 'block'"
+                    @click="$dispatch('open-payment-modal')"
                     class="px-8 py-4 bg-club-primary hover:opacity-90 text-white font-black rounded-2xl shadow-xl transform active:scale-95 transition-all text-sm uppercase tracking-widest"
                 >
                     + Registrar Mensualidad
@@ -118,38 +115,79 @@
     </div>
 
     @role('Admin')
-    <!-- Modal Alternativo (Simple HTML) -->
-    <div id="modal-pago" style="display:none;" class="fixed inset-0 z-[100] overflow-y-auto">
-        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm"></div>
+    <!-- Modal de Pago con Lógica de Recargo Dinámica -->
+    <div id="modal-pago" 
+         x-data="{ 
+            open: false, 
+            loading: false,
+            baseAmount: {{ env('DEFAULT_PAYMENT_AMOUNT', 50000) }},
+            month: {{ date('n') }},
+            year: {{ date('Y') }},
+            currentMonth: {{ date('n') }},
+            currentYear: {{ date('Y') }},
+            paidAt: '{{ date('Y-m-d') }}',
+            threshold: {{ env('PAYMENT_LATE_DAY_THRESHOLD', 10) }},
+            percentage: {{ env('PAYMENT_LATE_FEE_PERCENTAGE', 10) }},
+            hasLateFee: false,
+            get totalWithFee() {
+                if (this.hasLateFee) {
+                    return Math.round(this.baseAmount * (1 + (this.percentage / 100)));
+                }
+                return this.baseAmount;
+            },
+            calculate() {
+                let selectedMonth = parseInt(this.month);
+                let selectedYear = parseInt(this.year);
+                let day = parseInt(this.paidAt.split('-')[2]);
+                
+                this.hasLateFee = false;
+                if (selectedYear < this.currentYear) {
+                    this.hasLateFee = true;
+                } else if (selectedYear === this.currentYear) {
+                    if (selectedMonth < this.currentMonth) {
+                        this.hasLateFee = true;
+                    } else if (selectedMonth === this.currentMonth && day > this.threshold) {
+                        this.hasLateFee = true;
+                    }
+                }
+            }
+         }"
+         x-init="calculate(); $watch('paidAt', () => calculate()); $watch('month', () => calculate()); $watch('year', () => calculate())"
+         @open-payment-modal.window="open = true"
+         x-cloak
+         x-show="open" 
+         class="fixed inset-0 z-[100] overflow-y-auto"
+    >
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="open = false"></div>
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+            <div class="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300" @click.away="open = false">
                 <div class="p-10">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-black text-black">Nuevo Pago</h2>
-                        <button onclick="document.getElementById('modal-pago').style.display = 'none'" class="text-gray-400 hover:text-black">
+                        <button @click="open = false" class="text-gray-400 hover:text-black">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
 
-                    <form action="{{ route('payments.store') }}" method="POST" class="space-y-5">
+                    <form action="{{ route('payments.store') }}" method="POST" class="space-y-5" @submit="loading = true">
                         @csrf
                         <input type="hidden" name="student_id" value="{{ $student->id }}">
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-xs font-bold text-gray-400 uppercase">Mes</label>
-                                <select name="month" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-bold text-black" required>
+                                <select name="month" x-model="month" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-bold text-black" required>
                                     @php $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']; @endphp
                                     @foreach($meses as $index => $mes)
-                                        <option value="{{ $index + 1 }}" {{ date('n') == $index + 1 ? 'selected' : '' }}>{{ $mes }}</option>
+                                        <option value="{{ $index + 1 }}">{{ $mes }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-gray-400 uppercase">Año</label>
-                                <select name="year" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-bold text-black" required>
+                                <select name="year" x-model="year" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-bold text-black" required>
                                     @foreach(range(date('Y')-1, date('Y')+1) as $y)
-                                        <option value="{{ $y }}" {{ date('Y') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                        <option value="{{ $y }}">{{ $y }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -157,28 +195,39 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Monto ($)</label>
-                                <input type="number" name="amount" value="50000" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-black text-lg text-black" required>
+                                <label class="text-xs font-bold text-gray-400 uppercase">Monto Base ($)</label>
+                                <input type="number" name="amount" x-model="baseAmount" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-black text-lg text-black" required>
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-gray-400 uppercase">Fecha de Pago</label>
-                                <input type="date" name="paid_at" value="{{ date('Y-m-d') }}" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-bold text-black" required>
+                                <input type="date" name="paid_at" x-model="paidAt" class="w-full border-gray-200 rounded-xl mt-1 p-3 font-bold text-black" required>
                             </div>
                         </div>
 
-                        <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-100">
-                            <p class="text-[10px] text-yellow-700 font-bold leading-tight">
-                                <i class="bi bi-info-circle-fill mr-1"></i>
-                                Los pagos realizados después del día {{ env('PAYMENT_LATE_DAY_THRESHOLD', 10) }} tienen un recargo automático del {{ env('PAYMENT_LATE_FEE_PERCENTAGE', 10) }}% sobre el valor base.
-                            </p>
+                        <div :class="hasLateFee ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'" class="p-4 rounded-xl border transition-colors duration-300">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-widest" :class="hasLateFee ? 'text-red-600' : 'text-green-600'" x-text="hasLateFee ? 'Pago fuera de fecha' : 'Pago puntual'"></p>
+                                    <p class="text-xs font-bold text-gray-500" x-text="hasLateFee ? 'Se aplicará recargo del ' + percentage + '%' : 'Monto base sin recargos'"></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase">Total a Pagar</p>
+                                    <p class="text-2xl font-black" :class="hasLateFee ? 'text-red-600' : 'text-club-primary'">
+                                        $<span x-text="new Intl.NumberFormat('es-CO').format(totalWithFee)"></span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex gap-3 mt-8">
-                            <button type="button" onclick="document.getElementById('modal-pago').style.display = 'none'" class="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl">
+                            <button type="button" @click="open = false" :disabled="loading" class="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl disabled:opacity-50">
                                 Cerrar
                             </button>
-                            <button type="submit" class="flex-[2] py-4 bg-club-primary text-white font-black rounded-2xl shadow-lg shadow-blue-200">
-                                Guardar Pago
+                            <button type="submit" :disabled="loading" class="flex-[2] py-4 bg-club-primary text-white font-black rounded-2xl shadow-lg shadow-blue-200 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center">
+                                <span x-show="!loading">Guardar Pago</span>
+                                <span x-show="loading" class="flex items-center">
+                                    <i class="bi bi-arrow-repeat animate-spin mr-2"></i> Procesando...
+                                </span>
                             </button>
                         </div>
                     </form>
