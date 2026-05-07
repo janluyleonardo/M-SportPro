@@ -14,50 +14,70 @@ Este proyecto es una modernización del sistema original Jackeline, migrado a **
 Sigue estos pasos para configurar el proyecto localmente:
 
 ### 1. Preparación del Directorio
+
 Asegúrate de estar en la raíz del proyecto:
+
 ```bash
 cd c:\xampp\htdocs\jackeline
 ```
 
 ### 2. Instalar Dependencias de PHP
+
 Ejecuta composer para instalar todas las librerías necesarias de Laravel:
+
 ```bash
 composer install
 ```
 
 ### 3. Instalar Dependencias de JavaScript
+
 Instala los módulos de Node para el frontend:
+
 ```bash
 npm install
 ```
 
 ### 4. Configuración del Entorno (.env)
+
 Copia el archivo de ejemplo y configura tus credenciales de base de datos:
+
 ```bash
 copy .env.example .env
 ```
-*Abre el archivo `.env` y ajusta las siguientes variables según tu configuración de XAMPP:*
-- `DB_DATABASE=jackeline`
-- `DB_USERNAME=root`
-- `DB_PASSWORD=`
 
 ### 5. Generar Clave de Aplicación
+
 ```bash
 php artisan key:generate
 ```
 
+_Abre el archivo `.env` y ajusta las siguientes variables según tu configuración de XAMPP:_
+
+- `DB_DATABASE=jackeline`
+- `DB_USERNAME=root`
+- `DB_PASSWORD=`
+
 ### 6. Migraciones de Base de Datos
+
 Crea la estructura de la base de datos (asegúrate de que la DB exista en PHPMyAdmin):
+
 ```bash
 php artisan migrate
 ```
 
 ### 7. Ejecutar el Proyecto en Desarrollo
+
 Para poner en marcha el servidor y la compilación de assets en tiempo real, usa el comando simplificado configurado en el proyecto:
+
 ```bash
-composer dev
+php artisan serve
 ```
+```bash
+npm run dev
+```
+
 Este comando iniciará automáticamente:
+
 - El servidor de Laravel en [http://localhost:8000](http://localhost:8000)
 - El servidor de Vite para recarga en caliente (HMR).
 
@@ -69,5 +89,6 @@ Este comando iniciará automáticamente:
 - Las exportaciones a Excel utilizan **Laravel Excel (Maatwebsite)**.
 
 ---
+
 > [!NOTE]
 > El archivo README original de Laravel ha sido renombrado a [README_LARAVEL.md](./README_LARAVEL.md) para referencia futura.

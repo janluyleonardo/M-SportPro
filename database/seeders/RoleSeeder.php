@@ -57,5 +57,9 @@ class RoleSeeder extends Seeder
             'view dashboard',
             'view programming',
         ]);
+
+        // CLIENT: (Agregado para soportar el cambio en DatabaseSeeder)
+        $roleClient = Role::firstOrCreate(['name' => 'client']);
+        $roleClient->syncPermissions(Permission::all()); // Por ahora le damos todo para la demo
     }
 }
