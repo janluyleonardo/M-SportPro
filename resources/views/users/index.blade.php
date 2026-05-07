@@ -184,7 +184,6 @@
                     </div>
                 @endif
             </div>
-        </div>
 
         <!-- MODAL DE CREACIÓN -->
         <div x-show="openCreateModal" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
