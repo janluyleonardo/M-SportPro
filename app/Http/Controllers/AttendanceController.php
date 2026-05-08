@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\Student;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreAttendanceRequest;
 use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
@@ -44,18 +45,15 @@ class AttendanceController extends Controller
         return view('attendances.show', compact('schedule', 'students', 'existingAttendances'));
     }
 
-    public function store(Request $request)
+    public function store(StoreAttendanceRequest $request)
     {
-        $request->validate([
-            'class_schedule_id' => 'required|exists:class_schedules,id',
-            'students' => 'required|array',
-        ]);
+        $validated = $request->validated();
 
         $date = now()->format('Y-m-d');
         $month = now()->month;
         $year = now()->year;
 
-        foreach ($request->students as $studentId => $status) {
+        foreach ($validated['students'] as $studentId => $status) {
             // 1. Registrar la asistencia
             Attendance::updateOrCreate(
                 [

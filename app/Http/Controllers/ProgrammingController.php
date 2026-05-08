@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreProgrammingRequest;
 use App\Models\Student;
 use App\Models\programming;
 use Illuminate\Support\Facades\DB;
@@ -63,21 +64,19 @@ class ProgrammingController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, programming $programming)
+    public function store(StoreProgrammingRequest $request)
     {
-      $newProgramming = new Programming();
-      $newProgramming->torneo = $request->torneo;
-      $newProgramming->cancha = $request->cancha;
-      $newProgramming->categoriaUno = $request->categoriaUno;
-      $newProgramming->categoriaDos = $request->categoriaDos ?? '';
-      $newProgramming->eLocal = $request->eLocal;
-      $newProgramming->eVisitante = $request->eVisitante;
-      $newProgramming->hora = $request->hora;
-      $newProgramming->fecha = $request->fecha;
-      $newProgramming->jugadores_convocados = implode(',', $request->jugadores_convocados ?? []);
+      $validated = $request->validated();
+      
+      // Manejar la conversión de array a string para la DB
+      if (isset($validated['jugadores_convocados'])) {
+          $validated['jugadores_convocados'] = implode(',', $validated['jugadores_convocados']);
+      } else {
+          $validated['jugadores_convocados'] = '';
+      }
 
       try {
-        $newProgramming->save();
+        programming::create($validated);
         return redirect()->route('programming.index')->with('success', 'Registro creado correctamente.');
       } catch (\Throwable $th) {
         return back()->withInput()->with('error', 'No se pudo crear nuevo registro => '.$th->getMessage());
@@ -113,13 +112,17 @@ class ProgrammingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreProgrammingRequest $request, $id)
     {
       $programming = programming::findOrFail($id);
+      $validated = $request->validated();
+
+      if (isset($validated['jugadores_convocados'])) {
+          $validated['jugadores_convocados'] = implode(',', $validated['jugadores_convocados']);
+      }
+
       try {
-        $data = $request->all();
-        $data['categoriaDos'] = $data['categoriaDos'] ?? '';
-        $programming->update($data);
+        $programming->update($validated);
         return redirect()->route('programming.index')->with('success', 'Registro actualizado correctamente.');
       } catch (\Throwable $th) {
         return back()->withInput()->with('error', 'No se pudo actualizar registro porque => '.$th->getMessage());

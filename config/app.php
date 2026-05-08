@@ -123,4 +123,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Club Payment Configurations
+    |--------------------------------------------------------------------------
+    */
+    'payment_late_fee_percentage' => env('PAYMENT_LATE_FEE_PERCENTAGE', 10),
+    'payment_late_day_threshold' => env('PAYMENT_LATE_DAY_THRESHOLD', 10),
+    'default_payment_amount' => env('DEFAULT_PAYMENT_AMOUNT', 50000),
+
 ];

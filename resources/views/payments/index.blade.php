@@ -65,10 +65,22 @@
                             <h3 class="text-lg font-black text-gray-900 line-clamp-1 mb-1 group-hover:text-green-600 transition-colors">{{ $student->nomDeportista }}</h3>
                             <p class="text-xs text-gray-400 font-bold mb-6 uppercase tracking-[0.2em]">{{ $student->Categoria }}</p>
                             
-                            <div class="flex items-center justify-center space-x-2 mb-8">
+                            <div class="flex flex-col items-center justify-center space-y-2 mb-8">
                                 <span class="px-4 py-1.5 bg-gray-50 text-gray-500 rounded-full text-[10px] font-black border border-gray-100">
                                     ID: {{ $student->numDocumento }}
                                 </span>
+                                
+                                <div class="flex items-center">
+                                    @if($student->balance > 0)
+                                        <span class="px-4 py-1.5 bg-red-50 text-red-600 rounded-full text-[10px] font-black border border-red-100 animate-pulse">
+                                            Deuda: ${{ number_format($student->balance, 0, ',', '.') }}
+                                        </span>
+                                    @else
+                                        <span class="px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-[10px] font-black border border-green-100">
+                                            Al día
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
 
                             <div class="inline-flex items-center justify-center w-full py-3.5 bg-club-primary text-white rounded-2xl text-[10px] uppercase tracking-widest font-black group-hover:opacity-90 transition-all shadow-lg shadow-gray-200 group-hover:shadow-indigo-100">

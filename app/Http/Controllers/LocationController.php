@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Location;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreLocationRequest;
 
 class LocationController extends Controller
 {
@@ -13,16 +14,13 @@ class LocationController extends Controller
         return view('locations.index', compact('locations'));
     }
 
-    public function store(Request $request)
+    public function store(StoreLocationRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:100|unique:locations,name',
-            'description' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         Location::create([
-            'name'        => $request->name,
-            'description' => $request->description,
+            'name'        => $validated['name'],
+            'description' => $validated['description'] ?? null,
             'active'      => true,
         ]);
 
@@ -37,14 +35,11 @@ class LocationController extends Controller
             return back()->with('success', "Cancha \"{$location->name}\" {$estado}.");
         }
 
-        $request->validate([
-            'name' => 'required|string|max:100|unique:locations,name,' . $location->id,
-            'description' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $location->update([
-            'name' => $request->name,
-            'description' => $request->description,
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
         ]);
 
         return back()->with('success', 'Cancha actualizada correctamente.');

@@ -6,45 +6,37 @@ use App\Models\ClassSchedule;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreClassScheduleRequest;
 
 class ClassScheduleController extends Controller
 {
     public function index()
     {
-        $schedules = ClassSchedule::with('teacher')->orderBy('day_of_week')->orderBy('start_time')->get();
+        $schedules = ClassSchedule::with('teacher')
+            ->withExists(['attendances' => function($query) {
+                $query->whereDate('date', now()->toDateString());
+            }])
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get();
+
         $teachers  = User::role('Profesor')->get();
         $locations = Location::active()->orderBy('name')->get();
         return view('schedules.index', compact('schedules', 'teachers', 'locations'));
     }
 
-    public function store(Request $request)
+    public function store(StoreClassScheduleRequest $request)
     {
-        $validated = $request->validate([
-            'day_of_week' => 'required|string',
-            'start_time' => 'required',
-            'end_time' => 'required',
-            'category' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-            'location' => 'nullable|string',
-            'observations' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         ClassSchedule::create($validated);
 
         return redirect()->route('schedules.index')->with('success', 'Clase programada correctamente.');
     }
 
-    public function update(Request $request, ClassSchedule $classSchedule)
+    public function update(StoreClassScheduleRequest $request, ClassSchedule $classSchedule)
     {
-        $validated = $request->validate([
-            'day_of_week' => 'required|string',
-            'start_time' => 'required',
-            'end_time' => 'required',
-            'category' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-            'location' => 'nullable|string',
-            'observations' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $classSchedule->update($validated);
 

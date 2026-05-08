@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StorePaymentRequest;
 use App\Models\Payment;
 use App\Models\Student;
 
@@ -21,6 +22,9 @@ class PaymentController extends Controller
             })
             ->orderBy('nomDeportista', 'asc')
             ->paginate(6);
+        
+        // Actualizar saldos dinámicamente para los estudiantes visibles
+        $students->getCollection()->each->updateBalance();
 
         return view('payments.index', compact('students', 'search'));
     }
@@ -28,7 +32,9 @@ class PaymentController extends Controller
     public function show(Student $student)
     {
         $payments = $student->payments()->orderBy('year', 'desc')->orderBy('month', 'desc')->get();
-        return view('payments.show', compact('student', 'payments'));
+        $student->updateBalance();
+        $monthStatuses = $student->getPaymentStatusByMonth();
+        return view('payments.show', compact('student', 'payments', 'monthStatuses'));
     }
 
     /**
@@ -39,20 +45,13 @@ class PaymentController extends Controller
         //
     }
 
-    public function store(Request $request)
+    public function store(StorePaymentRequest $request)
     {
-        $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'month' => 'required|integer|min:1|max:12',
-            'year' => 'required|integer',
-            'amount' => 'required|numeric|min:0',
-            'notes' => 'nullable|string',
-            'paid_at' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
         $paidAt = $request->paid_at ? \Carbon\Carbon::parse($request->paid_at) : now();
-        $dayThreshold = env('PAYMENT_LATE_DAY_THRESHOLD', 10);
-        $feePercentage = env('PAYMENT_LATE_FEE_PERCENTAGE', 10);
+        $dayThreshold = config('app.payment_late_day_threshold', 10);
+        $feePercentage = config('app.payment_late_fee_percentage', 10);
         $extraMessage = '';
 
         // Determinar si es pago tardío basado en mes/año y día
@@ -82,19 +81,12 @@ class PaymentController extends Controller
         $validated['status'] = 'paid';
         $validated['paid_at'] = $paidAt;
 
-        // Evitar duplicados
-        $exists = Payment::where('student_id', $request->student_id)
-            ->where('month', $request->month)
-            ->where('year', $request->year)
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'Este estudiante ya tiene un pago registrado para este mes.');
-        }
-
         Payment::create($validated);
+        
+        $student = Student::find($validated['student_id']);
+        $student->updateBalance();
 
-        return redirect()->route('payments.show', $request->student_id)
+        return redirect()->route('payments.show', $validated['student_id'])
             ->with('success', 'Pago registrado correctamente.' . $extraMessage);
     }
     public function update(Request $request, Payment $payment)
@@ -116,6 +108,8 @@ class PaymentController extends Controller
             }
         }
 
+        $payment->student->updateBalance();
+
         return back()->with('success', $msg ?? 'Registro actualizado.');
     }
 
@@ -124,7 +118,9 @@ class PaymentController extends Controller
      */
     public function destroy(Payment $payment)
     {
+        $studentId = $payment->student_id;
         $payment->delete();
+        Student::find($studentId)->updateBalance();
         return back()->with('success', 'Pago eliminado correctamente.');
     }
 }

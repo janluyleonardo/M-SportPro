@@ -59,6 +59,14 @@
                                         </div>
                                     @endif
 
+                                    @role('Admin')
+                                        @if($schedule->attendances_exists)
+                                            <div class="mt-2 flex items-center text-[8px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-lg border border-green-100 uppercase tracking-widest">
+                                                <i class="bi bi-check-all text-sm mr-1"></i> Asistencia Tomada
+                                            </div>
+                                        @endif
+                                    @endrole
+
                                     @if($schedule->observations)
                                         <div class="mt-2 text-[9px] text-gray-500 italic bg-gray-50 p-2 rounded-lg border border-gray-100">
                                             <i class="bi bi-info-circle mr-1"></i> {{ $schedule->observations }}
