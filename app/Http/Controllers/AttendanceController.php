@@ -36,6 +36,9 @@ class AttendanceController extends Controller
         // Buscar estudiantes que pertenecen a la categoría de esta clase
         $students = Student::where('Categoria', $schedule->category)->orderBy('nomDeportista')->get();
         
+        // Sincronizar saldos antes de mostrar la lista
+        $students->each->updateBalance();
+        
         // Verificar si ya se tomó asistencia hoy para esta clase
         $existingAttendances = Attendance::where('class_schedule_id', $schedule->id)
             ->where('date', now()->format('Y-m-d'))

@@ -54,6 +54,11 @@
                                         <span class="text-[9px] font-black bg-green-50 text-green-600 px-2 py-0.5 rounded-full border border-green-100 uppercase mt-1 inline-block">
                                             <i class="bi bi-check-circle-fill mr-1"></i> Al Día ({{ $hasPaid->classes_used }}/8)
                                         </span>
+                                        @if($student->balance > 0)
+                                            <span class="text-[9px] font-black bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full border border-orange-100 uppercase mt-1 inline-block ml-1">
+                                                Deuda: ${{ number_format($student->balance, 0, ',', '.') }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -90,7 +95,7 @@
                                         <h4 class="text-sm font-black text-gray-600 leading-tight line-through decoration-red-300">{{ $student->nomDeportista }}</h4>
                                         <div class="mt-1">
                                             <span class="text-[9px] font-black bg-red-600 text-white px-3 py-1 rounded-full uppercase shadow-sm inline-flex items-center">
-                                                <i class="bi bi-x-circle-fill mr-1"></i> BLOQUEADO — SIN PAGO
+                                                <i class="bi bi-x-circle-fill mr-1"></i> BLOQUEADO — DEUDA: ${{ number_format($student->balance, 0, ',', '.') }}
                                             </span>
                                         </div>
                                         <p class="text-[9px] text-red-400 font-semibold mt-1 italic">
