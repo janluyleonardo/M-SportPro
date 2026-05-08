@@ -115,6 +115,7 @@ class Student extends Model
   {
       $this->balance = $this->calculateDebt();
       $this->save();
+      $this->syncAttendanceSlots();
       return $this->balance;
   }
 
@@ -179,6 +180,32 @@ class Student extends Model
           ];
       }
 
-      return array_reverse($statusList);
-  }
+        return array_reverse($statusList);
+    }
+
+    public function attendanceSlots()
+    {
+        return $this->hasMany(AttendanceSlot::class);
+    }
+
+    public function syncAttendanceSlots()
+    {
+        $statuses = $this->getPaymentStatusByMonth();
+        
+        foreach ($statuses as $status) {
+            if ($status['is_paid']) {
+                AttendanceSlot::firstOrCreate(
+                    [
+                        'student_id' => $this->id,
+                        'month' => $status['month_num'],
+                        'year' => $status['year']
+                    ],
+                    [
+                        'classes_used' => 0,
+                        'classes_allowed' => 8
+                    ]
+                );
+            }
+        }
+    }
 }

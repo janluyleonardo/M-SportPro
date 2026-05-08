@@ -16,55 +16,78 @@
 
             <!-- Perfil y Estado de Deuda -->
             <div
-                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center space-x-6">
+                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col lg:flex-row items-center justify-between gap-6">
+                <div class="flex items-center space-x-6 flex-1 min-w-0">
                     <div
-                        class="h-24 w-24 bg-gray-50 rounded-[2rem] flex items-center justify-center border border-gray-100 overflow-hidden relative shadow-inner group">
+                        class="h-20 w-20 flex-shrink-0 bg-gray-50 rounded-[1.8rem] flex items-center justify-center border border-gray-100 overflow-hidden relative shadow-inner group">
                         @php
                             $initials = substr($student->nomDeportista, 0, 1);
-                         @endphp
+                        @endphp
 
                         <span
-                            class="absolute text-3xl font-black text-gray-200 uppercase group-hover:scale-110 transition-transform">{{ $initials }}</span>
+                            class="absolute text-2xl font-black text-gray-200 uppercase group-hover:scale-110 transition-transform">{{ $initials }}</span>
 
                         @if(!empty($student->Photo))
                             <img src="{{ asset($student->Photo) }}"
-                                class="absolute inset-0 h-full w-full object-cover rounded-[2rem] z-10"
+                                class="absolute inset-0 h-full w-full object-cover rounded-[1.8rem] z-10"
                                 onerror="this.style.display='none'">
                         @endif
                     </div>
-                    <div>
-                        <h1 class="text-3xl font-black text-gray-900 uppercase mb-1">{{ $student->nomDeportista }}</h1>
-                        <div class="flex flex-wrap gap-2 items-center">
+                    <div class="min-w-0">
+                        @php
+                            $nameParts = explode(' ', $student->nomDeportista);
+                            $count = count($nameParts);
+                            if ($count >= 4) {
+                                $firstName = implode(' ', array_slice($nameParts, 0, 2));
+                                $lastName = implode(' ', array_slice($nameParts, 2));
+                            } elseif ($count == 3) {
+                                $firstName = $nameParts[0];
+                                $lastName = implode(' ', array_slice($nameParts, 1));
+                            } else {
+                                $firstName = $nameParts[0];
+                                $lastName = $nameParts[1] ?? '';
+                            }
+                        @endphp
+                        <h1 class="flex flex-col leading-none">
+                            <span class="text-xl md:text-2xl font-black text-gray-900 uppercase">{{ $firstName }}</span>
+                            <span class="text-2xl md:text-3xl font-black text-club-primary uppercase">{{ $lastName }}</span>
+                        </h1>
+                        <div class="flex flex-wrap gap-2 items-center mt-2">
                             <span
-                                class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
+                                class="text-[9px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
                                 {{ $student->Categoria }}
                             </span>
                             <span
-                                class="text-[10px] font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-100 uppercase">
+                                class="text-[9px] font-bold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100 uppercase">
                                 ID: {{ $student->numDocumento }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4 w-full md:w-auto">
+                <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
                     <!-- Resumen de Deuda -->
                     <div
-                        class="flex-1 md:flex-none px-6 py-4 rounded-2xl border-2 {{ $student->balance > 0 ? 'bg-red-50 border-red-100 text-red-600' : 'bg-green-50 border-green-100 text-green-600' }} text-center">
-                        <p class="text-[9px] font-black uppercase tracking-[0.2em] opacity-70 mb-1">Saldo Pendiente</p>
-                        <p class="text-2xl font-black">${{ number_format($student->balance, 0, ',', '.') }}</p>
+                        class="px-5 py-3 rounded-2xl border-2 {{ $student->balance > 0 ? 'bg-red-50 border-red-100 text-red-600' : 'bg-green-50 border-green-100 text-green-600' }} text-center min-w-[140px]">
+                        <p class="text-[8px] font-black uppercase tracking-[0.2em] opacity-70 mb-0.5">Saldo Pendiente</p>
+                        <p class="text-xl font-black">${{ number_format($student->balance, 0, ',', '.') }}</p>
                     </div>
 
                     <!-- Botón de Acción Directo (Solo Admin) -->
                     @role('Admin')
-                    <button @click="$dispatch('open-payment-modal')"
-                        class="flex-1 md:flex-none px-8 py-5 bg-club-primary hover:opacity-90 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 transform active:scale-95 transition-all text-[10px] uppercase tracking-widest flex items-center justify-center">
-                        <i class="bi bi-plus-circle-fill mr-2"></i> Registrar Pago
-                    </button>
+                    @if($student->balance > 0)
+                        <button @click="$dispatch('open-payment-modal')"
+                            class="px-6 py-4 bg-club-primary hover:opacity-90 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 transform active:scale-95 transition-all text-[9px] uppercase tracking-widest flex items-center justify-center whitespace-nowrap">
+                            <i class="bi bi-plus-circle-fill mr-2"></i> Registrar Pago
+                        </button>
+                    @else
+                        <button disabled
+                            class="px-6 py-4 bg-gray-100 text-gray-400 font-black rounded-2xl border border-gray-200 cursor-not-allowed text-[9px] uppercase tracking-widest flex items-center justify-center whitespace-nowrap">
+                            <i class="bi bi-check-circle-fill mr-2 text-green-500"></i> Al día
+                        </button>
+                    @endif
                     @endrole
                 </div>
-            </div>
             </div>
 
             <!-- Listado de Estados por Mes -->
@@ -126,19 +149,17 @@
                                     @role('Admin')
                                         <div class="border-l border-gray-100 pl-4 flex items-center space-x-2">
                                             @php
-                                                $monthPayments = $payments
+                                                $slot = $attendanceSlots
                                                     ->where('month', $status['month_num'])
-                                                    ->where('year', $status['year']);
-                                                
-                                                // Intentamos obtener el primero para el contador de clases
-                                                $paymentObj = $monthPayments->first();
+                                                    ->where('year', $status['year'])
+                                                    ->first();
                                             @endphp
-                                            @if ($paymentObj)
+                                            @if ($slot)
                                                 <div class="flex items-center bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
                                                     <span class="text-[9px] font-black text-gray-400 mr-1">Asis:</span>
-                                                    <span class="text-[10px] font-black text-gray-900 mr-1">{{ $paymentObj->classes_used }}
-                                                        / 8</span>
-                                                    <form action="{{ route('payments.update', $paymentObj) }}" method="POST">
+                                                    <span class="text-[10px] font-black text-gray-900 mr-1">{{ $slot->classes_used }}
+                                                        / {{ $slot->classes_allowed }}</span>
+                                                    <form action="{{ route('payments.update', $slot->id) }}" method="POST">
                                                         @csrf @method('PUT')
                                                         <input type="hidden" name="increment_classes" value="1">
                                                         <button type="submit" class="text-club-primary hover:scale-110 transition-transform">
@@ -172,11 +193,16 @@
                                 <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest px-2 mb-1">Historial de abonos registrados para este mes:</p>
                                 @foreach($monthAbonos as $abono)
                                     <div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg border border-gray-100 text-[10px]">
-                                        <div class="flex items-center text-gray-600">
-                                            <i class="bi bi-calendar-check mr-2 text-club-primary"></i>
-                                            <span class="font-bold">{{ \Carbon\Carbon::parse($abono->paid_at)->format('d/m/Y') }}</span>
+                                        <div class="flex flex-col">
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="bi bi-calendar-check mr-2 text-club-primary"></i>
+                                                <span class="font-bold">{{ \Carbon\Carbon::parse($abono->paid_at)->format('d/m/Y h:i A') }}</span>
+                                                @if($abono->user)
+                                                    <span class="ml-2 text-gray-500 font-medium italic"> - Por: {{ $abono->user->name }}</span>
+                                                @endif
+                                            </div>
                                             @if($abono->notes)
-                                                <span class="ml-2 text-gray-400 italic">- {{ $abono->notes }}</span>
+                                                <div class="ml-6 text-[9px] text-gray-400 italic mt-0.5">{{ $abono->notes }}</div>
                                             @endif
                                         </div>
                                         <div class="flex items-center">

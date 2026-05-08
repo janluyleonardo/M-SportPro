@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StorePaymentRequest;
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\AttendanceSlot;
 
 class PaymentController extends Controller
 {
@@ -31,10 +32,11 @@ class PaymentController extends Controller
 
     public function show(Student $student)
     {
-        $payments = $student->payments()->orderBy('year', 'desc')->orderBy('month', 'desc')->get();
+        $payments = $student->payments()->with('user')->orderBy('year', 'desc')->orderBy('month', 'desc')->get();
         $student->updateBalance();
         $monthStatuses = $student->getPaymentStatusByMonth();
-        return view('payments.show', compact('student', 'payments', 'monthStatuses'));
+        $attendanceSlots = $student->attendanceSlots;
+        return view('payments.show', compact('student', 'payments', 'monthStatuses', 'attendanceSlots'));
     }
 
     /**
@@ -48,10 +50,16 @@ class PaymentController extends Controller
     public function store(StorePaymentRequest $request)
     {
         $validated = $request->validated();
-        $paidAt = $request->paid_at ? \Carbon\Carbon::parse($request->paid_at) : now();
+        
+        // Si viene una fecha manual, la parseamos y le ponemos la hora actual
+        // Si no viene fecha, usamos el momento exacto (ahora)
+        $paidAt = $request->paid_at 
+            ? \Carbon\Carbon::parse($request->paid_at)->setTimeFrom(now()) 
+            : now();
 
         $validated['status'] = 'paid';
         $validated['paid_at'] = $paidAt;
+        $validated['user_id'] = auth()->id();
 
         Payment::create($validated);
         
@@ -61,28 +69,18 @@ class PaymentController extends Controller
         return redirect()->route('payments.show', $validated['student_id'])
             ->with('success', 'Pago registrado correctamente.');
     }
-    public function update(Request $request, Payment $payment)
+    public function update(Request $request, $id)
     {
-        if ($request->has('status')) {
-            $payment->update([
-                'status' => $request->status,
-                'paid_at' => $request->status == 'paid' ? now() : null
-            ]);
-            $msg = 'Estado de pago actualizado.';
-        }
-
         if ($request->has('increment_classes')) {
-            if ($payment->classes_used < $payment->classes_available) {
-                $payment->increment('classes_used');
-                $msg = 'Asistencia registrada correctamente.';
-            } else {
-                return back()->with('error', 'El estudiante ya cumplió sus 8 clases de este mes.');
+            $slot = AttendanceSlot::findOrFail($id);
+            if ($slot->classes_used < $slot->classes_allowed) {
+                $slot->increment('classes_used');
+                return back()->with('success', 'Asistencia registrada correctamente.');
             }
+            return back()->with('error', 'El estudiante ya cumplió sus clases de este mes.');
         }
 
-        $payment->student->updateBalance();
-
-        return back()->with('success', $msg ?? 'Registro actualizado.');
+        return back();
     }
 
     /**

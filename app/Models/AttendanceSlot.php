@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Payment extends Model
+class AttendanceSlot extends Model
 {
     use HasFactory;
 
@@ -13,26 +13,12 @@ class Payment extends Model
         'student_id',
         'month',
         'year',
-        'amount',
-        'status',
-        'paid_at',
-        'classes_available',
         'classes_used',
-        'notes',
-        'user_id',
-    ];
-
-    protected $casts = [
-        'paid_at' => 'datetime',
+        'classes_allowed',
     ];
 
     public function student()
     {
         return $this->belongsTo(Student::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 }
