@@ -131,4 +131,63 @@ class PaymentController extends Controller
         Student::find($studentId)->updateBalance();
         return back()->with('success', 'Pago eliminado correctamente.');
     }
+
+    public function uploadVoucher(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'month' => 'required|integer',
+            'year' => 'required|integer',
+            'amount' => 'required|numeric',
+            'voucher' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        ]);
+
+        $file = $request->file('voucher');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('vouchers'), $filename);
+
+        Payment::create([
+            'student_id' => $request->student_id,
+            'month' => $request->month,
+            'year' => $request->year,
+            'amount' => $request->amount,
+            'status' => 'pending',
+            'voucher' => 'vouchers/' . $filename,
+            'voucher_status' => 'pending',
+            'notes' => $request->notes,
+            'user_id' => auth()->id(),
+            'paid_at' => null,
+            'classes_available' => 8,
+            'classes_used' => 0,
+        ]);
+
+        return back()->with('success', 'Comprobante subido correctamente. Pendiente de verificación por el administrador.');
+    }
+
+    public function verifyVoucher(Payment $payment)
+    {
+        $payment->update([
+            'status' => 'paid',
+            'voucher_status' => 'approved',
+            'paid_at' => now(),
+        ]);
+
+        $payment->student->updateBalance();
+
+        return back()->with('success', 'Pago verificado correctamente.');
+    }
+
+    public function rejectVoucher(Request $request, Payment $payment)
+    {
+        $request->validate([
+            'rejection_reason' => 'required|string|max:255',
+        ]);
+
+        $payment->update([
+            'voucher_status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
+        return back()->with('warning', 'Comprobante rechazado.');
+    }
 }

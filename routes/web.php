@@ -61,6 +61,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export', [StudentsController::class, 'export'])->name('export');
             Route::get('/export-template', [StudentsController::class, 'exportTemplate'])->name('export.template');
             Route::post('/import', [StudentsController::class, 'import'])->name('import');
+            
+            // Verificación de comprobantes
+            Route::post('payments/{payment}/verify', [PaymentController::class, 'verifyVoucher'])->name('payments.verify');
+            Route::post('payments/{payment}/reject', [PaymentController::class, 'rejectVoucher'])->name('payments.reject');
+        });
+
+        // Ruta para que padres/deportistas suban comprobantes
+        Route::middleware(['role:Admin|Profesor|Padre|Deportista'])->group(function () {
+            Route::post('payments/upload-voucher', [PaymentController::class, 'uploadVoucher'])->name('payments.upload_voucher');
         });
 
     // 3. Módulo de Programación

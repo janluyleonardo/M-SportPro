@@ -20,6 +20,9 @@ class Payment extends Model
         'classes_used',
         'notes',
         'user_id',
+        'voucher',
+        'voucher_status',
+        'rejection_reason',
     ];
 
     protected $casts = [

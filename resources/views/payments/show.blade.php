@@ -180,6 +180,15 @@
                                             </button>
                                         </div>
                                     @endrole
+                                    @unlessrole('Admin|Profesor')
+                                        <div class="border-l border-gray-100 pl-4">
+                                            <button
+                                                @click="$dispatch('open-voucher-modal', { month: {{ $status['month_num'] }}, year: {{ $status['year'] }}, amount: {{ $status['amount'] }}, monthName: '{{ $status['month_name'] }}' })"
+                                                class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors">
+                                                <i class="bi bi-cloud-upload-fill mr-1"></i> Subir Recibo
+                                            </button>
+                                        </div>
+                                    @endunlessrole
                                 @endif
                             </div>
                         </div>
@@ -204,11 +213,57 @@
                                             @if($abono->notes)
                                                 <div class="ml-6 text-[9px] text-gray-400 italic mt-0.5">{{ $abono->notes }}</div>
                                             @endif
+                                            @if($abono->voucher)
+                                                <div class="ml-6 mt-2 flex items-center gap-2">
+                                                    <a href="{{ asset($abono->voucher) }}" target="_blank" class="flex items-center px-2 py-1 bg-indigo-50 text-indigo-600 rounded border border-indigo-100 hover:bg-indigo-100 transition-colors">
+                                                        <i class="bi bi-file-earmark-image mr-1"></i> Ver Comprobante
+                                                    </a>
+                                                    @if($abono->voucher_status == 'pending')
+                                                        <span class="px-2 py-1 bg-yellow-50 text-yellow-600 rounded border border-yellow-100 font-bold uppercase tracking-widest text-[8px]">Pendiente Verificación</span>
+                                                    @elseif($abono->voucher_status == 'approved')
+                                                        <span class="px-2 py-1 bg-green-50 text-green-600 rounded border border-green-100 font-bold uppercase tracking-widest text-[8px]">Verificado</span>
+                                                    @elseif($abono->voucher_status == 'rejected')
+                                                        <span class="px-2 py-1 bg-red-50 text-red-600 rounded border border-red-100 font-bold uppercase tracking-widest text-[8px]">Rechazado: {{ $abono->rejection_reason }}</span>
+                                                    @endif
+                                                </div>
+                                            @endif
                                         </div>
-                                        <div class="flex items-center">
+                                        <div class="flex items-center gap-3">
                                             <span class="font-black text-gray-900">${{ number_format($abono->amount, 0, ',', '.') }}</span>
+                                            
                                             @role('Admin')
-                                                <form action="{{ route('payments.destroy', $abono) }}" method="POST" class="ml-2"
+                                                @if($abono->voucher && $abono->voucher_status == 'pending')
+                                                    <div class="flex gap-1" x-data="{ rejecting: false }">
+                                                        <form action="{{ route('payments.verify', $abono) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit" class="p-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors" title="Aprobar Pago">
+                                                                <i class="bi bi-check-lg"></i>
+                                                            </button>
+                                                        </form>
+                                                        <button @click="rejecting = true" class="p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors" title="Rechazar Comprobante">
+                                                            <i class="bi bi-x-lg"></i>
+                                                        </button>
+
+                                                        <!-- Modal Mini para rechazo -->
+                                                        <template x-if="rejecting">
+                                                            <div class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                                                                <div class="bg-white p-6 rounded-2xl w-full max-w-xs shadow-2xl" @click.away="rejecting = false">
+                                                                    <h5 class="font-black text-sm mb-4">Motivo de Rechazo</h5>
+                                                                    <form action="{{ route('payments.reject', $abono) }}" method="POST">
+                                                                        @csrf
+                                                                        <textarea name="rejection_reason" class="w-full border-gray-200 rounded-xl text-xs mb-4" placeholder="Ej: No se ve bien la fecha, monto incorrecto..." required></textarea>
+                                                                        <div class="flex gap-2">
+                                                                            <button type="button" @click="rejecting = false" class="flex-1 py-2 bg-gray-100 rounded-lg text-xs font-bold">Cancelar</button>
+                                                                            <button type="submit" class="flex-1 py-2 bg-red-600 text-white rounded-lg text-xs font-black">Confirmar</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                @endif
+
+                                                <form action="{{ route('payments.destroy', $abono) }}" method="POST"
                                                     onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar abono', '¿Estás seguro de eliminar este abono de ${{ number_format($abono->amount, 0, ',', '.') }}?')">
                                                     @csrf @method('DELETE')
                                                     <button type="submit" class="text-red-300 hover:text-red-500 transition-colors">
@@ -381,4 +436,75 @@
         </div>
     </div>
     @endrole
+
+    <!-- Modal para Subir Comprobante (Padres/Deportistas) -->
+    <div id="modal-voucher" x-data="{ 
+            open: false, 
+            loading: false,
+            month: 1,
+            year: 2024,
+            amount: 50000,
+            monthName: ''
+        }"
+        @open-voucher-modal.window="
+            open = true; 
+            month = $event.detail.month; 
+            year = $event.detail.year; 
+            amount = $event.detail.amount;
+            monthName = $event.detail.monthName;
+        "
+        x-cloak x-show="open" class="fixed inset-0 z-[100] overflow-y-auto">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="open = false"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300"
+                @click.away="open = false">
+                <div class="p-10 text-center">
+                    <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <i class="bi bi-cloud-arrow-up-fill text-4xl"></i>
+                    </div>
+                    
+                    <h2 class="text-2xl font-black text-black mb-2">Subir Comprobante</h2>
+                    <p class="text-sm text-gray-500 mb-8 font-medium">Carga la foto o PDF de tu pago para <span class="text-indigo-600 font-bold" x-text="monthName + ' ' + year"></span></p>
+
+                    <form action="{{ route('payments.upload_voucher') }}" method="POST" enctype="multipart/form-data" class="space-y-5 text-left"
+                        @submit="loading = true">
+                        @csrf
+                        <input type="hidden" name="student_id" value="{{ $student->id }}">
+                        <input type="hidden" name="month" x-model="month">
+                        <input type="hidden" name="year" x-model="year">
+                        <input type="hidden" name="amount" x-model="amount">
+
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Selecciona tu archivo</label>
+                            <input type="file" name="voucher" accept="image/*,application/pdf"
+                                class="w-full border-2 border-dashed border-gray-200 rounded-2xl p-4 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-white hover:border-indigo-300 transition-all cursor-pointer"
+                                required>
+                            <p class="text-[9px] text-gray-400 mt-2 px-2 italic text-center">Formatos aceptados: JPG, PNG, PDF. Máximo 5MB.</p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Nota adicional (Opcional)</label>
+                            <textarea name="notes" rows="2"
+                                class="w-full border-gray-200 rounded-2xl p-4 text-sm font-medium focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Ej: Pago realizado por Nequi #123456"></textarea>
+                        </div>
+
+                        <div class="flex gap-3 mt-8">
+                            <button type="button" @click="open = false" :disabled="loading"
+                                class="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl disabled:opacity-50">
+                                Cancelar
+                            </button>
+                            <button type="submit" :disabled="loading"
+                                class="flex-[2] py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-indigo-100 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center">
+                                <span x-show="!loading">Subir Recibo</span>
+                                <span x-show="loading" class="flex items-center">
+                                    <i class="bi bi-arrow-repeat animate-spin mr-2"></i> Procesando...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>
