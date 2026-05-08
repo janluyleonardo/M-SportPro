@@ -5,22 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Ficha de inscripcion de: {{ Str::title($student->nomDeportista)}}</title>
-  <link href="{{ public_path('css/pdf-imprimir.css') }}" rel="stylesheet">
   <style>
+    /* Inlined CSS for better performance */
+    @page { margin: 0cm 0cm; font-family: Arial; }
     body {
-      background-image: url("{{ public_path('images/logo/LOGO.png') }}");
+      @if($base64Logo)
+      background-image: url("{{ $base64Logo }}");
+      @endif
       background-repeat: no-repeat;
-      background-size:100%;
+      background-size: 100%;
       background-position: 50% 50%;
-      /* background-color:red; */
       margin: 3rem 2rem 2rem;
     }
+    header { position: fixed; top: 0cm; left: 0cm; right: 0cm; height: 2cm; color: #000; text-align: center; line-height: 30px; }
+    footer { position: fixed; bottom: 0cm; left: 0cm; right: 0cm; height: 2cm; color: #000; text-align: center; line-height: 35px; }
+    .tabla-datos { background-color: rgba(255, 255, 255, 0.7); margin-top: 8%; }
+    .div-img { display: block; margin: 0 auto; }
+    .photo{ width: 2cm; height: 2.5cm; border:2px solid #000; }
+    div.firmas{ background-color: rgba(255, 255, 255, 0.7); height: 8%; margin-left: 10px; margin-right: 10px; margin-top: -15px !important; border-bottom: 2px solid #000; }
+    .h-pdf-left { float: left; margin-top: 1%; margin-left:8%; }
+    .h-pdf-center { float: center; width: 84%; height: 100px; margin-top: 1%; margin-left: 8%; margin-right: 8%; z-index: -1; }
+    .h-pdf-right { margin-top: 1%; margin-right: 8%; float: right; }
+    .resolucion{ font-size:10px; }
   </style>
 </head>
 <body>
   <header>
     <div class="h-pdf-left">
-      <img src="{{ public_path('images/logo/LOGO.png') }}" alt="LOGO-jackeline" width="100">
+      @if($base64Logo)
+      <img src="{{ $base64Logo }}" alt="LOGO-jackeline" width="100">
+      @endif
     </div>
     <div class="h-pdf-center">
       <h2 style="text-shadow: 2px 2px #FF0000 !important;">{{__('CLUB DEPORTIVO JACKELINE FS A.F.A')}}</h2>
@@ -33,7 +47,9 @@
     </div>
     <div class="h-pdf-right">
       <div class="div-img">
-        <img class="photo" src="{{ public_path($student->Photo) }}" alt="foto-deportista">
+        @if($base64Photo)
+        <img class="photo" src="{{ $base64Photo }}" alt="foto-deportista">
+        @endif
       </div>
     </div>
   </header>

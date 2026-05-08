@@ -86,8 +86,35 @@ class StudentsController extends Controller
     public function imprimir($id)
     {
       $student = Student::findOrFail($id);
-      $pdf = Pdf::loadView('students.pdf', compact('student'));
+
+      // Optimización: Convertir imágenes a Base64 para acelerar el procesamiento de DomPDF
+      $base64Logo = $this->imageToBase64(public_path('images/logo/LOGO.png'));
+      $base64Photo = $student->Photo ? $this->imageToBase64(public_path($student->Photo)) : null;
+
+      $pdf = Pdf::loadView('students.pdf', compact('student', 'base64Logo', 'base64Photo'));
+      
+      // Configuraciones adicionales para mejorar rendimiento
+      $pdf->setPaper('letter', 'portrait');
+      $pdf->setOptions([
+          'isHtml5ParserEnabled' => true,
+          'isRemoteEnabled' => true,
+          'defaultFont' => 'Arial'
+      ]);
+
       return $pdf->stream($student->nomDeportista.'.pdf');
+    }
+
+    /**
+     * Auxiliar para convertir imágenes a Base64
+     */
+    private function imageToBase64($path)
+    {
+        if (file_exists($path)) {
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            return 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+        return null;
     }
 
     /**
