@@ -118,8 +118,13 @@
                               </div>
                               
                               <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                                  <h4 class="text-xs font-black text-blue-700 uppercase tracking-widest mb-2 flex items-center">
-                                      <i class="bi bi-info-circle-fill mr-1.5"></i> Sugerencia de Formato
+                                  <h4 class="text-xs font-black text-blue-700 uppercase tracking-widest mb-2 flex items-center justify-between">
+                                      <span class="flex items-center">
+                                          <i class="bi bi-info-circle-fill mr-1.5"></i> Sugerencia de Formato
+                                      </span>
+                                      <a href="{{ route('export.template') }}" class="text-indigo-600 hover:text-indigo-800 flex items-center font-bold transition-colors">
+                                          <i class="bi bi-download mr-1"></i> Descargar Plantilla
+                                      </a>
                                   </h4>
                                   <p class="text-[10px] text-blue-600/80 leading-normal">
                                       Para mejores resultados, use cabeceras como: <span class="font-bold">nombre_deportista, documento, categoria, genero, fecha_nacimiento, telefono</span>.

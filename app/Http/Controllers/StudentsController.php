@@ -8,6 +8,7 @@ use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StudentsExport;
+use App\Exports\StudentTemplateExport;
 use App\Imports\StudentsImport;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -204,5 +205,14 @@ class StudentsController extends Controller
         } catch (\Throwable $th) {
             return back()->with('error', 'Error al importar deportistas: ' . $th->getMessage());
         }
+    }
+
+    public function exportTemplate()
+    {
+      try {
+        return Excel::download(new StudentTemplateExport, 'Plantilla_Deportistas.xlsx');
+      } catch (\Throwable $th) {
+        return redirect()->route('dashboard')->with('error', 'no se pudo generar la plantilla excel => '.$th);
+      }
     }
 }
