@@ -49,6 +49,17 @@
         </style>
     </head>
     <body class="font-sans antialiased text-gray-900 bg-gray-50">
+        <!-- Global Page Loader -->
+        <div id="global-loader" class="fixed inset-0 z-[10000] flex items-center justify-center bg-white/60 backdrop-blur-sm transition-opacity duration-300 pointer-events-none opacity-0">
+            <div class="flex flex-col items-center">
+                <div class="relative w-16 h-16">
+                    <div class="absolute inset-0 border-4 border-club-primary/20 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-club-primary rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <p class="mt-4 text-[10px] font-black text-gray-700 tracking-[0.2em] uppercase animate-pulse">Cargando...</p>
+            </div>
+        </div>
+
         <div class="min-h-screen">
             @include('layouts.navigation')
 
@@ -262,6 +273,33 @@
                     detail: { form, title, message, type: type || 'danger' }
                 }));
             }
+
+            // Global Loader Logic
+            window.addEventListener('beforeunload', function() {
+                const loader = document.getElementById('global-loader');
+                if (loader) {
+                    loader.classList.remove('pointer-events-none', 'opacity-0');
+                    loader.classList.add('opacity-100');
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link && 
+                    link.href && 
+                    !link.href.startsWith('#') && 
+                    !link.href.startsWith('javascript') && 
+                    !link.target &&
+                    link.hostname === window.location.hostname &&
+                    !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                    
+                    const loader = document.getElementById('global-loader');
+                    if (loader) {
+                        loader.classList.remove('pointer-events-none', 'opacity-0');
+                        loader.classList.add('opacity-100');
+                    }
+                }
+            });
         </script>
     </body>
 </html>
