@@ -66,8 +66,8 @@ class Student extends Model
   }
 
   /**
-   * Calcula la deuda total acumulada del estudiante.
-   * Basado en meses pendientes desde la fecha de inscripción.
+   * Calcula la deuda total acumulada del estudiante como una cuenta corriente.
+   * Total de cargos requeridos - Total de abonos realizados.
    */
   public function calculateDebt()
   {
@@ -80,40 +80,35 @@ class Student extends Model
       $feePercentage = config('app.payment_late_fee_percentage', 10);
       $baseAmount = config('app.default_payment_amount', 50000);
 
-      $totalDebt = 0;
+      $totalRequired = 0;
       $currentDate = $startDate->copy();
 
-      // Obtener meses ya pagados
-      $paidMonths = $this->payments()->where('status', 'paid')
-          ->get()
-          ->map(fn($p) => $p->year . '-' . str_pad($p->month, 2, '0', STR_PAD_LEFT))
-          ->toArray();
-
+      // 1. Calcular todo lo que el estudiante DEBERÍA haber pagado hasta hoy
       while ($currentDate <= $endDate) {
-          $monthKey = $currentDate->format('Y-m');
-          
-          if (!in_array($monthKey, $paidMonths)) {
-              $amount = $baseAmount;
-              $isLate = false;
+          $amount = $baseAmount;
+          $isLate = false;
 
-              if ($currentDate < $endDate) {
-                  // Mes pasado y no pagado
-                  $isLate = true;
-              } elseif ($currentDate->isSameMonth(now()) && now()->day > $dayThreshold) {
-                  // Mes actual y ya pasó el día límite
-                  $isLate = true;
-              }
-
-              if ($isLate) {
-                  $amount += ($amount * ($feePercentage / 100));
-              }
-
-              $totalDebt += $amount;
+          if ($currentDate < $endDate) {
+              // Mes pasado y no se pagó en su momento (o ya pasó)
+              $isLate = true;
+          } elseif ($currentDate->isSameMonth(now()) && now()->day > $dayThreshold) {
+              // Mes actual y ya pasó el día límite
+              $isLate = true;
           }
+
+          if ($isLate) {
+              $amount += ($amount * ($feePercentage / 100));
+          }
+
+          $totalRequired += $amount;
           $currentDate->addMonth();
       }
 
-      return $totalDebt;
+      // 2. Calcular todo lo que el estudiante HA PAGADO en su historia
+      $totalPaid = $this->payments()->where('status', 'paid')->sum('amount');
+
+      // 3. El saldo es la diferencia
+      return $totalRequired - $totalPaid;
   }
 
   public function updateBalance()
@@ -124,7 +119,8 @@ class Student extends Model
   }
 
   /**
-   * Obtiene el listado detallado de estados por mes (Pagado / Pendiente)
+   * Obtiene el listado de estados por mes repartiendo el dinero total pagado
+   * de forma cronológica (FIFO - Primero en entrar, primero en salir).
    */
   public function getPaymentStatusByMonth()
   {
@@ -137,55 +133,52 @@ class Student extends Model
       $feePercentage = config('app.payment_late_fee_percentage', 10);
       $baseAmount = config('app.default_payment_amount', 50000);
 
+      // Total de dinero disponible del estudiante
+      $remainingPaid = $this->payments()->where('status', 'paid')->sum('amount');
+
       $statusList = [];
       $currentDate = $startDate->copy();
-
-      // Obtener pagos realizados
-      $payments = $this->payments()->where('status', 'paid')->get()
-          ->keyBy(fn($p) => $p->year . '-' . str_pad($p->month, 2, '0', STR_PAD_LEFT));
-
       $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-      // Iteramos desde el final hacia el principio para mostrar primero lo más reciente
-      $monthsToCalculate = [];
+      // Calculamos mes a mes desde el principio para repartir el dinero
+      $months = [];
       while ($currentDate <= $endDate) {
-          $monthsToCalculate[] = $currentDate->copy();
+          $months[] = $currentDate->copy();
           $currentDate->addMonth();
       }
 
-      foreach (array_reverse($monthsToCalculate) as $date) {
-          $monthKey = $date->format('Y-m');
-          $payment = $payments->get($monthKey);
-          
-          $isPaid = (bool)$payment;
-          $amount = $baseAmount;
+      foreach ($months as $date) {
+          $amountDue = $baseAmount;
           $isLate = false;
 
-          if (!$isPaid) {
-              if ($date < $endDate) {
-                  $isLate = true;
-              } elseif ($date->isSameMonth(now()) && now()->day > $dayThreshold) {
-                  $isLate = true;
-              }
-
-              if ($isLate) {
-                  $amount += ($amount * ($feePercentage / 100));
-              }
-          } else {
-              $amount = $payment->amount;
+          if ($date < $endDate) {
+              $isLate = true;
+          } elseif ($date->isSameMonth(now()) && now()->day > $dayThreshold) {
+              $isLate = true;
           }
+
+          if ($isLate) {
+              $amountDue += ($amountDue * ($feePercentage / 100));
+          }
+
+          // Repartir el dinero disponible a este mes
+          $covered = min($remainingPaid, $amountDue);
+          $remainingPaid -= $covered;
 
           $statusList[] = [
               'month_name' => $meses[$date->month - 1],
               'year' => $date->year,
               'month_num' => $date->month,
-              'is_paid' => $isPaid,
-              'amount' => $amount,
+              'is_paid' => $covered >= $amountDue,
+              'amount' => $amountDue,
+              'covered' => $covered,
+              'pending' => $amountDue - $covered,
               'is_late' => $isLate,
-              'paid_at' => $isPaid ? $payment->paid_at : null
+              // Para compatibilidad con la vista
+              'paid_at' => ($covered >= $amountDue) ? now() : null 
           ];
       }
 
-      return $statusList;
+      return array_reverse($statusList);
   }
 }

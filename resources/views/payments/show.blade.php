@@ -88,7 +88,11 @@
                                     <div class="flex items-center">
                                         @if ($status['is_paid'])
                                             <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                                                Pagado: {{ \Carbon\Carbon::parse($status['paid_at'])->format('d/m/Y') }}
+                                                Saldado Totalmente
+                                            </span>
+                                        @elseif ($status['covered'] > 0)
+                                            <span class="text-[9px] font-black text-orange-500 uppercase tracking-wider">
+                                                Abono Parcial: ${{ number_format($status['covered'], 0, ',', '.') }}
                                             </span>
                                         @else
                                             <span class="text-[9px] font-black text-red-500 uppercase tracking-wider">
@@ -107,20 +111,27 @@
 
                             <div class="flex items-center gap-4">
                                 <div class="text-right">
-                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Monto</p>
-                                    <p class="text-base font-black {{ $status['is_paid'] ? 'text-gray-900' : 'text-red-600' }}">
+                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Requerido</p>
+                                    <p class="text-base font-black {{ $status['is_paid'] ? 'text-gray-900' : ($status['covered'] > 0 ? 'text-orange-600' : 'text-red-600') }}">
                                         ${{ number_format($status['amount'], 0, ',', '.') }}
                                     </p>
+                                    @if(!$status['is_paid'] && $status['covered'] > 0)
+                                        <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mt-0.5">
+                                            Faltan: ${{ number_format($status['pending'], 0, ',', '.') }}
+                                        </p>
+                                    @endif
                                 </div>
 
                                 @if ($status['is_paid'])
                                     @role('Admin')
                                         <div class="border-l border-gray-100 pl-4 flex items-center space-x-2">
                                             @php
-                                                $paymentObj = $payments
+                                                $monthPayments = $payments
                                                     ->where('month', $status['month_num'])
-                                                    ->where('year', $status['year'])
-                                                    ->first();
+                                                    ->where('year', $status['year']);
+                                                
+                                                // Intentamos obtener el primero para el contador de clases
+                                                $paymentObj = $monthPayments->first();
                                             @endphp
                                             @if ($paymentObj)
                                                 <div class="flex items-center bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
@@ -135,15 +146,6 @@
                                                         </button>
                                                     </form>
                                                 </div>
-
-                                                <form action="{{ route('payments.destroy', $paymentObj) }}" method="POST"
-                                                    onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar pago', '¿Estás seguro de eliminar este registro de pago?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit"
-                                                        class="text-red-200 hover:text-red-500 transition-colors">
-                                                        <i class="bi bi-trash-fill text-sm"></i>
-                                                    </button>
-                                                </form>
                                             @endif
                                         </div>
                                     @endrole
@@ -153,13 +155,46 @@
                                             <button
                                                 @click="$dispatch('open-payment-modal', { month: {{ $status['month_num'] }}, year: {{ $status['year'] }} })"
                                                 class="px-3 py-1.5 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-colors">
-                                                Pagar
+                                                Abonar
                                             </button>
                                         </div>
                                     @endrole
                                 @endif
                             </div>
                         </div>
+
+                        {{-- Detalle de Abonos para este mes --}}
+                        @php
+                            $monthAbonos = $payments->where('month', $status['month_num'])->where('year', $status['year']);
+                        @endphp
+                        @if($monthAbonos->count() > 0)
+                            <div class="mx-6 mb-4 -mt-2 bg-gray-50/50 rounded-b-xl border-x border-b border-gray-100 p-2 space-y-1">
+                                <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest px-2 mb-1">Historial de abonos registrados para este mes:</p>
+                                @foreach($monthAbonos as $abono)
+                                    <div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg border border-gray-100 text-[10px]">
+                                        <div class="flex items-center text-gray-600">
+                                            <i class="bi bi-calendar-check mr-2 text-club-primary"></i>
+                                            <span class="font-bold">{{ \Carbon\Carbon::parse($abono->paid_at)->format('d/m/Y') }}</span>
+                                            @if($abono->notes)
+                                                <span class="ml-2 text-gray-400 italic">- {{ $abono->notes }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="font-black text-gray-900">${{ number_format($abono->amount, 0, ',', '.') }}</span>
+                                            @role('Admin')
+                                                <form action="{{ route('payments.destroy', $abono) }}" method="POST" class="ml-2"
+                                                    onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar abono', '¿Estás seguro de eliminar este abono de ${{ number_format($abono->amount, 0, ',', '.') }}?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="text-red-300 hover:text-red-500 transition-colors">
+                                                        <i class="bi bi-trash text-[10px]"></i>
+                                                    </button>
+                                                </form>
+                                            @endrole
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     @empty
                         <div class="p-20 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-200 text-center">
                             <i class="bi bi-calendar-x text-5xl text-gray-300 mb-4 block"></i>
