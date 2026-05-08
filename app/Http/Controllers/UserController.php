@@ -43,6 +43,7 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'documento_deportista' => $request->documento_deportista,
         ]);
 
         $user->assignRole($validated['role']);
@@ -57,11 +58,16 @@ class UserController extends Controller
     {
         $request->validate([
             'role' => 'required|exists:roles,name',
+            'documento_deportista' => 'nullable|string',
+        ]);
+
+        $user->update([
+            'documento_deportista' => $request->documento_deportista
         ]);
 
         $user->syncRoles([$request->role]);
 
-        return redirect()->route('users.index')->with('success', 'Rol de usuario actualizado correctamente.');
+        return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
     /**

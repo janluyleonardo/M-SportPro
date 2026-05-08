@@ -18,6 +18,7 @@ class StoreUserRequest extends FormRequest
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'required|exists:roles,name',
+            'documento_deportista' => 'nullable|string',
         ];
     }
 }

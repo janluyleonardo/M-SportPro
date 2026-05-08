@@ -13,6 +13,19 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
+            <!-- Error Message for Unlinked Accounts -->
+            @if(isset($error_message))
+                <div class="bg-red-50 border-2 border-red-100 p-6 rounded-3xl flex items-center space-x-4 animate-shake">
+                    <div class="h-12 w-12 bg-red-100 rounded-2xl flex items-center justify-center text-red-600 flex-shrink-0">
+                        <i class="bi bi-exclamation-triangle-fill text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-red-900 font-black uppercase text-xs tracking-widest mb-1">Acceso Limitado</h4>
+                        <p class="text-red-600 text-sm font-bold">{{ $error_message }}</p>
+                    </div>
+                </div>
+            @endif
+
             <!-- Search Bar -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <form action="{{ route('payments.index') }}" method="GET" class="relative">

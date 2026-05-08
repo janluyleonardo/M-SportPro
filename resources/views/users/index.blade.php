@@ -38,7 +38,7 @@
                             <tr>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Usuario</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Rol Actual</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vínculo Deportista</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Cambiar Rol</th>
                                 <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
                             </tr>
@@ -53,7 +53,11 @@
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-bold text-gray-900 leading-tight">{{ $user->name }}</div>
-                                            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Desde {{ $user->created_at->format('d/m/Y') }}</div>
+                                            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+                                                @foreach($user->roles as $role)
+                                                    {{ $role->name }}@if(!$loop->last), @endif
+                                                @endforeach
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -61,21 +65,18 @@
                                     {{ $user->email }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @foreach($user->roles as $role)
-                                        <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-black rounded-full uppercase tracking-wider border
-                                            @if($role->name == 'Admin') bg-club-secondary text-gray-900 border-club-secondary/30
-                                            @elseif($role->name == 'Profesor') bg-blue-50 text-club-primary border-blue-100
-                                            @elseif($role->name == 'Deportista') bg-indigo-50 text-indigo-700 border-indigo-100
-                                            @elseif($role->name == 'Padre') bg-green-50 text-green-800 border-green-100
-                                            @else bg-gray-50 text-gray-600 border-gray-100 @endif">
-                                            {{ $role->name }}
-                                        </span>
-                                    @endforeach
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <form action="{{ route('users.update', $user) }}" method="POST" class="flex items-center space-x-2">
+                                    <form action="{{ route('users.update', $user) }}" method="POST" id="form-user-{{ $user->id }}" class="flex items-center space-x-2">
                                         @csrf
                                         @method('PATCH')
+                                        <div class="relative group">
+                                            <i class="bi bi-person-badge absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"></i>
+                                            <input type="text" name="documento_deportista" value="{{ $user->documento_deportista }}" 
+                                                   placeholder="N° Documento"
+                                                   class="text-[10px] font-bold rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 pl-7 pr-2 w-32 transition-all bg-gray-50"
+                                                   title="Número de documento del deportista vinculado">
+                                        </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                         <select name="role" class="text-[10px] font-bold rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 pl-2 pr-8 transition-all bg-gray-50">
                                             @foreach($roles as $role)
                                                 <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
@@ -157,18 +158,26 @@
                                 </div>
                             </div>
 
-                            <form action="{{ route('users.update', $user) }}" method="POST" class="flex gap-2">
+                            <form action="{{ route('users.update', $user) }}" method="POST" class="flex flex-col gap-2">
                                 @csrf
                                 @method('PATCH')
-                                <select name="role" class="flex-1 text-[11px] font-black rounded-xl border-gray-200 bg-white focus:ring-club-primary focus:border-club-primary py-2.5 pl-3 transition-all uppercase tracking-tighter">
-                                    @foreach($roles as $role)
-                                        <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
-                                            Cambiar a {{ $role->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="px-5 bg-club-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100 active:scale-95 transition-all">
-                                    OK
+                                <div class="flex gap-2">
+                                    <div class="relative flex-1">
+                                        <i class="bi bi-person-badge absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        <input type="text" name="documento_deportista" value="{{ $user->documento_deportista }}" 
+                                               placeholder="N° Documento Deportista"
+                                               class="w-full text-[11px] font-black rounded-xl border-gray-200 bg-white focus:ring-club-primary focus:border-club-primary py-2.5 pl-9 transition-all uppercase tracking-tighter">
+                                    </div>
+                                    <select name="role" class="flex-1 text-[11px] font-black rounded-xl border-gray-200 bg-white focus:ring-club-primary focus:border-club-primary py-2.5 pl-3 transition-all uppercase tracking-tighter">
+                                        @foreach($roles as $role)
+                                            <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                                Rol: {{ $role->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full py-2.5 bg-club-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100 active:scale-95 transition-all">
+                                    Actualizar Usuario
                                 </button>
                             </form>
                         </div>
@@ -203,28 +212,36 @@
                             </div>
                             
                             <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
-                                    <input type="text" name="name" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
+                                        <input type="text" name="name" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico</label>
+                                        <input type="email" name="email" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Contraseña Inicial</label>
+                                        <input type="text" name="password" required value="jackeline123" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Rol del Usuario</label>
+                                        <select name="role" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                            @foreach($roles as $role)
+                                                <option value="{{ $role->name }}" {{ $role->name == 'Padre' ? 'selected' : '' }}>
+                                                    {{ $role->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico</label>
-                                    <input type="email" name="email" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Contraseña Inicial</label>
-                                    <input type="text" name="password" required value="jackeline123" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
-                                    <p class="mt-1 text-[10px] text-gray-400">Puedes asignar una genérica para que luego el usuario la cambie.</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Rol del Usuario</label>
-                                    <select name="role" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
-                                        @foreach($roles as $role)
-                                            <option value="{{ $role->name }}" {{ $role->name == 'Padre' ? 'selected' : '' }}>
-                                                {{ $role->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Vínculo Deportista (N° Documento)</label>
+                                    <input type="text" name="documento_deportista" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all" placeholder="Escribe el documento del niño/deportista">
+                                    <p class="mt-1 text-[10px] text-gray-400 italic">Si el usuario es Admin o Profesor, puedes dejar este campo vacío.</p>
                                 </div>
                             </div>
                         </div>

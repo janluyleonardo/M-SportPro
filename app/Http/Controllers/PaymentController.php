@@ -16,15 +16,44 @@ class PaymentController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        
-        $students = Student::when($search, function($query) use ($search) {
-                $query->where('nomDeportista', 'LIKE', "%$search%")
-                      ->orWhere('numDocumento', 'LIKE', "%$search%");
-            })
-            ->orderBy('nomDeportista', 'asc')
-            ->paginate(6);
-        
-        // Actualizar saldos dinámicamente para los estudiantes visibles
+        $user = auth()->user();
+
+        // Seguridad y UX: Si no es Admin ni Profesor, manejar redirección directa
+        if (!$user->hasRole(['Admin', 'Profesor'])) {
+            $doc = $user->documento_deportista;
+            
+            if (!$doc) {
+                return view('payments.index', [
+                    'students' => collect(), 
+                    'search' => $search,
+                    'error_message' => 'Tu cuenta no tiene un número de documento vinculado. Contacta al administrador.'
+                ]);
+            }
+
+            $student = Student::where('numDocumento', $doc)->first();
+
+            if (!$student) {
+                return view('payments.index', [
+                    'students' => collect(), 
+                    'search' => $search,
+                    'error_message' => "No se encontró ningún deportista con el documento $doc. Verifica la información con el club."
+                ]);
+            }
+
+            // Si existe, lo llevamos directo a su línea de tiempo
+            return redirect()->route('payments.show', $student->id);
+        }
+
+        $query = Student::query();
+        // (El resto de la lógica para Admin/Profesor sigue igual...)
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nomDeportista', 'LIKE', "%$search%")
+                  ->orWhere('numDocumento', 'LIKE', "%$search%");
+            });
+        }
+
+        $students = $query->orderBy('nomDeportista', 'asc')->paginate(6);
         $students->getCollection()->each->updateBalance();
 
         return view('payments.index', compact('students', 'search'));
@@ -32,6 +61,15 @@ class PaymentController extends Controller
 
     public function show(Student $student)
     {
+        $user = auth()->user();
+
+        // Seguridad: Si no es Admin ni Profesor, verificar que sea su registro vinculado
+        if (!$user->hasRole(['Admin', 'Profesor'])) {
+            if ((string)$user->documento_deportista !== (string)$student->numDocumento) {
+                abort(403, 'No tienes permiso para ver esta información.');
+            }
+        }
+
         $payments = $student->payments()->with('user')->orderBy('year', 'desc')->orderBy('month', 'desc')->get();
         $student->updateBalance();
         $monthStatuses = $student->getPaymentStatusByMonth();
