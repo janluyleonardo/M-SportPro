@@ -15,7 +15,8 @@ class ClassSchedule extends Model
         'end_time',
         'category',
         'user_id',
-        'location'
+        'location',
+        'observations'
     ];
 
     public function teacher()

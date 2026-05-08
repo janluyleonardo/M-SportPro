@@ -49,8 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
             Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
             
-            // Rutas de Horarios (Solo Admin para crear/eliminar)
+            // Rutas de Horarios (Solo Admin para crear/editar/eliminar)
             Route::post('schedules', [ClassScheduleController::class, 'store'])->name('schedules.store');
+            Route::put('schedules/{classSchedule}', [ClassScheduleController::class, 'update'])->name('schedules.update');
             Route::delete('schedules/{classSchedule}', [ClassScheduleController::class, 'destroy'])->name('schedules.destroy');
             
             Route::resource('users', UserController::class);
