@@ -108,7 +108,7 @@
                                           <p class="text-xs font-bold text-gray-500 group-hover:text-indigo-600 uppercase tracking-wider">Haga clic o arrastre su archivo</p>
                                           <p class="text-[10px] text-gray-400 mt-1">XLSX, XLS, CSV (Máx. 10MB)</p>
                                       </div>
-                                      <input id="file-upload" name="file" type="file" class="hidden" required accept=".xlsx,.xls,.csv" @change="fileName = $event.target.files[0].name" :disabled="importing">
+                                      <input id="file-upload" name="file" type="file" class="hidden" required accept=".xlsx,.xls,.csv" @change="fileName = $event.target.files[0].name">
                                   </label>
                                   <template x-if="fileName">
                                       <div class="mt-2 text-xs font-bold text-indigo-600 flex items-center justify-center">
