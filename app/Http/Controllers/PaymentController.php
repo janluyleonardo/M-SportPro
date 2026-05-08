@@ -48,35 +48,7 @@ class PaymentController extends Controller
     public function store(StorePaymentRequest $request)
     {
         $validated = $request->validated();
-
         $paidAt = $request->paid_at ? \Carbon\Carbon::parse($request->paid_at) : now();
-        $dayThreshold = config('app.payment_late_day_threshold', 10);
-        $feePercentage = config('app.payment_late_fee_percentage', 10);
-        $extraMessage = '';
-
-        // Determinar si es pago tardío basado en mes/año y día
-        $currentMonth = now()->month;
-        $currentYear = now()->year;
-        $selectedMonth = (int)$validated['month'];
-        $selectedYear = (int)$validated['year'];
-
-        $isLate = false;
-        if ($selectedYear < $currentYear) {
-            $isLate = true;
-        } elseif ($selectedYear == $currentYear) {
-            if ($selectedMonth < $currentMonth) {
-                $isLate = true;
-            } elseif ($selectedMonth == $currentMonth && $paidAt->day > $dayThreshold) {
-                $isLate = true;
-            }
-        }
-
-        // Aplicar recargo si es tarde
-        if ($isLate) {
-            $extra = $validated['amount'] * ($feePercentage / 100);
-            $validated['amount'] += $extra;
-            $extraMessage = " (Se aplicó un recargo del {$feePercentage}% por pago extemporáneo)";
-        }
 
         $validated['status'] = 'paid';
         $validated['paid_at'] = $paidAt;
@@ -87,7 +59,7 @@ class PaymentController extends Controller
         $student->updateBalance();
 
         return redirect()->route('payments.show', $validated['student_id'])
-            ->with('success', 'Pago registrado correctamente.' . $extraMessage);
+            ->with('success', 'Pago registrado correctamente.');
     }
     public function update(Request $request, Payment $payment)
     {

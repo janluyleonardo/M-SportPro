@@ -295,9 +295,10 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Monto Base ($)</label>
+                                <label class="text-xs font-bold text-gray-400 uppercase">Monto Recibido ($)</label>
                                 <input type="number" name="amount" x-model="baseAmount"
                                     class="w-full border-gray-200 rounded-xl mt-1 p-3 font-black text-lg text-black"
+                                    placeholder="Ej: 55000"
                                     required>
                             </div>
                             <div>
@@ -313,16 +314,16 @@
                                 <div>
                                     <p class="text-[10px] font-black uppercase tracking-widest"
                                         :class="hasLateFee ? 'text-red-600' : 'text-green-600'"
-                                        x-text="hasLateFee ? 'Pago fuera de fecha' : 'Pago puntual'"></p>
+                                        x-text="hasLateFee ? 'Mes con recargo (10%)' : 'Mes sin recargo'"></p>
                                     <p class="text-xs font-bold text-gray-500"
-                                        x-text="hasLateFee ? 'Se aplicará recargo del ' + percentage + '%' : 'Monto base sin recargos'">
+                                        x-text="hasLateFee ? 'El abono cubrirá primero el recargo y luego la base.' : 'El abono cubrirá la base del mes.'">
                                     </p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-[10px] text-gray-400 font-bold uppercase">Total a Pagar</p>
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase">Monto a Registrar</p>
                                     <p class="text-2xl font-black"
                                         :class="hasLateFee ? 'text-red-600' : 'text-club-primary'">
-                                        $<span x-text="new Intl.NumberFormat('es-CO').format(totalWithFee)"></span>
+                                        $<span x-text="new Intl.NumberFormat('es-CO').format(baseAmount)"></span>
                                     </p>
                                 </div>
                             </div>
