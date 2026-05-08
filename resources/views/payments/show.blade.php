@@ -308,6 +308,13 @@
                             </div>
                         </div>
 
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase">Observaciones / Notas</label>
+                            <textarea name="notes" rows="2"
+                                class="w-full border-gray-200 rounded-xl mt-1 p-3 text-sm text-gray-600 font-medium"
+                                placeholder="Ej: Pago en efectivo, Nequi, abono de deuda, etc. (Opcional)"></textarea>
+                        </div>
+
                         <div :class="hasLateFee ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'"
                             class="p-4 rounded-xl border transition-colors duration-300">
                             <div class="flex items-center justify-between">
