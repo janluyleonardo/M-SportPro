@@ -119,11 +119,13 @@
               
               <!-- Categoria -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría (Año) <span class="text-red-500">*</span></label>
-                <select name="Categoria" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría <span class="text-red-500">*</span></label>
+                <select name="Categoria" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-sm">
                   <option value="">Seleccione...</option>
-                  @for ($year = 2025; $year >= 2005; $year--)
-                    <option value="{{ $year }}">{{ $year }}</option>
+                  <option value="Mayores">Mayores (18+ años)</option>
+                  @php $currentYear = date('Y'); @endphp
+                  @for ($year = ($currentYear - 5); $year >= ($currentYear - 17); $year--)
+                    <option value="{{ $year }}">Categoría {{ $year }}</option>
                   @endfor
                 </select>
               </div>

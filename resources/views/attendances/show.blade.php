@@ -29,6 +29,18 @@
                 @csrf
                 <input type="hidden" name="class_schedule_id" value="{{ $schedule->id }}">
 
+                @if($existingAttendances->count() > 0)
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl mb-6 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-100 p-2 rounded-xl text-indigo-600">
+                                <i class="bi bi-info-circle-fill"></i>
+                            </div>
+                            <p class="text-xs font-bold text-indigo-700">Ya se tomó asistencia para esta clase hoy. Puedes realizar correcciones si es necesario.</p>
+                        </div>
+                        <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{{ now()->format('d/m/Y') }}</span>
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($students as $student)
                         @php
@@ -51,8 +63,15 @@
                                     </div>
                                     <div>
                                         <h4 class="text-sm font-black text-gray-900 leading-tight">{{ $student->nomDeportista }}</h4>
+                                        @php
+                                            $slot = $student->attendanceSlots()
+                                                ->where('month', now()->month)
+                                                ->where('year', now()->year)
+                                                ->first();
+                                            $used = $slot ? $slot->classes_used : 0;
+                                        @endphp
                                         <span class="text-[9px] font-black bg-green-50 text-green-600 px-2 py-0.5 rounded-full border border-green-100 uppercase mt-1 inline-block">
-                                            <i class="bi bi-check-circle-fill mr-1"></i> Al Día ({{ $hasPaid->classes_used }}/8)
+                                            <i class="bi bi-check-circle-fill mr-1"></i> Al Día ({{ $used }}/8)
                                         </span>
                                         @if($student->balance > 0)
                                             <span class="text-[9px] font-black bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full border border-orange-100 uppercase mt-1 inline-block ml-1">
@@ -117,8 +136,9 @@
                 </div>
 
                 <div class="mt-12 sticky bottom-8 flex justify-center">
-                    <button type="submit" class="px-12 py-5 bg-club-primary text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:opacity-90 transition-all shadow-2xl shadow-blue-200 flex items-center border-b-4 border-club-secondary">
-                        <i class="bi bi-cloud-arrow-up mr-3 text-lg"></i> Guardar Asistencia de Hoy
+                    <button type="submit" class="px-12 py-5 bg-club-primary text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:opacity-90 transition-all shadow-2xl shadow-blue-200 flex items-center border-b-4 border-club-secondary group">
+                        <i class="bi {{ $existingAttendances->count() > 0 ? 'bi-pencil-square' : 'bi-cloud-arrow-up' }} mr-3 text-lg group-hover:scale-110 transition-transform"></i> 
+                        {{ $existingAttendances->count() > 0 ? 'Actualizar Asistencia' : 'Guardar Asistencia de Hoy' }}
                     </button>
                 </div>
             </form>

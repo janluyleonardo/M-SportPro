@@ -149,7 +149,8 @@
                                     @role('Admin')
                                         <div class="border-l border-gray-100 pl-4 flex items-center space-x-2">
                                             @php
-                                                $slot = $attendanceSlots
+                                                // Buscamos directamente en la base de datos para asegurar el dato más fresco
+                                                $slot = \App\Models\AttendanceSlot::where('student_id', $student->id)
                                                     ->where('month', $status['month_num'])
                                                     ->where('year', $status['year'])
                                                     ->first();

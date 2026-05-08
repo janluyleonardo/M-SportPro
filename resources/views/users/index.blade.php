@@ -40,6 +40,7 @@
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vínculo Deportista</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Cambiar Rol</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pago/Clase</th>
                                 <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
@@ -87,6 +88,14 @@
                                         <button type="submit" class="p-1.5 bg-club-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm">
                                             <i class="bi bi-arrow-repeat"></i>
                                         </button>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="relative">
+                                        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">$</span>
+                                        <input type="number" name="pay_per_session" value="{{ (int)$user->pay_per_session }}" 
+                                               form="form-user-{{ $user->id }}"
+                                               class="text-[10px] font-bold rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 pl-5 pr-1 w-20 transition-all bg-gray-50">
+                                    </div>
                                     </form>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -238,11 +247,17 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Vínculo Deportista (N° Documento)</label>
-                                    <input type="text" name="documento_deportista" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all" placeholder="Escribe el documento del niño/deportista">
-                                    <p class="mt-1 text-[10px] text-gray-400 italic">Si el usuario es Admin o Profesor, puedes dejar este campo vacío.</p>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Vínculo Deportista (N° Documento)</label>
+                                        <input type="text" name="documento_deportista" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all" placeholder="Documento niño">
+                                    </div>
+                                    <div class="col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pago por Sesión ($)</label>
+                                        <input type="number" name="pay_per_session" value="0" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                    </div>
                                 </div>
+                                <p class="mt-1 text-[10px] text-gray-400 italic text-center">Define el pago por clase solo si el usuario es Profesor.</p>
                             </div>
                         </div>
                         

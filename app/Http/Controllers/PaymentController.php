@@ -99,13 +99,24 @@ class PaymentController extends Controller
         $validated['paid_at'] = $paidAt;
         $validated['user_id'] = auth()->id();
 
-        Payment::create($validated);
+        $payment = Payment::create($validated);
         
+        // Registrar ingreso en Tesorería
+        \App\Models\Transaction::create([
+            'type' => 'income',
+            'category' => 'monthly_payment',
+            'amount' => $payment->amount,
+            'date' => now()->format('Y-m-d'),
+            'description' => "Pago manual mensualidad {$payment->month}/{$payment->year} - {$payment->student->nomDeportista}",
+            'student_id' => $payment->student_id,
+            'reference_id' => $payment->id,
+        ]);
+
         $student = Student::find($validated['student_id']);
         $student->updateBalance();
 
         return redirect()->route('payments.show', $validated['student_id'])
-            ->with('success', 'Pago registrado correctamente.');
+            ->with('success', 'Pago registrado y contabilizado en tesorería.');
     }
     public function update(Request $request, $id)
     {
@@ -172,9 +183,20 @@ class PaymentController extends Controller
             'paid_at' => now(),
         ]);
 
+        // Registrar ingreso en Tesorería
+        \App\Models\Transaction::create([
+            'type' => 'income',
+            'category' => 'monthly_payment',
+            'amount' => $payment->amount,
+            'date' => now()->format('Y-m-d'),
+            'description' => "Mensualidad {$payment->month}/{$payment->year} - {$payment->student->nomDeportista}",
+            'student_id' => $payment->student_id,
+            'reference_id' => $payment->id,
+        ]);
+
         $payment->student->updateBalance();
 
-        return back()->with('success', 'Pago verificado correctamente.');
+        return back()->with('success', 'Pago verificado y registrado en tesorería.');
     }
 
     public function rejectVoucher(Request $request, Payment $payment)

@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'documento_deportista',
+        'pay_per_session',
     ];
 
     /**

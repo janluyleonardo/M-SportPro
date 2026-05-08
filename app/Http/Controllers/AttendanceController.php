@@ -57,7 +57,16 @@ class AttendanceController extends Controller
         $year = now()->year;
 
         foreach ($validated['students'] as $studentId => $status) {
-            // 1. Registrar la asistencia
+            // 1. Verificar si ya existía un registro para este alumno hoy en esta clase
+            $existingAttendance = Attendance::where([
+                'class_schedule_id' => $request->class_schedule_id,
+                'student_id' => $studentId,
+                'date' => $date,
+            ])->first();
+
+            $oldStatus = $existingAttendance ? $existingAttendance->status : null;
+
+            // 2. Registrar o actualizar la asistencia
             Attendance::updateOrCreate(
                 [
                     'class_schedule_id' => $request->class_schedule_id,
@@ -67,15 +76,30 @@ class AttendanceController extends Controller
                 ['status' => $status]
             );
 
-            // 2. Si asistió, descontar de la mensualidad (si existe pago)
-            if ($status === 'present') {
-                $payment = Payment::where('student_id', $studentId)
-                    ->where('month', $month)
-                    ->where('year', $year)
-                    ->first();
+            // 3. Lógica de incremento/decremento de clases usadas (Solo si el estado cambió)
+            if ($status !== $oldStatus) {
+                // Buscamos o creamos el cupo de asistencia para este mes/año
+                // Nota: El cupo se asocia al estudiante y al mes/año, no a un pago específico
+                $slot = \App\Models\AttendanceSlot::firstOrCreate(
+                    [
+                        'student_id' => $studentId,
+                        'month' => $month,
+                        'year' => $year
+                    ],
+                    [
+                        'classes_used' => 0,
+                        'classes_allowed' => 8
+                    ]
+                );
 
-                if ($payment) {
-                    $payment->increment('classes_used');
+                if ($status === 'present' && $oldStatus !== 'present') {
+                    // Cambió de Ausente a Presente: Sumar clase
+                    $slot->increment('classes_used');
+                } elseif ($status !== 'present' && $oldStatus === 'present') {
+                    // Cambió de Presente a Ausente (Corrección): Restar clase
+                    if ($slot->classes_used > 0) {
+                        $slot->decrement('classes_used');
+                    }
                 }
             }
         }

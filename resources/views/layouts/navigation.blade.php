@@ -28,6 +28,9 @@
                         {{ __('Partidos') }}
                     </x-nav-link>
 
+                    @role('Admin')
+                    @endrole
+
                     {{-- Dropdown de Gestión: visible para Admin y Profesor --}}
                     @hasanyrole('Admin|Profesor')
                         <div class="relative" x-data="{ openGestion: false }" @click.outside="openGestion = false">
@@ -102,6 +105,28 @@
                                             </span>
                                             {{ __('Canchas') }}
                                             <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">Admin</span>
+                                        </a>
+
+                                        <div class="border-t border-gray-100 my-1.5"></div>
+                                        <a href="{{ route('treasury.index') }}"
+                                           class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
+                                                  {{ request()->routeIs('treasury.index') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50' }}">
+                                            <span class="w-7 h-7 rounded-lg flex items-center justify-center mr-3
+                                                         {{ request()->routeIs('treasury.index') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500' }}">
+                                                <i class="bi bi-bank2 text-xs"></i>
+                                            </span>
+                                            {{ __('Tesorería') }}
+                                            <span class="ml-auto text-[9px] font-black bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase">Caja</span>
+                                        </a>
+                                        <a href="{{ route('treasury.salaries') }}"
+                                           class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
+                                                  {{ request()->routeIs('treasury.salaries') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50' }}">
+                                            <span class="w-7 h-7 rounded-lg flex items-center justify-center mr-3
+                                                         {{ request()->routeIs('treasury.salaries') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500' }}">
+                                                <i class="bi bi-cash-stack text-xs"></i>
+                                            </span>
+                                            {{ __('Nómina') }}
+                                            <span class="ml-auto text-[9px] font-black bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase">Sueldos</span>
                                         </a>
                                     @endrole
                                 </div>
@@ -215,6 +240,9 @@
                     <i class="bi bi-trophy mr-3 text-base {{ request()->routeIs('programming.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                     {{ __('Partidos') }}
                 </a>
+
+                    @role('Admin')
+                    @endrole
             </div>
 
             {{-- Sección de Gestión en móvil --}}
@@ -243,9 +271,20 @@
                             </a>
 
                             <a href="{{ route('locations.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('locations.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
-                                <i class="bi bi-geo-alt-fill mr-3 text-base {{ request()->routeIs('locations.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
+                                 <i class="bi bi-geo-alt-fill mr-3 text-base {{ request()->routeIs('locations.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Canchas') }}
                                 <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">Admin</span>
+                            </a>
+
+                            <div class="border-t border-gray-100 my-2"></div>
+                            <a href="{{ route('treasury.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('treasury.index') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <i class="bi bi-bank2 mr-3 text-base {{ request()->routeIs('treasury.index') ? 'text-club-primary' : 'text-gray-400' }}"></i>
+                                {{ __('Tesorería') }}
+                            </a>
+
+                            <a href="{{ route('treasury.salaries') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('treasury.salaries') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <i class="bi bi-cash-stack mr-3 text-base {{ request()->routeIs('treasury.salaries') ? 'text-club-primary' : 'text-gray-400' }}"></i>
+                                {{ __('Nómina') }}
                             </a>
                         @endrole
                     </div>

@@ -131,5 +131,6 @@ return [
     'payment_late_fee_percentage' => env('PAYMENT_LATE_FEE_PERCENTAGE', 10),
     'payment_late_day_threshold' => env('PAYMENT_LATE_DAY_THRESHOLD', 10),
     'default_payment_amount' => env('DEFAULT_PAYMENT_AMOUNT', 50000),
+    'default_teacher_pay_per_session' => env('DEFAULT_TEACHER_PAY_PER_SESSION', 30000),
 
 ];

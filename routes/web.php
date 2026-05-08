@@ -10,6 +10,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\TreasuryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -70,6 +71,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Ruta para que padres/deportistas suban comprobantes
         Route::middleware(['role:Admin|Profesor|Padre|Deportista'])->group(function () {
             Route::post('payments/upload-voucher', [PaymentController::class, 'uploadVoucher'])->name('payments.upload_voucher');
+        });
+
+        Route::middleware(['role:Admin'])->group(function () {
+            // Módulo de Tesorería
+            Route::prefix('treasury')->name('treasury.')->group(function() {
+                Route::get('/', [TreasuryController::class, 'index'])->name('index');
+                Route::post('/', [TreasuryController::class, 'store'])->name('store');
+                Route::get('/salaries', [TreasuryController::class, 'salaries'])->name('salaries');
+                Route::post('/salaries/pay', [TreasuryController::class, 'payTeacher'])->name('pay_teacher');
+                Route::get('/teacher-history/{teacher}', [TreasuryController::class, 'teacherHistory'])->name('teacher_history');
+            });
         });
 
     // 3. Módulo de Programación
