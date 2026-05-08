@@ -76,11 +76,11 @@
                 <div class="space-y-3">
                     @forelse($monthStatuses as $status)
                         <div
-                            class="bg-white p-3 rounded-xl shadow-sm border {{ $status['is_paid'] ? 'border-gray-100' : 'border-red-100 bg-red-50/5' }} flex items-center justify-between group hover:shadow-md transition-all">
+                            class="bg-white p-3 rounded-xl shadow-sm border {{ $status['is_paid'] ? 'border-gray-100' : ($status['is_late'] ? 'border-red-100 bg-red-50/5' : 'border-blue-100 bg-blue-50/5') }} flex items-center justify-between group hover:shadow-md transition-all">
                             <div class="flex items-center space-x-4">
                                 <div
-                                    class="w-10 h-10 rounded-xl flex items-center justify-center text-lg {{ $status['is_paid'] ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' }}">
-                                    <i class="bi {{ $status['is_paid'] ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill' }}"></i>
+                                    class="w-10 h-10 rounded-xl flex items-center justify-center text-lg {{ $status['is_paid'] ? 'bg-green-50 text-green-600' : ($status['is_late'] ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600') }}">
+                                    <i class="bi {{ $status['is_paid'] ? 'bi-check-circle-fill' : ($status['is_late'] ? 'bi-exclamation-circle-fill' : 'bi-calendar-event-fill') }}"></i>
                                 </div>
                                 <div>
                                     <h4 class="font-black text-gray-900 text-sm">{{ $status['month_name'] }}
@@ -95,8 +95,8 @@
                                                 Abono Parcial: ${{ number_format($status['covered'], 0, ',', '.') }}
                                             </span>
                                         @else
-                                            <span class="text-[9px] font-black text-red-500 uppercase tracking-wider">
-                                                Pendiente
+                                            <span class="text-[9px] font-black uppercase tracking-wider {{ $status['is_late'] ? 'text-red-500' : 'text-blue-500' }}">
+                                                {{ $status['is_late'] ? 'Vencido' : 'Pendiente (A tiempo)' }}
                                             </span>
                                             @if ($status['is_late'])
                                                 <span
@@ -112,7 +112,7 @@
                             <div class="flex items-center gap-4">
                                 <div class="text-right">
                                     <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Requerido</p>
-                                    <p class="text-base font-black {{ $status['is_paid'] ? 'text-gray-900' : ($status['covered'] > 0 ? 'text-orange-600' : 'text-red-600') }}">
+                                    <p class="text-base font-black {{ $status['is_paid'] ? 'text-gray-900' : ($status['is_late'] ? 'text-red-600' : 'text-blue-600') }}">
                                         ${{ number_format($status['amount'], 0, ',', '.') }}
                                     </p>
                                     @if(!$status['is_paid'] && $status['covered'] > 0)
@@ -154,7 +154,7 @@
                                         <div class="border-l border-gray-100 pl-4">
                                             <button
                                                 @click="$dispatch('open-payment-modal', { month: {{ $status['month_num'] }}, year: {{ $status['year'] }} })"
-                                                class="px-3 py-1.5 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-colors">
+                                                class="px-3 py-1.5 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors {{ $status['is_late'] ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700' }}">
                                                 Abonar
                                             </button>
                                         </div>
