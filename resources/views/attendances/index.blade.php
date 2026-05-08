@@ -31,7 +31,7 @@
                                 </div>
 
                                 <div>
-                                    <h3 class="text-xl sm:text-2xl font-black text-gray-900 uppercase tracking-tight">Categoría {{ $schedule->category }}</h3>
+                                    <h3 class="text-xl sm:text-2xl font-black text-gray-900 uppercase tracking-tight">Categoría {{ __($schedule->category) }}</h3>
                                     <div class="flex flex-wrap items-center justify-center sm:justify-start mt-2 gap-x-4 gap-y-2">
                                         <span class="flex items-center text-xs font-bold text-gray-400">
                                             <i class="bi bi-person-badge mr-2 text-indigo-500"></i> {{ $schedule->teacher->name }}

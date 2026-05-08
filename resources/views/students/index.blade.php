@@ -202,7 +202,7 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-club-secondary text-gray-900 border border-club-secondary/30">
-                      {{ $student->Categoria }}
+                      {{ __($student->Categoria) }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -262,7 +262,7 @@
                   </div>
                   <div class="ml-3">
                     <div class="text-sm font-bold text-gray-900 leading-tight">{{ Str::title($student->nomDeportista) }}</div>
-                    <div class="text-[10px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Categoría {{ $student->Categoria }}</div>
+                    <div class="text-[10px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Categoría {{ __($student->Categoria) }}</div>
                   </div>
                 </div>
                 <div class="text-right">

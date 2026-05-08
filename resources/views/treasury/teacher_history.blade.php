@@ -5,7 +5,7 @@
                 <i class="bi bi-arrow-left-circle-fill text-2xl"></i>
             </a>
             <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
-                Historial de Pagos: {{ $teacher->name }}
+                {{ __('Payment History') }}: {{ $teacher->name }}
             </h2>
         </div>
     </x-slot>
@@ -21,11 +21,11 @@
                     </div>
                     <div>
                         <h3 class="text-xl font-black text-gray-900 uppercase tracking-tight">{{ $teacher->name }}</h3>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Profesor / Entrenador</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">{{ __('Teacher / Coach') }}</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Pagado Histórico</p>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ __('Total Historic Paid') }}</p>
                     <p class="text-2xl font-black text-emerald-600">${{ number_format($payments->sum('amount'), 0, ',', '.') }}</p>
                 </div>
             </div>
@@ -45,7 +45,7 @@
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                     <div>
                                         <div class="flex items-center space-x-2 mb-1">
-                                            <span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md uppercase tracking-wider">Pago Exitoso</span>
+                                            <span class="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md uppercase tracking-wider">{{ __('Successful Payment') }}</span>
                                             <span class="text-xs font-bold text-gray-400 italic">{{ \Carbon\Carbon::parse($payment->date)->translatedFormat('d M, Y') }}</span>
                                         </div>
                                         <h4 class="font-black text-gray-900 text-lg">{{ $payment->description }}</h4>
@@ -56,12 +56,12 @@
                                         @if($payment->attachment)
                                             <a href="{{ asset('storage/' . $payment->attachment) }}" target="_blank" class="mt-2 inline-flex items-center text-[10px] font-black text-club-primary uppercase tracking-widest hover:underline">
                                                 <i class="bi bi-file-earmark-text-fill mr-1.5 text-xs"></i>
-                                                Ver Soporte de Pago
+                                                {{ __('View Payment Support') }}
                                             </a>
                                         @else
                                             <span class="mt-2 inline-flex items-center text-[10px] font-bold text-gray-300 uppercase tracking-widest">
                                                 <i class="bi bi-file-earmark-x mr-1.5 text-xs"></i>
-                                                Sin soporte cargado
+                                                {{ __('No support uploaded') }}
                                             </span>
                                         @endif
                                     </div>
@@ -71,7 +71,7 @@
                     @empty
                         <div class="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 ml-20">
                             <i class="bi bi-calendar-x text-5xl text-gray-300 mb-4 block"></i>
-                            <p class="text-gray-500 font-bold">No hay registros de pagos para este profesor.</p>
+                            <p class="text-gray-500 font-bold">{{ __('No payment records found') }}</p>
                         </div>
                     @endforelse
                 </div>

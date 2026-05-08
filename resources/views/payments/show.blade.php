@@ -55,7 +55,7 @@
                         <div class="flex flex-wrap gap-2 items-center mt-2">
                             <span
                                 class="text-[9px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
-                                {{ $student->Categoria }}
+                                {{ __($student->Categoria) }}
                             </span>
                             <span
                                 class="text-[9px] font-bold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100 uppercase">

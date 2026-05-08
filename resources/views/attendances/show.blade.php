@@ -7,7 +7,7 @@
                 </a>
                 <div>
                     <h2 class="font-black text-2xl text-gray-900 leading-tight uppercase tracking-tight">
-                        Asistencia: {{ $schedule->category }}
+                        Asistencia: {{ __($schedule->category) }}
                     </h2>
                     <p class="text-[10px] font-black text-club-primary uppercase tracking-[0.2em]">
                         {{ $schedule->day_of_week }} | {{ date('g:i A', strtotime($schedule->start_time)) }}

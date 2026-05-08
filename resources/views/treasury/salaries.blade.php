@@ -7,15 +7,15 @@
                 </div>
                 <div>
                     <h2 class="font-black text-2xl text-gray-900 tracking-tight">
-                        Cálculo de Nómina
+                        {{ __('Payroll Calculation') }}
                     </h2>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Liquidación de Profesores por Sesión</p>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">{{ __('Teacher Settlement by Session') }}</p>
                 </div>
             </div>
             
             <form action="{{ route('treasury.salaries') }}" method="GET" class="flex items-center gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
                 <select name="month" class="border-none focus:ring-0 text-xs font-bold text-gray-600 bg-transparent py-1">
-                    @php $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']; @endphp
+                    @php $meses = [__('January'), __('February'), __('March'), __('April'), __('May'), __('June'), __('July'), __('August'), __('September'), __('October'), __('November'), __('December')]; @endphp
                     @foreach($meses as $idx => $m)
                         <option value="{{ $idx + 1 }}" {{ $month == ($idx + 1) ? 'selected' : '' }}>{{ $m }}</option>
                     @endforeach
@@ -41,16 +41,16 @@
                 </div>
                 <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h3 class="text-3xl font-black mb-2 uppercase tracking-tight">Consolidado Mensual</h3>
+                        <h3 class="text-3xl font-black mb-2 uppercase tracking-tight">{{ __('Monthly Consolidated') }}</h3>
                         <p class="text-indigo-100 font-bold text-sm tracking-widest uppercase">{{ $meses[$month-1] }} {{ $year }}</p>
                     </div>
                     <div class="flex gap-4">
                         <div class="bg-white/10 backdrop-blur-md px-6 py-4 rounded-3xl border border-white/20">
-                            <p class="text-[9px] font-black uppercase text-indigo-200 tracking-widest mb-1">Total a Liquidar</p>
+                            <p class="text-[9px] font-black uppercase text-indigo-200 tracking-widest mb-1">{{ __('Total to Liquidate') }}</p>
                             <p class="text-2xl font-black">${{ number_format($salaryData->sum('total_earned'), 0, ',', '.') }}</p>
                         </div>
                         <div class="bg-white/10 backdrop-blur-md px-6 py-4 rounded-3xl border border-white/20">
-                            <p class="text-[9px] font-black uppercase text-indigo-200 tracking-widest mb-1">Pendiente de Pago</p>
+                            <p class="text-[9px] font-black uppercase text-indigo-200 tracking-widest mb-1">{{ __('Pending Payment') }}</p>
                             <p class="text-2xl font-black text-club-secondary">${{ number_format($salaryData->sum('pending'), 0, ',', '.') }}</p>
                         </div>
                     </div>
@@ -68,35 +68,35 @@
                                 <div>
                                     <h4 class="font-black text-gray-900 text-lg uppercase tracking-tight">{{ $data['teacher']->name }}</h4>
                                     <div class="flex items-center space-x-2">
-                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Profesor / Entrenador</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ __('Teacher / Coach') }}</p>
                                         <span class="text-gray-300">•</span>
-                                        <a href="{{ route('treasury.teacher_history', $data['teacher']->id) }}" class="text-[10px] font-black text-club-primary uppercase tracking-widest hover:underline">Ver Historial</a>
+                                        <a href="{{ route('treasury.teacher_history', $data['teacher']->id) }}" class="text-[10px] font-black text-club-primary uppercase tracking-widest hover:underline">{{ __('View History') }}</a>
                                     </div>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Pago por Clase</p>
+                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ __('Payment per Session') }}</p>
                                 @php
                                     $effectivePay = $data['teacher']->pay_per_session > 0 ? $data['teacher']->pay_per_session : config('app.default_teacher_pay_per_session', 30000);
                                 @endphp
                                 <p class="font-black text-gray-900">${{ number_format($effectivePay, 0, ',', '.') }}</p>
                                 @if($data['teacher']->pay_per_session <= 0)
-                                    <span class="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">(Por Defecto)</span>
+                                    <span class="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">({{ __('By Default') }})</span>
                                 @endif
                             </div>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 mb-8">
                             <div class="bg-gray-50/50 p-4 rounded-2xl text-center border border-gray-50">
-                                <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Sesiones</p>
+                                <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ __('Sessions') }}</p>
                                 <p class="text-lg font-black text-gray-900">{{ $data['sessions_count'] }}</p>
                             </div>
                             <div class="bg-gray-50/50 p-4 rounded-2xl text-center border border-gray-50">
-                                <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Ganado</p>
+                                <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ __('Earned') }}</p>
                                 <p class="text-lg font-black text-gray-900">${{ number_format($data['total_earned'], 0, ',', '.') }}</p>
                             </div>
                             <div class="bg-indigo-50 p-4 rounded-2xl text-center border border-indigo-100">
-                                <p class="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">Pendiente</p>
+                                <p class="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">{{ __('Pending') }}</p>
                                 <p class="text-lg font-black text-indigo-600">${{ number_format($data['pending'], 0, ',', '.') }}</p>
                             </div>
                         </div>
@@ -110,17 +110,17 @@
                                 <input type="hidden" name="year" value="{{ $year }}">
                                 
                                 <div class="relative group">
-                                    <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 block ml-2">Soporte de Pago (Opcional)</label>
+                                    <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 block ml-2">{{ __('Support Attachment') }} ({{ __('Optional') }})</label>
                                     <input type="file" name="attachment" class="w-full text-[10px] text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-500 hover:file:bg-gray-200 transition-all cursor-pointer">
                                 </div>
 
                                 <button type="submit" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-club-primary transition-all active:scale-[0.98]">
-                                    Registrar Pago de ${{ number_format($data['pending'], 0, ',', '.') }}
+                                    {{ __('Register Payment of') }} ${{ number_format($data['pending'], 0, ',', '.') }}
                                 </button>
                             </form>
                         @else
                             <div class="w-full py-4 bg-green-50 text-green-600 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-green-100 flex items-center justify-center">
-                                <i class="bi bi-check-circle-fill mr-2"></i> Nómina al día
+                                <i class="bi bi-check-circle-fill mr-2"></i> {{ __('Payroll up to date') }}
                             </div>
                         @endif
                     </div>

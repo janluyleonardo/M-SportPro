@@ -16,7 +16,7 @@
             <div class="flex items-center gap-3">
                 <form action="{{ route('treasury.index') }}" method="GET" class="flex items-center gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
                     <select name="month" class="border-none focus:ring-0 text-xs font-bold text-gray-600 bg-transparent py-1">
-                        @php $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']; @endphp
+                        @php $meses = [__('January'), __('February'), __('March'), __('April'), __('May'), __('June'), __('July'), __('August'), __('September'), __('October'), __('November'), __('December')]; @endphp
                         @foreach($meses as $idx => $m)
                             <option value="{{ $idx + 1 }}" {{ $month == ($idx + 1) ? 'selected' : '' }}>{{ $m }}</option>
                         @endforeach
@@ -68,8 +68,7 @@
                     </div>
                 </div>
 
-                <div class="relative overflow-hidden p-6 rounded-[2rem] shadow-xl text-white flex items-center gap-5" 
-                     :class="{{ ($totalIncome - $totalExpense) >= 0 ? 'bg-indigo-600' : 'bg-red-600' }}">
+                <div class="relative overflow-hidden p-6 rounded-[2rem] shadow-xl text-white flex items-center gap-5 {{ ($totalIncome - $totalExpense) >= 0 ? 'bg-indigo-600' : 'bg-red-600' }}">
                     <div class="absolute -right-4 -bottom-4 opacity-10 rotate-12">
                         <i class="bi bi-safe2 text-9xl"></i>
                     </div>
@@ -117,7 +116,7 @@
                                         <div class="flex items-center gap-2">
                                             <div class="w-2 h-2 rounded-full {{ $t->type == 'income' ? 'bg-green-400' : 'bg-red-400' }}"></div>
                                             <span class="text-[10px] font-black uppercase tracking-widest text-gray-600">
-                                                {{ str_replace('_', ' ', $t->category) }}
+                                                {{ __($t->category) }}
                                             </span>
                                         </div>
                                     </td>
@@ -193,17 +192,17 @@
                                 <select name="category" class="w-full border-gray-200 rounded-2xl p-4 text-xs font-black text-gray-700 bg-gray-50 focus:bg-white transition-all" required>
                                     <template x-if="type == 'income'">
                                         <optgroup label="Ingresos">
-                                            <option value="monthly_payment">Mensualidad</option>
-                                            <option value="sporting_goods">Venta Artículos</option>
-                                            <option value="other">Otro Ingreso</option>
+                                            <option value="monthly_payment">{{ __('monthly_payment') }}</option>
+                                            <option value="sporting_goods">{{ __('sporting_goods') }}</option>
+                                            <option value="other">{{ __('other') }}</option>
                                         </optgroup>
                                     </template>
                                     <template x-if="type == 'expense'">
                                         <optgroup label="Egresos">
-                                            <option value="rent">Arriendo</option>
-                                            <option value="teacher_salary">Pago Profesor</option>
-                                            <option value="supplies">Insumos/Materiales</option>
-                                            <option value="other">Otro Egreso</option>
+                                            <option value="rent">{{ __('rent') }}</option>
+                                            <option value="teacher_salary">{{ __('teacher_salary') }}</option>
+                                            <option value="supplies">{{ __('supplies') }}</option>
+                                            <option value="other">{{ __('other') }}</option>
                                         </optgroup>
                                     </template>
                                 </select>
