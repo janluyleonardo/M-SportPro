@@ -22,6 +22,7 @@
                 --club-primary: rgb({{ env('CLUB_COLOR_PRIMARY_RGB', '0, 74, 173') }});
                 --club-secondary: rgb({{ env('CLUB_COLOR_SECONDARY_RGB', '255, 222, 89') }});
             }
+            [x-cloak] { display: none !important; }
             .bg-club-primary { background-color: var(--club-primary); }
             .bg-club-secondary { background-color: var(--club-secondary); }
             .text-club-primary { color: var(--club-primary); }
@@ -275,13 +276,8 @@
             }
 
             // Global Loader Logic
-            window.addEventListener('beforeunload', function() {
-                const loader = document.getElementById('global-loader');
-                if (loader) {
-                    loader.classList.remove('pointer-events-none', 'opacity-0');
-                    loader.classList.add('opacity-100');
-                }
-            });
+            // Eliminamos el listener de 'beforeunload' porque causaba que el cargador se quedara pegado en las descargas.
+            // El sistema de clic de abajo es suficiente y más inteligente.
 
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('a');
@@ -291,6 +287,10 @@
                     !link.href.startsWith('javascript') && 
                     !link.target &&
                     link.hostname === window.location.hostname &&
+                    !link.hasAttribute('data-no-loader') &&
+                    link.getAttribute('data-no-loader') !== 'true' &&
+                    !link.href.includes('template') &&
+                    !link.href.includes('export') &&
                     !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
                     
                     const loader = document.getElementById('global-loader');

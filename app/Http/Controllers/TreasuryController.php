@@ -25,8 +25,8 @@ class TreasuryController extends Controller
 
         $transactions = $query->whereMonth('date', $month)
             ->whereYear('date', $year)
-            ->orderBy('date', 'desc')
-            ->paginate(15);
+            ->latest('id') // Ordenar por ID descendente para ver lo último primero
+            ->paginate(10); // Paginación corta de 10 registros
 
         $totalIncome = Transaction::whereMonth('date', $month)
             ->whereYear('date', $year)
@@ -38,7 +38,30 @@ class TreasuryController extends Controller
             ->where('type', 'expense')
             ->sum('amount');
 
-        return view('treasury.index', compact('transactions', 'totalIncome', 'totalExpense', 'month', 'year'));
+        $products = \App\Models\Product::orderBy('name')->get();
+        $invoiceSettings = \App\Models\InvoiceSetting::firstOrCreate([], [
+            'prefix' => 'JFS-',
+            'next_number' => 1001
+        ]);
+
+        return view('treasury.index', compact('transactions', 'totalIncome', 'totalExpense', 'month', 'year', 'products', 'invoiceSettings'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'prefix' => 'required|string|max:10',
+            'next_number' => 'required|integer|min:1',
+            'resolution_number' => 'nullable|string'
+        ]);
+
+        $settings = \App\Models\InvoiceSetting::first();
+        if (!$settings) $settings = new \App\Models\InvoiceSetting();
+        
+        $settings->fill($request->all());
+        $settings->save();
+
+        return back()->with('success', 'Configuración de facturación actualizada.');
     }
 
     public function store(Request $request)
@@ -46,13 +69,30 @@ class TreasuryController extends Controller
         $validated = $request->validate([
             'type' => 'required|in:income,expense',
             'category' => 'required|string',
+            'custom_category' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
             'description' => 'nullable|string|max:255',
+            'product_id' => 'nullable|exists:products,id',
+            'quantity' => 'nullable|integer|min:1',
             'user_id' => 'nullable|exists:users,id',
         ]);
 
-        Transaction::create($validated);
+        // Generar número de factura automático si es un INGRESO
+        if ($validated['type'] == 'income') {
+            $validated['invoice_number'] = \App\Models\InvoiceSetting::generateNext();
+        }
+
+        $transaction = Transaction::create($validated);
+
+        // Si es venta de artículos y hay un producto seleccionado, descontar stock
+        if ($validated['type'] == 'income' && $validated['category'] == 'sporting_goods' && !empty($validated['product_id'])) {
+            $product = \App\Models\Product::find($validated['product_id']);
+            if ($product) {
+                $qty = $validated['quantity'] ?? 1;
+                $product->decrement('stock', $qty);
+            }
+        }
 
         return back()->with('success', 'Transacción registrada correctamente.');
     }

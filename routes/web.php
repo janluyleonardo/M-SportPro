@@ -11,6 +11,7 @@ use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TreasuryController;
+use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -75,12 +76,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::middleware(['role:Admin'])->group(function () {
             // Módulo de Tesorería
-            Route::prefix('treasury')->name('treasury.')->group(function() {
+            // Inventario y Productos
+    Route::get('products/template', [ProductController::class, 'downloadTemplate'])->name('products.template');
+    Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
+    Route::resource('products', ProductController::class);
+    
+    // Tesorería
+    Route::prefix('treasury')->name('treasury.')->group(function() {
                 Route::get('/', [TreasuryController::class, 'index'])->name('index');
                 Route::post('/', [TreasuryController::class, 'store'])->name('store');
                 Route::get('/salaries', [TreasuryController::class, 'salaries'])->name('salaries');
                 Route::post('/salaries/pay', [TreasuryController::class, 'payTeacher'])->name('pay_teacher');
                 Route::get('/teacher-history/{teacher}', [TreasuryController::class, 'teacherHistory'])->name('teacher_history');
+                Route::post('/settings', [TreasuryController::class, 'updateSettings'])->name('settings.update');
             });
         });
 
