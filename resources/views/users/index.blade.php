@@ -234,7 +234,7 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Contraseña Inicial</label>
-                                        <input type="text" name="password" required value="jackeline123" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                        <input type="text" name="password" required value="{{ env('DEFAULT_USER_PASSWORD', 'jackeline123') }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Rol del Usuario</label>

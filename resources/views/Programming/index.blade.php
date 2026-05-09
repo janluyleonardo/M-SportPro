@@ -12,7 +12,7 @@
     </div>
   </x-slot>
 
-  <div class="py-8" x-data="calendarApp()">
+  <div class="py-8" x-data="calendarApp(@js($tournaments))">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
       
       <!-- Top Action Bar -->
@@ -182,6 +182,13 @@
                                                 <button @click="openShow(item)" title="Ver Detalles" class="p-2 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors focus:outline-none">
                                                     <i class="bi bi-eye text-lg"></i>
                                                 </button>
+
+                                                <a :href="'https://wa.me/?text=' + encodeURIComponent('⚽ *PROGRAMACIÓN JACKELINE FS*\n\n🏆 *Torneo:* ' + item.torneo + '\n📅 *Fecha:* ' + item.fecha + '\n⏰ *Hora:* ' + item.hora + '\n🏟️ *Cancha:* ' + item.cancha + '\n⚔️ *Partido:* ' + item.eLocal + ' VS ' + item.eVisitante + '\n\n💰 *Inscripción:* $' + (item.costo_inscripcion || 0) + '\n⚖️ *Arbitraje:* $' + (item.costo_arbitraje || 0) + '\n\n¡Vamos con toda! 🔥')" 
+                                                   target="_blank" 
+                                                   title="Compartir por WhatsApp" 
+                                                   class="p-2 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors focus:outline-none">
+                                                    <i class="bi bi-whatsapp text-lg"></i>
+                                                </a>
                                                 
                                                 @hasanyrole('Admin|Profesor')
                                                     <button @click="openEdit(item)" title="Editar" class="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors focus:outline-none">
@@ -189,6 +196,12 @@
                                                     </button>
                                                 @endhasanyrole
 
+                                                @hasanyrole('Admin|Profesor')
+                                                    <button @click="openPayments(item)" title="Control de Pagos" class="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors focus:outline-none">
+                                                        <i class="bi bi-cash-coin text-lg"></i>
+                                                    </button>
+                                                @endhasanyrole
+                                                
                                                 @hasrole('Admin')
                                                     <button @click="openDelete(item)" title="Eliminar" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors focus:outline-none">
                                                         <i class="bi bi-trash text-lg"></i>
@@ -259,7 +272,7 @@
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div x-show="openCreateModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-100">
           
-          <form action="{{ route('programming.store') }}" method="post" class="requires-validation" novalidate>
+          <form action="{{ route('programming.store') }}" method="post" class="requires-validation" novalidate @submit="submitting = true">
             @csrf
             <div class="bg-white px-4 pt-5 pb-4 sm:p-8">
               <div class="flex justify-between items-center mb-6">
@@ -270,9 +283,19 @@
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Torneo <span class="text-red-500">*</span></label>
-                  <input type="text" name="torneo" placeholder="Ej: Liga Betplay Futsal" value="{{ old('torneo') }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                <div class="md:col-span-1">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Seleccionar Torneo (Opcional)</label>
+                  <select name="tournament_id" x-model="selectedTournamentId" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                    <option value="">-- No asociado --</option>
+                    @foreach($tournaments as $tour)
+                      <option value="{{ $tour->id }}">{{ $tour->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+
+                <div class="md:col-span-1">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Evento <span class="text-red-500">*</span></label>
+                  <input type="text" name="torneo" placeholder="Ej: Amistoso / Fecha 1" value="{{ old('torneo') }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
                 </div>
                 
                 <div>
@@ -310,55 +333,52 @@
                   <input type="text" name="eVisitante" placeholder="Rival" value="{{ old('eVisitante') }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
                 </div>
 
-                <!-- Lista de jugadores convocados (Transfer List) -->
-                <div class="lg:col-span-3" x-data="{
-                    searchLeft: '',
-                    searchRight: '',
-                    available: [
-                        @foreach($studentList ?? [] as $student)
-                            { id: {{ $student->id }}, name: '{{ addslashes($student->nomDeportista) }}', category: '{{ $student->Categoria }}' },
-                        @endforeach
-                    ],
-                    selected: [],
+                  <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 col-span-1 md:col-span-2 lg:col-span-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-bold text-indigo-900 mb-1"><i class="bi bi-cash-stack mr-1"></i> Inscripción ($ por deportista)</label>
+                        <input type="number" name="costo_inscripcion" placeholder="0.00" value="{{ old('costo_inscripcion', 0) }}" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                      </div>
+                      <div>
+                        <label class="block text-sm font-bold text-indigo-900 mb-1"><i class="bi bi-person-badge-fill mr-1"></i> Arbitraje ($ por deportista)</label>
+                        <input type="number" name="costo_arbitraje" placeholder="0.00" value="{{ old('costo_arbitraje', 0) }}" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                      </div>
+                    </div>
                     
-                    get filteredAvailable() {
-                        let filtered = this.available;
-                        if (this.searchLeft !== '') {
-                            filtered = this.available.filter(p => p.name.toLowerCase().includes(this.searchLeft.toLowerCase()) || p.category.toString().includes(this.searchLeft));
-                        }
-                        return filtered.slice(0, 5);
-                    },
-                    get filteredSelected() {
-                        if (this.searchRight === '') return this.selected;
-                        return this.selected.filter(p => p.name.toLowerCase().includes(this.searchRight.toLowerCase()) || p.category.toString().includes(this.searchRight));
-                    },
-                    
-                    moveToSelected(player) {
-                        this.selected.push(player);
-                        this.available = this.available.filter(p => p.id !== player.id);
-                    },
-                    moveToAvailable(player) {
-                        this.available.push(player);
-                        this.selected = this.selected.filter(p => p.id !== player.id);
-                    },
-                    moveAllToSelected() {
-                        this.selected = [...this.selected, ...this.filteredAvailable];
-                        let filteredIds = this.filteredAvailable.map(p => p.id);
-                        this.available = this.available.filter(p => !filteredIds.includes(p.id));
-                    },
-                    moveAllToAvailable() {
-                        this.available = [...this.available, ...this.filteredSelected];
-                        let filteredIds = this.filteredSelected.map(p => p.id);
-                        this.selected = this.selected.filter(p => !filteredIds.includes(p.id));
-                    }
-                }">
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Seleccionar Jugadores Convocados <span class="text-red-500">*</span></label>
-                  
-                  <template x-for="player in selected" :key="player.id">
-                      <input type="hidden" name="jugadores_convocados[]" :value="player.name">
-                  </template>
+                    <template x-if="selected.length > 0 && selectedTournament">
+                      <div class="mt-3 p-2 bg-white/60 rounded-lg border border-indigo-100 text-[10px] font-bold text-indigo-700 flex justify-between items-center animate-pulse">
+                        <span><i class="bi bi-calculator mr-1"></i> Sugerido según Torneo (<span x-text="selected.length"></span> jugadores):</span>
+                        <div class="flex gap-4">
+                          <span x-show="selectedTournament.costo_total_inscripcion > 0">Inscrip: $<span x-text="Math.round(selectedTournament.costo_total_inscripcion / selected.length)"></span></span>
+                          <span x-show="selectedTournament.costo_total_arbitraje > 0">Arbitr: $<span x-text="Math.round(selectedTournament.costo_total_arbitraje / selected.length)"></span></span>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
 
-                  <div class="flex flex-col md:flex-row gap-4 items-stretch">
+                <!-- Lista de jugadores convocados (Transfer List) -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-3 w-full" x-init="available = [...allStudents]">
+                  <div x-show="selectedTournament" class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mb-4 flex items-start space-x-4 shadow-sm">
+                      <div class="bg-indigo-100 p-3 rounded-xl">
+                          <i class="bi bi-people-fill text-indigo-600 text-2xl"></i>
+                      </div>
+                      <div>
+                          <h5 class="text-indigo-900 font-black text-sm uppercase tracking-wider mb-1">Planilla Automática Activada</h5>
+                          <p class="text-indigo-700 text-sm leading-relaxed">
+                              Este partido está vinculado al torneo <strong x-text="selectedTournament ? selectedTournament.name : ''"></strong>. 
+                              El sistema usará automáticamente los <strong x-text="selectedTournament ? selectedTournament.students.length : 0"></strong> deportistas que asociaste a este torneo en la planilla oficial.
+                          </p>
+                      </div>
+                  </div>
+
+                  <div x-show="!selectedTournament">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Seleccionar Jugadores Convocados <span class="text-red-500">*</span></label>
+                    
+                    <template x-for="player in selected" :key="player.id">
+                        <input type="hidden" name="jugadores_convocados[]" :value="player.id">
+                    </template>
+
+                  <div class="w-full flex flex-col md:flex-row gap-4 items-stretch">
                       <!-- Available -->
                       <div class="flex-1 flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
                           <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
@@ -414,15 +434,25 @@
                               </div>
                           </div>
                       </div>
+                    </div>
+                    <input type="checkbox" x-show="!selectedTournament" :checked="selected.length > 0" :required="!selectedTournament" class="opacity-0 absolute -z-10" oninvalid="this.setCustomValidity('Debes convocar al menos un jugador')" oninput="this.setCustomValidity('')">
                   </div>
-                  <input type="checkbox" :checked="selected.length > 0" required class="opacity-0 absolute -z-10" oninvalid="this.setCustomValidity('Debes convocar al menos un jugador')" oninput="this.setCustomValidity('')">
                 </div>
               </div>
             </div>
             
             <div class="bg-gray-50 px-4 py-4 sm:px-8 sm:flex sm:flex-row-reverse rounded-b-2xl border-t border-gray-100">
-              <button type="submit" class="w-full inline-flex justify-center items-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-indigo-600 text-base font-bold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm transition-all transform hover:scale-105">
-                <i class="bi bi-save mr-2"></i> Guardar Programación
+              <button type="submit" :disabled="submitting" class="w-full inline-flex justify-center items-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-indigo-600 text-base font-bold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                <template x-if="!submitting">
+                  <i class="bi bi-save mr-2"></i>
+                </template>
+                <template x-if="submitting">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </template>
+                <span x-text="submitting ? 'Guardando...' : 'Guardar Programación'"></span>
               </button>
               <button type="button" @click="openCreateModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
                 Cancelar
@@ -441,7 +471,7 @@
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
         <div x-show="openEditModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100">
           
-          <form :action="'{{ route('programming.update', 999999) }}'.replace('999999', editingItem.id)" method="post" class="requires-validation">
+          <form :action="'{{ route('programming.update', 999999) }}'.replace('999999', editingItem.id)" method="post" class="requires-validation" @submit="submitting = true">
             @method('put')
             @csrf
             <div class="bg-white px-4 pt-5 pb-4 sm:p-8">
@@ -452,8 +482,17 @@
                 </button>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Torneo</label>
+                <div class="md:col-span-1">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Torneo Asociado</label>
+                  <select name="tournament_id" x-model="selectedTournamentIdEdit" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                    <option value="">-- No asociado --</option>
+                    @foreach($tournaments as $tour)
+                      <option value="{{ $tour->id }}">{{ $tour->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="md:col-span-1">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Evento</label>
                   <input type="text" name="torneo" :value="editingItem.torneo" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                 </div>
                 <div>
@@ -476,77 +515,121 @@
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Hora</label>
                   <input type="time" name="hora" :value="editingItem.hora" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                 </div>
+
+                <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 md:col-span-2">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-bold text-indigo-900 mb-1">Inscrip. (Indiv.)</label>
+                      <input type="number" name="costo_inscripcion" :value="editingItem.costo_inscripcion" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-bold text-indigo-900 mb-1">Arbitr. (Indiv.)</label>
+                      <input type="number" name="costo_arbitraje" :value="editingItem.costo_arbitraje" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                    </div>
+                  </div>
+
+                  <template x-if="editSelected.length > 0 && selectedTournamentEdit">
+                    <div class="mt-3 p-2 bg-white/60 rounded-lg border border-indigo-100 text-[10px] font-bold text-indigo-700 flex justify-between items-center animate-pulse">
+                      <span><i class="bi bi-calculator mr-1"></i> Sugerido según Torneo (<span x-text="editSelected.length"></span> jugadores):</span>
+                      <div class="flex gap-4">
+                        <span x-show="selectedTournamentEdit.costo_total_inscripcion > 0">Inscrip: $<span x-text="Math.round(selectedTournamentEdit.costo_total_inscripcion / editSelected.length)"></span></span>
+                        <span x-show="selectedTournamentEdit.costo_total_arbitraje > 0">Arbitr: $<span x-text="Math.round(selectedTournamentEdit.costo_total_arbitraje / editSelected.length)"></span></span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
                 
                 <!-- Edit Transfer List -->
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Editar Jugadores Convocados</label>
-                  
-                  <template x-for="player in editSelected" :key="player.id">
-                      <input type="hidden" name="jugadores_convocados[]" :value="player.name">
-                  </template>
-
-                  <div class="flex flex-col md:flex-row gap-4 items-stretch">
-                      <!-- Available -->
-                      <div class="flex-1 flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
-                          <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                              <span class="font-bold text-sm text-gray-700">Disponibles <span class="font-normal text-xs text-gray-500">(<span x-text="editFilteredAvailable.length"></span> de <span x-text="editAvailable.length"></span>)</span></span>
-                              <button type="button" @click="editMoveAllToSelected" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">Convocar Visibles <i class="bi bi-chevron-double-right"></i></button>
-                          </div>
-                          <div class="p-2 border-b border-gray-100 bg-gray-50/50">
-                              <div class="relative">
-                                  <i class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
-                                  <input type="text" x-model="editSearchLeft" placeholder="Buscar..." class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border-gray-300 focus:ring-indigo-500">
-                              </div>
-                          </div>
-                          <div class="flex-1 overflow-y-auto h-auto min-h-[12rem] p-2 space-y-1 bg-gray-50/30">
-                              <template x-for="player in editFilteredAvailable" :key="player.id">
-                                  <div @click="editMoveToSelected(player)" class="flex justify-between items-center p-2 rounded-lg hover:bg-indigo-50 cursor-pointer border border-transparent hover:border-indigo-100 transition-colors group">
-                                      <div><div class="text-sm font-medium text-gray-800 group-hover:text-indigo-700" x-text="player.name"></div></div>
-                                      <div class="flex items-center space-x-2">
-                                          <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gray-200 text-gray-600" x-text="player.category"></span>
-                                          <i class="bi bi-arrow-right-short text-gray-300 group-hover:text-indigo-500 text-lg"></i>
-                                      </div>
-                                  </div>
-                              </template>
-                              <div x-show="editFilteredAvailable.length === 0" class="text-center py-4 text-sm text-gray-400 italic">No hay jugadores</div>
-                          </div>
+                <div class="col-span-1 md:col-span-2 lg:col-span-3 w-full">
+                  <div x-show="selectedTournamentEdit" class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mb-4 flex items-start space-x-4 shadow-sm" style="display: none;">
+                      <div class="bg-indigo-100 p-3 rounded-xl">
+                          <i class="bi bi-people-fill text-indigo-600 text-2xl"></i>
                       </div>
-
-                      <!-- Selected -->
-                      <div class="flex-1 flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
-                          <div class="bg-indigo-50 px-4 py-3 border-b border-indigo-100 flex justify-between items-center">
-                              <span class="font-bold text-sm text-indigo-900">Convocados (<span x-text="editSelected.length"></span>)</span>
-                              <button type="button" @click="editMoveAllToAvailable" class="text-xs text-red-600 hover:text-red-800 font-semibold"><i class="bi bi-chevron-double-left"></i> Quitar Todos</button>
-                          </div>
-                          <div class="p-2 border-b border-indigo-50 bg-indigo-50/30">
-                              <div class="relative">
-                                  <i class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
-                                  <input type="text" x-model="editSearchRight" placeholder="Buscar..." class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border-gray-300 focus:ring-indigo-500">
-                              </div>
-                          </div>
-                          <div class="flex-1 overflow-y-auto h-auto min-h-[12rem] p-2 space-y-1 bg-white">
-                              <template x-for="player in editFilteredSelected" :key="player.id">
-                                  <div @click="editMoveToAvailable(player)" class="flex justify-between items-center p-2 rounded-lg bg-green-50 hover:bg-red-50 cursor-pointer border border-green-100 hover:border-red-100 transition-colors group">
-                                      <div class="flex items-center space-x-2">
-                                          <i class="bi bi-arrow-left-short text-transparent group-hover:text-red-500 text-lg"></i>
-                                          <div class="text-sm font-bold text-green-800 group-hover:text-red-700" x-text="player.name"></div>
-                                      </div>
-                                      <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-green-200 text-green-800" x-text="player.category"></span>
-                                  </div>
-                              </template>
-                              <div x-show="editSelected.length === 0" class="flex flex-col items-center justify-center h-full text-center p-4">
-                                  <p class="text-sm text-gray-400">Haz clic en un jugador para convocarlo.</p>
-                              </div>
-                          </div>
+                      <div>
+                          <h5 class="text-indigo-900 font-black text-sm uppercase tracking-wider mb-1">Planilla Automática Activada</h5>
+                          <p class="text-indigo-700 text-sm leading-relaxed">
+                              Este partido está vinculado al torneo <strong x-text="selectedTournamentEdit ? selectedTournamentEdit.name : ''"></strong>. 
+                              El sistema mantendrá sincronizados a los <strong x-text="selectedTournamentEdit ? (selectedTournamentEdit.students ? selectedTournamentEdit.students.length : 0) : 0"></strong> deportistas de la planilla oficial del torneo.
+                          </p>
                       </div>
+                  </div>
+
+                  <div x-show="!selectedTournamentEdit">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Editar Jugadores Convocados</label>
+                    
+                    <template x-for="player in editSelected" :key="player.id">
+                        <input type="hidden" name="jugadores_convocados[]" :value="player.id">
+                    </template>
+
+                    <div class="flex flex-col md:flex-row gap-4 items-stretch">
+                        <!-- Available -->
+                        <div class="flex-1 flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                                <span class="font-bold text-sm text-gray-700">Disponibles <span class="font-normal text-xs text-gray-500">(<span x-text="editFilteredAvailable.length"></span> de <span x-text="editAvailable.length"></span>)</span></span>
+                                <button type="button" @click="editMoveAllToSelected" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">Convocar Visibles <i class="bi bi-chevron-double-right"></i></button>
+                            </div>
+                            <div class="p-2 border-b border-gray-100 bg-gray-50/50">
+                                <div class="relative">
+                                    <i class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                                    <input type="text" x-model="editSearchLeft" placeholder="Buscar..." class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border-gray-300 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                            <div class="flex-1 overflow-y-auto h-auto min-h-[12rem] p-2 space-y-1 bg-gray-50/30">
+                                <template x-for="player in editFilteredAvailable" :key="player.id">
+                                    <div @click="editMoveToSelected(player)" class="flex justify-between items-center p-2 rounded-lg hover:bg-indigo-50 cursor-pointer border border-transparent hover:border-indigo-100 transition-colors group">
+                                        <div><div class="text-sm font-medium text-gray-800 group-hover:text-indigo-700" x-text="player.name"></div></div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gray-200 text-gray-600" x-text="player.category"></span>
+                                            <i class="bi bi-arrow-right-short text-gray-300 group-hover:text-indigo-500 text-lg"></i>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div x-show="editFilteredAvailable.length === 0" class="text-center py-4 text-sm text-gray-400 italic">No hay jugadores</div>
+                            </div>
+                        </div>
+
+                        <!-- Selected -->
+                        <div class="flex-1 flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                            <div class="bg-indigo-50 px-4 py-3 border-b border-indigo-100 flex justify-between items-center">
+                                <span class="font-bold text-sm text-indigo-900">Convocados (<span x-text="editSelected.length"></span>)</span>
+                                <button type="button" @click="editMoveAllToAvailable" class="text-xs text-red-600 hover:text-red-800 font-semibold"><i class="bi bi-chevron-double-left"></i> Quitar Todos</button>
+                            </div>
+                            <div class="p-2 border-b border-indigo-50 bg-indigo-50/30">
+                                <div class="relative">
+                                    <i class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                                    <input type="text" x-model="editSearchRight" placeholder="Buscar..." class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border-gray-300 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                            <div class="flex-1 overflow-y-auto h-auto min-h-[12rem] p-2 space-y-1 bg-white">
+                                <template x-for="player in editFilteredSelected" :key="player.id">
+                                    <div @click="editMoveToAvailable(player)" class="flex justify-between items-center p-2 rounded-lg bg-green-50 hover:bg-red-50 cursor-pointer border border-green-100 hover:border-red-100 transition-colors group">
+                                        <div class="flex items-center space-x-2">
+                                            <i class="bi bi-arrow-left-short text-transparent group-hover:text-red-500 text-lg"></i>
+                                            <div class="text-sm font-bold text-green-800 group-hover:text-red-700" x-text="player.name"></div>
+                                        </div>
+                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-green-200 text-green-800" x-text="player.category"></span>
+                                    </div>
+                                </template>
+                                <div x-show="editSelected.length === 0" class="flex flex-col items-center justify-center h-full text-center p-4">
+                                    <p class="text-sm text-gray-400">Haz clic en un jugador para convocarlo.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                   </div>
                 </div>
 
               </div>
             </div>
             <div class="bg-gray-50 px-4 py-4 sm:px-8 sm:flex sm:flex-row-reverse rounded-b-2xl border-t border-gray-100">
-              <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-amber-500 text-base font-medium text-white hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                Guardar Cambios
+              <button type="submit" :disabled="submitting" class="w-full inline-flex justify-center items-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-amber-500 text-base font-medium text-white hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <template x-if="submitting">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </template>
+                <span x-text="submitting ? 'Actualizando...' : 'Guardar Cambios'"></span>
               </button>
               <button type="button" @click="openEditModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
                 Cancelar
@@ -579,11 +662,17 @@
             </div>
           </div>
           <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse rounded-b-2xl border-t border-gray-100">
-            <form :action="'{{ route('programming.destroy', 999999) }}'.replace('999999', deletingItem.id)" method="post" class="m-0">
+            <form :action="'{{ route('programming.destroy', 999999) }}'.replace('999999', deletingItem.id)" method="post" class="m-0" @submit="submitting = true">
               @csrf
               @method('delete')
-              <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                Sí, Eliminar
+              <button type="submit" :disabled="submitting" class="w-full inline-flex justify-center items-center rounded-xl border border-transparent shadow-sm px-6 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <template x-if="submitting">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </template>
+                <span x-text="submitting ? 'Eliminando...' : 'Sí, Eliminar'"></span>
               </button>
             </form>
             <button type="button" @click="openDeleteModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
@@ -611,9 +700,9 @@
           </div>
 
           <div class="bg-white px-6 py-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
                   <!-- Detalles -->
-                  <div class="space-y-4">
+                  <div class="md:col-span-5 space-y-4">
                       <div>
                           <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Torneo</p>
                           <p class="text-lg font-bold text-gray-900" x-text="showingItem.torneo"></p>
@@ -649,19 +738,24 @@
                   </div>
 
                   <!-- Convocados -->
-                  <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                      <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3">Jugadores Convocados (<span x-text="showingPlayers.length"></span>)</p>
-                      <ul class="space-y-2 max-h-64 overflow-y-auto pr-2">
+                  <div class="md:col-span-7 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                      <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-4 flex items-center">
+                        <i class="bi bi-people-fill mr-2 text-indigo-500"></i> Jugadores Convocados (<span x-text="showingPlayers.length"></span>)
+                      </p>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
                           <template x-for="(player, index) in showingPlayers" :key="index">
-                              <li class="flex items-center text-sm font-semibold text-gray-800 bg-white px-3 py-2 rounded shadow-sm border border-gray-100">
-                                  <i class="bi bi-person-check-fill text-green-500 mr-2"></i>
-                                  <span x-text="player"></span>
-                              </li>
+                              <div class="flex items-center text-xs font-bold text-gray-700 bg-white px-3 py-2.5 rounded-xl shadow-sm border border-gray-100 hover:border-indigo-200 transition-colors">
+                                  <div class="w-2 h-2 rounded-full bg-green-400 mr-3 animate-pulse"></div>
+                                  <span x-text="player" class="truncate"></span>
+                              </div>
                           </template>
                           <template x-if="showingPlayers.length === 0">
-                              <li class="text-sm text-gray-500 italic text-center py-4">No hay jugadores convocados</li>
+                              <div class="col-span-full text-sm text-gray-400 italic text-center py-8">
+                                <i class="bi bi-person-x text-2xl block mb-2 opacity-20"></i>
+                                No hay jugadores convocados
+                              </div>
                           </template>
-                      </ul>
+                      </div>
                   </div>
               </div>
           </div>
@@ -674,11 +768,80 @@
       </div>
     </div>
 
+    <!-- PAYMENTS MODAL -->
+    <div x-show="openPaymentsModal" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div x-show="openPaymentsModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="openPaymentsModal = false"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        <div x-show="openPaymentsModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100">
+          
+          <div class="bg-green-600 px-6 py-4 flex justify-between items-center">
+              <h3 class="text-xl font-bold text-white flex items-center">
+                  <i class="bi bi-cash-coin mr-2"></i> Control de Pagos - <span x-text="paymentItem.torneo" class="ml-1"></span>
+              </h3>
+              <button @click="openPaymentsModal = false" class="text-green-200 hover:text-white transition-colors">
+                  <i class="bi bi-x-circle-fill text-2xl"></i>
+              </button>
+          </div>
+
+          <div class="bg-white px-6 py-6">
+              <div class="mb-4 flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <div>
+                      <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Inscrip. (Indiv.)</p>
+                      <p class="text-lg font-black text-gray-900" x-text="'$' + (paymentItem.costo_inscripcion || 0)"></p>
+                  </div>
+                  <div class="text-right">
+                      <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Arbitr. (Indiv.)</p>
+                      <p class="text-lg font-black text-gray-900" x-text="'$' + (paymentItem.costo_arbitraje || 0)"></p>
+                  </div>
+              </div>
+
+              <div class="overflow-hidden border border-gray-100 rounded-xl">
+                  <table class="min-w-full divide-y divide-gray-200">
+                      <thead class="bg-gray-50">
+                          <tr>
+                              <th class="px-4 py-3 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Deportista</th>
+                              <th class="px-4 py-3 text-center text-[10px] font-black text-gray-500 uppercase tracking-widest">Inscrip.</th>
+                              <th class="px-4 py-3 text-center text-[10px] font-black text-gray-500 uppercase tracking-widest">Arbitr.</th>
+                          </tr>
+                      </thead>
+                      <tbody class="bg-white divide-y divide-gray-100">
+                          <template x-for="p in paymentList" :key="p.student_id">
+                              <tr class="hover:bg-gray-50 transition-colors">
+                                  <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-700" x-text="p.name"></td>
+                                  <td class="px-4 py-3 whitespace-nowrap text-center">
+                                      <input type="checkbox" x-model="p.pagado_inscripcion" class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500 h-5 w-5 transition-all">
+                                  </td>
+                                  <td class="px-4 py-3 whitespace-nowrap text-center">
+                                      <input type="checkbox" x-model="p.pagado_arbitraje" class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500 h-5 w-5 transition-all">
+                                  </td>
+                              </tr>
+                          </template>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-2xl border-t border-gray-100">
+            <span class="text-[10px] text-gray-400 font-bold italic">* Los cambios se guardan al presionar Guardar</span>
+            <div class="flex space-x-3">
+                <button type="button" @click="openPaymentsModal = false" class="inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none transition-colors">
+                  Cancelar
+                </button>
+                <button type="button" @click="savePayments" class="inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2 bg-green-600 text-base font-bold text-white hover:bg-green-700 focus:outline-none transition-all transform hover:scale-105">
+                  <i class="bi bi-save mr-2"></i> Guardar Pagos
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    function calendarApp() {
+    function calendarApp(tournaments = []) {
         return {
+            tournaments: tournaments,
             month: new Date().getMonth(),
             year: new Date().getFullYear(),
             monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
@@ -686,6 +849,7 @@
             selectedDate: null,
             selectedEvents: [],
             printing: false,
+            submitting: false,
             
             allStudents: [
                 @foreach($studentList ?? [] as $student)
@@ -697,15 +861,37 @@
             openEditModal: false,
             openDeleteModal: false,
             openShowModal: false,
+            openPaymentsModal: false,
             editingItem: {},
             deletingItem: {},
             showingItem: {},
+            paymentItem: {},
+            paymentList: [],
             showingPlayers: [],
             
+            // Create Modal Transfer List
+            selectedTournamentId: '',
+            available: [],
+            selected: [],
+            searchLeft: '',
+            searchRight: '',
+
+            // Edit Modal Transfer List
+            selectedTournamentIdEdit: '',
             editSearchLeft: '',
             editSearchRight: '',
             editAvailable: [],
             editSelected: [],
+
+            get selectedTournament() {
+                if (!this.selectedTournamentId) return null;
+                return this.tournaments.find(t => t.id == this.selectedTournamentId);
+            },
+
+            get selectedTournamentEdit() {
+                if (!this.selectedTournamentIdEdit) return null;
+                return this.tournaments.find(t => t.id == this.selectedTournamentIdEdit);
+            },
 
             get daysInMonth() {
                 return new Date(this.year, this.month + 1, 0).getDate();
@@ -809,17 +995,24 @@
             // Show Modal Logic
             openShow(item) {
                 this.showingItem = item;
-                this.showingPlayers = this.parseConvocados(item.jugadores_convocados);
+                let convocadosArray = this.parseConvocados(item.jugadores_convocados);
+                // Si son IDs, buscar nombres. Si son nombres (viejos), dejarlos.
+                this.showingPlayers = convocadosArray.map(p => {
+                    let student = this.allStudents.find(s => s.id == p);
+                    return student ? student.name : p;
+                });
                 this.openShowModal = true;
             },
             
             // Edit Modal Logic
             openEdit(item) {
                 this.editingItem = item;
+                this.selectedTournamentIdEdit = item.tournament_id || '';
                 
                 let convocadosArray = this.parseConvocados(item.jugadores_convocados);
-                this.editSelected = this.allStudents.filter(s => convocadosArray.includes(s.name));
-                this.editAvailable = this.allStudents.filter(s => !convocadosArray.includes(s.name));
+                // Intentar filtrar por ID primero, luego por nombre para retrocompatibilidad
+                this.editSelected = this.allStudents.filter(s => convocadosArray.includes(s.id.toString()) || convocadosArray.includes(s.name));
+                this.editAvailable = this.allStudents.filter(s => !convocadosArray.includes(s.id.toString()) && !convocadosArray.includes(s.name));
                 
                 this.editSearchLeft = '';
                 this.editSearchRight = '';
@@ -827,10 +1020,17 @@
             },
             get editFilteredAvailable() {
                 let filtered = this.editAvailable;
-                if (this.editSearchLeft !== '') {
-                    filtered = this.editAvailable.filter(p => p.name.toLowerCase().includes(this.editSearchLeft.toLowerCase()) || p.category.toString().includes(this.editSearchLeft));
+                
+                // Filter by tournament if selected
+                if (this.selectedTournamentEdit) {
+                    const studentIds = this.selectedTournamentEdit.students.map(s => s.id);
+                    filtered = filtered.filter(p => studentIds.includes(p.id));
                 }
-                return filtered.slice(0, 5);
+
+                if (this.editSearchLeft !== '') {
+                    filtered = filtered.filter(p => p.name.toLowerCase().includes(this.editSearchLeft.toLowerCase()) || p.category.toString().includes(this.editSearchLeft));
+                }
+                return filtered.slice(0, 50);
             },
             get editFilteredSelected() {
                 if (this.editSearchRight === '') return this.editSelected;
@@ -854,10 +1054,80 @@
                 let filteredIds = this.editFilteredSelected.map(p => p.id);
                 this.editSelected = this.editSelected.filter(p => !filteredIds.includes(p.id));
             },
+
+            // Create Helpers
+            get filteredAvailable() {
+                let filtered = this.available;
+
+                // Filter by tournament if selected
+                if (this.selectedTournament) {
+                    const studentIds = this.selectedTournament.students.map(s => s.id);
+                    filtered = filtered.filter(p => studentIds.includes(p.id));
+                }
+
+                if (this.searchLeft !== '') {
+                    filtered = filtered.filter(p => p.name.toLowerCase().includes(this.searchLeft.toLowerCase()) || p.category.toString().includes(this.searchLeft));
+                }
+                return filtered.slice(0, 50);
+            },
+            get filteredSelected() {
+                if (this.searchRight === '') return this.selected;
+                return this.selected.filter(p => p.name.toLowerCase().includes(this.searchRight.toLowerCase()) || p.category.toString().includes(this.searchRight));
+            },
+            moveToSelected(player) {
+                this.selected.push(player);
+                this.available = this.available.filter(p => p.id !== player.id);
+            },
+            moveToAvailable(player) {
+                this.available.push(player);
+                this.selected = this.selected.filter(p => p.id !== player.id);
+            },
+            moveAllToSelected() {
+                this.selected = [...this.selected, ...this.filteredAvailable];
+                let filteredIds = this.filteredAvailable.map(p => p.id);
+                this.available = this.available.filter(p => !filteredIds.includes(p.id));
+            },
+            moveAllToAvailable() {
+                this.available = [...this.available, ...this.filteredSelected];
+                let filteredIds = this.filteredSelected.map(p => p.id);
+                this.selected = this.selected.filter(p => !filteredIds.includes(p.id));
+            },
             
             openDelete(item) {
                 this.deletingItem = item;
                 this.openDeleteModal = true;
+            },
+            // Payments Logic
+            async openPayments(item) {
+                this.paymentItem = item;
+                this.paymentList = [];
+                try {
+                    const response = await fetch(`/programming/${item.id}/payments`);
+                    this.paymentList = await response.json();
+                    this.openPaymentsModal = true;
+                } catch (e) {
+                    alert('Error al cargar los pagos: ' + e);
+                }
+            },
+            
+            async savePayments() {
+                try {
+                    const response = await fetch(`/programming/${this.paymentItem.id}/payments`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ payments: this.paymentList })
+                    });
+                    
+                    if (response.ok) {
+                        this.openPaymentsModal = false;
+                        showToast('Pagos actualizados correctamente', 'success');
+                    }
+                } catch (e) {
+                    alert('Error al guardar los pagos: ' + e);
+                }
             }
         }
     }

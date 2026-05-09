@@ -28,6 +28,7 @@
                         {{ __('Partidos') }}
                     </x-nav-link>
 
+
                     @role('Admin')
                     @endrole
 
@@ -82,6 +83,16 @@
                                             <i class="bi bi-clipboard2-check text-xs"></i>
                                         </span>
                                         {{ __('Asistencias') }}
+                                    </a>
+
+                                    <a href="{{ route('tournaments.index') }}"
+                                       class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
+                                              {{ request()->routeIs('tournaments.*') ? 'bg-blue-50 text-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
+                                        <span class="w-7 h-7 rounded-lg flex items-center justify-center mr-3
+                                                     {{ request()->routeIs('tournaments.*') ? 'bg-club-primary text-white' : 'bg-gray-100 text-gray-500' }}">
+                                            <i class="bi bi-flag text-xs"></i>
+                                        </span>
+                                        {{ __('Torneos') }}
                                     </a>
 
                                     @role('Admin')
@@ -252,6 +263,9 @@
                     {{ __('Partidos') }}
                 </a>
 
+                @hasanyrole('Admin|Profesor')
+                @endhasanyrole
+
                     @role('Admin')
                     @endrole
             </div>
@@ -272,6 +286,11 @@
                         <a href="{{ route('attendances.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('attendances.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                             <i class="bi bi-clipboard2-check mr-3 text-base {{ request()->routeIs('attendances.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                             {{ __('Asistencias') }}
+                        </a>
+
+                        <a href="{{ route('tournaments.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('tournaments.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
+                            <i class="bi bi-flag mr-3 text-base {{ request()->routeIs('tournaments.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
+                            {{ __('Torneos') }}
                         </a>
 
                         @role('Admin')

@@ -122,6 +122,11 @@
                 <strong>Categoría:</strong> {{ $match->categoriaUno }}{{ $match->categoriaDos ? ' / ' . $match->categoriaDos : '' }}
             </div>
 
+            <div style="font-size: 11px; margin-top: 5px; text-align: center; color: #4b5563;">
+                <span style="margin-right: 15px;"><strong>Inscripción:</strong> ${{ number_format($match->costo_inscripcion, 0) }}</span>
+                <span><strong>Arbitraje:</strong> ${{ number_format($match->costo_arbitraje, 0) }}</span>
+            </div>
+
             <div class="convocados-list">
                 <span class="convocados-title">Jugadores Convocados:</span>
                 @php

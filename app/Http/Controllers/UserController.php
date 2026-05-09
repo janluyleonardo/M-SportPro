@@ -44,6 +44,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'documento_deportista' => $request->documento_deportista,
+            'must_change_password' => true,
         ]);
 
         $user->assignRole($validated['role']);

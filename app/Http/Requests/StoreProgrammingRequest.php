@@ -23,6 +23,9 @@ class StoreProgrammingRequest extends FormRequest
             'hora' => 'required',
             'fecha' => 'required|date',
             'jugadores_convocados' => 'nullable|array',
+            'costo_inscripcion' => 'nullable|numeric|min:0',
+            'costo_arbitraje' => 'nullable|numeric|min:0',
+            'tournament_id' => 'nullable|exists:tournaments,id',
         ];
     }
 }

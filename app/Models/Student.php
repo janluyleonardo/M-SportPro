@@ -65,6 +65,11 @@ class Student extends Model
       return $this->hasMany(Attendance::class);
   }
 
+  public function tournaments()
+  {
+      return $this->belongsToMany(Tournament::class, 'student_tournament');
+  }
+
   /**
    * Calcula la deuda total acumulada del estudiante como una cuenta corriente.
    * Total de cargos requeridos - Total de abonos realizados.

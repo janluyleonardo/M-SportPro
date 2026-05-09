@@ -45,7 +45,12 @@ class ProgrammingController extends Controller
           return $items->toArray();
       })->toJson();
 
-      return view('Programming.index', compact('texto','programming','studentList', 'eventsByDate'));
+      // Get tournaments for selection with associated students
+      $tournaments = \App\Models\Tournament::with(['students' => function($q) {
+          $q->select('students.id');
+      }])->where('status', 'activo')->orderBy('name')->get();
+
+      return view('Programming.index', compact('texto','programming','studentList', 'eventsByDate', 'tournaments'));
     }
 
     /**
@@ -67,12 +72,19 @@ class ProgrammingController extends Controller
     public function store(StoreProgrammingRequest $request)
     {
       $validated = $request->validated();
-      
+      // Si hay un torneo seleccionado, cargar automáticamente a todos sus deportistas asociados
+      if (!empty($validated['tournament_id'])) {
+          $tournament = \App\Models\Tournament::with('students')->find($validated['tournament_id']);
+          if ($tournament) {
+              $validated['jugadores_convocados'] = $tournament->students->pluck('id')->toArray();
+          }
+      }
+
       // Manejar la conversión de array a string para la DB
-      if (isset($validated['jugadores_convocados'])) {
+      if (isset($validated['jugadores_convocados']) && is_array($validated['jugadores_convocados'])) {
           $validated['jugadores_convocados'] = implode(',', $validated['jugadores_convocados']);
       } else {
-          $validated['jugadores_convocados'] = '';
+          $validated['jugadores_convocados'] = $validated['jugadores_convocados'] ?? '';
       }
 
       try {
@@ -117,7 +129,15 @@ class ProgrammingController extends Controller
       $programming = programming::findOrFail($id);
       $validated = $request->validated();
 
-      if (isset($validated['jugadores_convocados'])) {
+      // Si hay un torneo seleccionado, cargar automáticamente a todos sus deportistas asociados
+      if (!empty($validated['tournament_id'])) {
+          $tournament = \App\Models\Tournament::with('students')->find($validated['tournament_id']);
+          if ($tournament) {
+              $validated['jugadores_convocados'] = $tournament->students->pluck('id')->toArray();
+          }
+      }
+
+      if (isset($validated['jugadores_convocados']) && is_array($validated['jugadores_convocados'])) {
           $validated['jugadores_convocados'] = implode(',', $validated['jugadores_convocados']);
       }
 
@@ -144,5 +164,44 @@ class ProgrammingController extends Controller
       } catch (\Throwable $th) {
         return redirect()->route('programming.index')->with('error', 'No se pudo eliminar registro porque => '.$th->getMessage());
       }
+    }
+
+    public function getPayments($id)
+    {
+        $programming = programming::findOrFail($id);
+        $ids = explode(',', $programming->jugadores_convocados);
+        
+        $students = Student::whereIn('id', $ids)->select('id', 'nomDeportista')->get();
+        $payments = \App\Models\ProgrammingPayment::where('programming_id', $id)->get()->keyBy('student_id');
+
+        $data = $students->map(function($student) use ($payments) {
+            $payment = $payments->get($student->id);
+            return [
+                'student_id' => $student->id,
+                'name' => $student->nomDeportista,
+                'pagado_inscripcion' => $payment ? (bool)$payment->pagado_inscripcion : false,
+                'pagado_arbitraje' => $payment ? (bool)$payment->pagado_arbitraje : false,
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    public function updatePayments(Request $request, $id)
+    {
+        $payments = $request->input('payments', []);
+
+        foreach ($payments as $p) {
+            \App\Models\ProgrammingPayment::updateOrCreate(
+                ['programming_id' => $id, 'student_id' => $p['student_id']],
+                [
+                    'pagado_inscripcion' => $p['pagado_inscripcion'] ?? false,
+                    'pagado_arbitraje' => $p['pagado_arbitraje'] ?? false,
+                    'fecha_pago' => ($p['pagado_inscripcion'] || $p['pagado_arbitraje']) ? now() : null,
+                ]
+            );
+        }
+
+        return response()->json(['success' => true]);
     }
 }

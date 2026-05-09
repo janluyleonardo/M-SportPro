@@ -12,16 +12,23 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TreasuryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PasswordChangeController;
+use App\Http\Controllers\TournamentController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // 1. Dashboard: Acceso para todos los roles definidos
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard')->middleware('role:Admin|Profesor|Padre|Deportista');
+    // Rutas de cambio de clave obligatoria (Fuera del middleware restrictivo para evitar bucles)
+    Route::get('/password/change', [PasswordChangeController::class, 'show'])->name('password.change');
+    Route::post('/password/change', [PasswordChangeController::class, 'update'])->name('password.update.mandatory');
+
+    Route::middleware(['must.change.password'])->group(function () {
+        // 1. Dashboard: Acceso para todos los roles definidos
+        Route::get('/dashboard', function () {
+            return view('dashboard');
+        })->name('dashboard')->middleware('role:Admin|Profesor|Padre|Deportista');
 
     // 2. Módulo de Estudiantes (Solo Admin y Profesor)
     Route::middleware(['role:Admin|Profesor'])->group(function () {
@@ -96,10 +103,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Lectura: Para todos
     Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|Profesor|Padre|Deportista');
 
-    // Escritura (Crear/Editar): Admin y Profesor
+        Route::middleware(['role:Admin|Profesor'])->group(function () {
+            Route::resource('programming', ProgrammingController::class)->except(['index', 'show', 'destroy']);
+            Route::get('/programming/imprimir/{date}', [ProgrammingController::class, 'imprimir'])->name('programming.imprimir');
+            Route::get('/programming/{id}/payments', [ProgrammingController::class, 'getPayments'])->name('programming.payments.get');
+            Route::post('/programming/{id}/payments', [ProgrammingController::class, 'updatePayments'])->name('programming.payments.update');
+        });
+
+    // 5. Módulo de Torneos
     Route::middleware(['role:Admin|Profesor'])->group(function () {
-        Route::resource('programming', ProgrammingController::class)->except(['index', 'show', 'destroy']);
-        Route::get('/programming/imprimir/{date}', [ProgrammingController::class, 'imprimir'])->name('programming.imprimir');
+        Route::resource('tournaments', TournamentController::class);
+        Route::get('/tournaments/{tournament}/payments', [TournamentController::class, 'payments'])->name('tournaments.payments');
     });
 
     // 4. Perfil
@@ -108,6 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/profile', 'update')->name('profile.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
+});
 });
 
 Route::get('/index', [generalController::class, 'index'])->name('index');

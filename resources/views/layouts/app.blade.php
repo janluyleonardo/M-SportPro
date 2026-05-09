@@ -110,6 +110,7 @@
                     add({ type: 'error', message: @js($errors->first()) });
                 @endif
             "
+            @toast-notify.window="add($event.detail)"
             class="fixed bottom-6 right-6 z-[9999] flex flex-col items-end space-y-3 pointer-events-none"
             style="min-width: 0;"
         >
@@ -272,6 +273,12 @@
             function confirmAction(form, title, message, type) {
                 window.dispatchEvent(new CustomEvent('confirm-action', {
                     detail: { form, title, message, type: type || 'danger' }
+                }));
+            }
+
+            function showToast(message, type = 'success') {
+                window.dispatchEvent(new CustomEvent('toast-notify', {
+                    detail: { type, message }
                 }));
             }
 
