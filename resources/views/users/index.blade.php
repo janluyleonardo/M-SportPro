@@ -12,7 +12,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12" x-data="{ openCreateModal: false }">
+    <div class="py-12" x-data="{ openCreateModal: false, roleSelected: 'Padre' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
             <!-- Barra de Herramientas (Búsqueda y Nuevo) -->
@@ -94,7 +94,8 @@
                                         <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">$</span>
                                         <input type="number" name="pay_per_session" value="{{ (int)$user->pay_per_session }}" 
                                                form="form-user-{{ $user->id }}"
-                                               class="text-[10px] font-bold rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 pl-5 pr-1 w-20 transition-all bg-gray-50">
+                                               {{ !$user->hasRole('Profesor') ? 'disabled' : '' }}
+                                               class="text-[10px] font-bold rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 pl-5 pr-1 w-20 transition-all {{ !$user->hasRole('Profesor') ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-transparent shadow-none' : 'bg-gray-50' }}">
                                     </div>
                                     </form>
                                 </td>
@@ -238,9 +239,9 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Rol del Usuario</label>
-                                        <select name="role" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                        <select name="role" x-model="roleSelected" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
                                             @foreach($roles as $role)
-                                                <option value="{{ $role->name }}" {{ $role->name == 'Padre' ? 'selected' : '' }}>
+                                                <option value="{{ $role->name }}">
                                                     {{ $role->name }}
                                                 </option>
                                             @endforeach
@@ -252,12 +253,12 @@
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Vínculo Deportista (N° Documento)</label>
                                         <input type="text" name="documento_deportista" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all" placeholder="Documento niño">
                                     </div>
-                                    <div class="col-span-1">
+                                    <div class="col-span-1" x-show="roleSelected == 'Profesor'">
                                         <label class="block text-sm font-semibold text-gray-700 mb-1">Pago por Sesión ($)</label>
                                         <input type="number" name="pay_per_session" value="0" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
                                     </div>
                                 </div>
-                                <p class="mt-1 text-[10px] text-gray-400 italic text-center">Define el pago por clase solo si el usuario es Profesor.</p>
+                                <p class="mt-1 text-[10px] text-gray-400 italic text-center" x-show="roleSelected == 'Profesor'">Define el pago por clase solo si el usuario es Profesor.</p>
                             </div>
                         </div>
                         

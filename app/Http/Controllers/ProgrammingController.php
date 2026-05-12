@@ -191,8 +191,8 @@ class ProgrammingController extends Controller
             return [
                 'student_id' => $student->id,
                 'name' => $student->nomDeportista,
-                'pagado_inscripcion' => $payment ? (bool)$payment->pagado_inscripcion : false,
-                'pagado_arbitraje' => $payment ? (bool)$payment->pagado_arbitraje : false,
+                'pagado_inscripcion' => $payment ? $payment->pagado_inscripcion : 0,
+                'pagado_arbitraje' => $payment ? $payment->pagado_arbitraje : 0,
             ];
         });
 
@@ -207,9 +207,9 @@ class ProgrammingController extends Controller
             \App\Models\ProgrammingPayment::updateOrCreate(
                 ['programming_id' => $id, 'student_id' => $p['student_id']],
                 [
-                    'pagado_inscripcion' => $p['pagado_inscripcion'] ?? false,
-                    'pagado_arbitraje' => $p['pagado_arbitraje'] ?? false,
-                    'fecha_pago' => ($p['pagado_inscripcion'] || $p['pagado_arbitraje']) ? now() : null,
+                    'pagado_inscripcion' => $p['pagado_inscripcion'] ?? 0,
+                    'pagado_arbitraje' => $p['pagado_arbitraje'] ?? 0,
+                    'fecha_pago' => ($p['pagado_inscripcion'] > 0 || $p['pagado_arbitraje'] > 0) ? now() : null,
                 ]
             );
         }

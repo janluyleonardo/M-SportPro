@@ -838,10 +838,22 @@
                               <tr class="hover:bg-gray-50 transition-colors">
                                   <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-700" x-text="p.name"></td>
                                   <td class="px-4 py-3 whitespace-nowrap text-center">
-                                      <input type="checkbox" x-model="p.pagado_inscripcion" class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500 h-5 w-5 transition-all">
+                                       <div class="flex items-center justify-center space-x-1">
+                                           <span class="text-[10px] text-gray-400">$</span>
+                                           <input type="number" x-model="p.pagado_inscripcion" class="w-20 text-xs font-bold rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 py-1 px-2 transition-all">
+                                           <button type="button" @click="p.pagado_inscripcion = suggestedInscripForPayment" title="Pagar todo" class="p-1 text-green-600 hover:bg-green-50 rounded transition-colors">
+                                               <i class="bi bi-check-all text-lg"></i>
+                                           </button>
+                                       </div>
                                   </td>
                                   <td class="px-4 py-3 whitespace-nowrap text-center">
-                                      <input type="checkbox" x-model="p.pagado_arbitraje" class="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500 h-5 w-5 transition-all">
+                                       <div class="flex items-center justify-center space-x-1">
+                                           <span class="text-[10px] text-gray-400">$</span>
+                                           <input type="number" x-model="p.pagado_arbitraje" class="w-20 text-xs font-bold rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500 py-1 px-2 transition-all">
+                                           <button type="button" @click="p.pagado_arbitraje = paymentItem.costo_arbitraje" title="Pagar todo" class="p-1 text-green-600 hover:bg-green-50 rounded transition-colors">
+                                               <i class="bi bi-check-all text-lg"></i>
+                                           </button>
+                                       </div>
                                   </td>
                               </tr>
                           </template>
@@ -935,6 +947,18 @@
                         this.eventNameEdit = this.selectedTournamentEdit.name;
                     }
                 });
+            },
+
+            get suggestedInscripForPayment() {
+                if (!this.paymentItem) return 0;
+                const tourId = this.paymentItem.tournament_id;
+                if (!tourId) return this.paymentItem.costo_inscripcion;
+                
+                const tour = this.tournaments.find(t => t.id == tourId);
+                if (!tour) return this.paymentItem.costo_inscripcion;
+                
+                const count = (tour.students && tour.students.length > 0) ? tour.students.length : 1;
+                return Math.round(tour.costo_total_inscripcion / count);
             },
 
             get hasConflict() {
