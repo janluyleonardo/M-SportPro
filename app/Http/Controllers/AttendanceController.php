@@ -20,7 +20,7 @@ class AttendanceController extends Controller
         // Los profesores solo ven sus clases de hoy
         // Los Admin ven todas las clases de hoy
         $query = ClassSchedule::with('teacher')
-            ->where('day_of_week', $today);
+            ->whereDate('date', now()->toDateString());
 
         if (Auth::user()->hasRole('Profesor')) {
             $query->where('user_id', Auth::id());
@@ -41,7 +41,7 @@ class AttendanceController extends Controller
         
         // Verificar si ya se tomó asistencia hoy para esta clase
         $existingAttendances = Attendance::where('class_schedule_id', $schedule->id)
-            ->where('date', now()->format('Y-m-d'))
+            ->where('date', $schedule->date)
             ->get()
             ->pluck('status', 'student_id');
 
@@ -51,10 +51,11 @@ class AttendanceController extends Controller
     public function store(StoreAttendanceRequest $request)
     {
         $validated = $request->validated();
+        $schedule = ClassSchedule::findOrFail($request->class_schedule_id);
 
-        $date = now()->format('Y-m-d');
-        $month = now()->month;
-        $year = now()->year;
+        $date = $schedule->date;
+        $month = \Carbon\Carbon::parse($date)->month;
+        $year = \Carbon\Carbon::parse($date)->year;
 
         foreach ($validated['students'] as $studentId => $status) {
             // 1. Verificar si ya existía un registro para este alumno hoy en esta clase

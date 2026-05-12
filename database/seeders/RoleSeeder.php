@@ -65,5 +65,12 @@ class RoleSeeder extends Seeder
             'view programming',
             'view students',
         ]);
+
+        // DEPORTISTA: Solo lectura de programación y dashboard
+        $roleDeportista = Role::firstOrCreate(['name' => 'Deportista']);
+        $roleDeportista->syncPermissions([
+            'view dashboard',
+            'view programming',
+        ]);
     }
 }

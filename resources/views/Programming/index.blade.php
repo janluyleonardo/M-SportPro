@@ -294,13 +294,13 @@
                 </div>
 
                 <div class="md:col-span-1">
-                  <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Evento <span class="text-red-500">*</span></label>
-                  <input type="text" name="torneo" placeholder="Ej: Amistoso / Fecha 1" value="{{ old('torneo') }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Descripción del Encuentro <span class="text-red-500">*</span></label>
+                  <input type="text" name="torneo" x-model="eventName" placeholder="Ej: Fecha 1 / Amistoso" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
                 </div>
                 
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Cancha <span class="text-red-500">*</span></label>
-                  <input type="text" name="cancha" placeholder="Lugar del partido" value="{{ old('cancha') }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                  <input type="text" name="cancha" x-model="selectedCourt" placeholder="Lugar del partido" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
                 </div>
                 
                 <div>
@@ -315,17 +315,20 @@
 
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha <span class="text-red-500">*</span></label>
-                  <input type="date" name="fecha" min="{{now()->format('Y-m-d')}}" value="{{ old('fecha') }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                  <input type="date" name="fecha" x-model="selectedDateInput" min="{{now()->format('Y-m-d')}}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
                 </div>
 
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Hora <span class="text-red-500">*</span></label>
-                  <input type="time" name="hora" value="{{ old('hora') }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                  <input type="time" name="hora" x-model="selectedTime" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all" :class="hasConflict ? 'border-red-500 ring-red-200' : ''">
+                  <p x-show="hasConflict" class="text-[10px] text-red-600 font-bold mt-1 animate-bounce">
+                    <i class="bi bi-exclamation-triangle-fill"></i> ¡Conflicto! Ya hay un partido a las <span x-text="conflictInfo"></span> en esta cancha.
+                  </p>
                 </div>
 
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Equipo Local <span class="text-red-500">*</span></label>
-                  <input type="text" name="eLocal" value="Jackeline FS" readonly required class="block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 text-gray-500 cursor-not-allowed">
+                  <input type="text" name="eLocal" value="{{ old('eLocal', 'Jackeline FS') }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
                 </div>
                 
                 <div>
@@ -335,13 +338,22 @@
 
                   <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 col-span-1 md:col-span-2 lg:col-span-3">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
+                      <div x-show="!selectedTournament">
                         <label class="block text-sm font-bold text-indigo-900 mb-1"><i class="bi bi-cash-stack mr-1"></i> Inscripción ($ por deportista)</label>
-                        <input type="number" name="costo_inscripcion" placeholder="0.00" value="{{ old('costo_inscripcion', 0) }}" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                        <input type="number" name="costo_inscripcion" value="0" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all font-black">
+                      </div>
+                      <div x-show="selectedTournament" class="flex flex-col justify-center">
+                        <div class="p-3 bg-white/50 rounded-xl border border-indigo-100/50">
+                          <p class="text-[10px] text-indigo-600 font-black uppercase tracking-widest leading-tight">
+                            <i class="bi bi-info-circle-fill mr-1"></i> Inscripción Protegida
+                          </p>
+                          <p class="text-[9px] text-indigo-500 font-medium mt-1">El costo de inscripción se gestiona desde el panel del torneo.</p>
+                          <input type="hidden" name="costo_inscripcion" value="0">
+                        </div>
                       </div>
                       <div>
                         <label class="block text-sm font-bold text-indigo-900 mb-1"><i class="bi bi-person-badge-fill mr-1"></i> Arbitraje ($ por deportista)</label>
-                        <input type="number" name="costo_arbitraje" placeholder="0.00" value="{{ old('costo_arbitraje', 0) }}" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                        <input type="number" name="costo_arbitraje" :value="calculatedArbitr" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all font-black">
                       </div>
                     </div>
                     
@@ -492,8 +504,8 @@
                   </select>
                 </div>
                 <div class="md:col-span-1">
-                  <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Evento</label>
-                  <input type="text" name="torneo" :value="editingItem.torneo" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Descripción del Encuentro</label>
+                  <input type="text" name="torneo" x-model="eventNameEdit" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría 1</label>
@@ -501,7 +513,11 @@
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Cancha</label>
-                  <input type="text" name="cancha" :value="editingItem.cancha" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                  <input type="text" name="cancha" x-model="selectedCourtEdit" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Equipo Local</label>
+                  <input type="text" name="eLocal" :value="editingItem.eLocal" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Equipo Visitante</label>
@@ -509,22 +525,34 @@
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha</label>
-                  <input type="date" name="fecha" :value="editingItem.fecha" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                  <input type="date" name="fecha" x-model="selectedDateEdit" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Hora</label>
-                  <input type="time" name="hora" :value="editingItem.hora" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                  <input type="time" name="hora" x-model="selectedTimeEdit" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200" :class="hasConflictEdit ? 'border-red-500 ring-red-200' : ''">
+                  <p x-show="hasConflictEdit" class="text-[10px] text-red-600 font-bold mt-1">
+                    <i class="bi bi-exclamation-triangle-fill"></i> ¡Conflicto detected!
+                  </p>
                 </div>
 
                 <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 md:col-span-2">
                   <div class="grid grid-cols-2 gap-4">
-                    <div>
+                    <div x-show="!selectedTournamentEdit">
                       <label class="block text-sm font-bold text-indigo-900 mb-1">Inscrip. (Indiv.)</label>
-                      <input type="number" name="costo_inscripcion" :value="editingItem.costo_inscripcion" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                      <input type="number" name="costo_inscripcion" :value="editingItem.costo_inscripcion" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all font-black">
+                    </div>
+                    <div x-show="selectedTournamentEdit" class="flex flex-col justify-center">
+                        <div class="p-3 bg-white/50 rounded-xl border border-indigo-100/50">
+                          <p class="text-[10px] text-indigo-600 font-black uppercase tracking-widest leading-tight">
+                            <i class="bi bi-info-circle-fill mr-1"></i> Inscripción de Torneo
+                          </p>
+                          <p class="text-[9px] text-indigo-500 font-medium mt-1">Costo centralizado en el módulo de pagos.</p>
+                          <input type="hidden" name="costo_inscripcion" value="0">
+                        </div>
                     </div>
                     <div>
                       <label class="block text-sm font-bold text-indigo-900 mb-1">Arbitr. (Indiv.)</label>
-                      <input type="number" name="costo_arbitraje" :value="editingItem.costo_arbitraje" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all">
+                      <input type="number" name="costo_arbitraje" :value="calculatedArbitrEdit" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all font-black">
                     </div>
                   </div>
 
@@ -882,6 +910,102 @@
             editSearchRight: '',
             editAvailable: [],
             editSelected: [],
+            eventName: '',
+            eventNameEdit: '',
+            selectedTime: '',
+            selectedDateInput: '',
+            selectedCourt: '',
+            selectedTimeEdit: '',
+            selectedDateEdit: '',
+            selectedCourtEdit: '',
+
+            init() {
+                this.available = [...this.allStudents];
+                
+                // Auto-fill event name on tournament selection (Create)
+                this.$watch('selectedTournamentId', (value) => {
+                    if (value && this.selectedTournament) {
+                        this.eventName = this.selectedTournament.name;
+                    }
+                });
+
+                // Auto-fill event name on tournament selection (Edit)
+                this.$watch('selectedTournamentIdEdit', (value) => {
+                    if (value && this.selectedTournamentEdit) {
+                        this.eventNameEdit = this.selectedTournamentEdit.name;
+                    }
+                });
+            },
+
+            get hasConflict() {
+                if (!this.selectedTime || !this.selectedDateInput || !this.selectedCourt) return false;
+                return this.checkTimeOverlap(this.selectedDateInput, this.selectedTime, this.selectedCourt);
+            },
+
+            get hasConflictEdit() {
+                if (!this.selectedTimeEdit || !this.selectedDateEdit || !this.selectedCourtEdit) return false;
+                return this.checkTimeOverlap(this.selectedDateEdit, this.selectedTimeEdit, this.selectedCourtEdit, this.editingItem.id);
+            },
+
+            get conflictInfo() {
+                const conflict = this.hasConflict;
+                return conflict ? conflict.hora : '';
+            },
+
+            checkTimeOverlap(date, time, court, excludeId = null) {
+                const dayEvents = this.events[date] || [];
+                const newStart = this.timeToMinutes(time);
+                const newEnd = newStart + 59;
+
+                for (let event of dayEvents) {
+                    if (excludeId && event.id == excludeId) continue;
+                    if (event.cancha !== court) continue;
+
+                    const existingStart = this.timeToMinutes(event.hora);
+                    const existingEnd = existingStart + 59;
+
+                    if (newStart <= existingEnd && newEnd >= existingStart) {
+                        return event;
+                    }
+                }
+                return false;
+            },
+
+            timeToMinutes(timeStr) {
+                if (!timeStr) return 0;
+                const [h, m] = timeStr.split(':').map(Number);
+                return h * 60 + m;
+            },
+
+            get calculatedInscrip() {
+                const tour = this.selectedTournament;
+                const count = tour ? tour.students.length : this.selected.length;
+                if (!tour || count === 0) return 0;
+                return Math.round(tour.costo_total_inscripcion / count);
+            },
+
+            get calculatedArbitr() {
+                const tour = this.selectedTournament;
+                const count = tour ? tour.students.length : this.selected.length;
+                if (!tour || count === 0) return 0;
+                return Math.round(tour.costo_total_arbitraje / count);
+            },
+
+            get calculatedInscripEdit() {
+                const tour = this.selectedTournamentEdit;
+                if (!tour) return this.editingItem.costo_inscripcion;
+                const count = tour.students ? tour.students.length : this.editSelected.length;
+                if (count === 0) return 0;
+                return Math.round(tour.costo_total_inscripcion / count);
+            },
+
+            get calculatedArbitrEdit() {
+                const tour = this.selectedTournamentEdit;
+                if (!tour) return this.editingItem.costo_arbitraje;
+                const count = tour.students ? tour.students.length : this.editSelected.length;
+                if (count === 0) return 0;
+                return Math.round(tour.costo_total_arbitraje / count);
+            },
 
             get selectedTournament() {
                 if (!this.selectedTournamentId) return null;
@@ -1016,6 +1140,10 @@
                 
                 this.editSearchLeft = '';
                 this.editSearchRight = '';
+                this.eventNameEdit = item.torneo || '';
+                this.selectedTimeEdit = item.hora || '';
+                this.selectedDateEdit = item.fecha || '';
+                this.selectedCourtEdit = item.cancha || '';
                 this.openEditModal = true;
             },
             get editFilteredAvailable() {

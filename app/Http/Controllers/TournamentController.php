@@ -70,12 +70,16 @@ class TournamentController extends Controller
             ->orderBy('fecha') // Ordenar por fecha ascendente para calcular deuda acumulada correctamente
             ->get();
 
+        // Calcular el costo individual de inscripción dividiendo el total entre los alumnos registrados
+        $studentCount = $tournament->students->count();
+        $individualInscription = $studentCount > 0 ? (float)$tournament->costo_total_inscripcion / $studentCount : 0;
+
         // Mapa para llevar el seguimiento de la deuda acumulada por estudiante
         $debtTracker = [];
         
-        // Inicializar deuda para todos los estudiantes del torneo
+        // Inicializar deuda con el costo equitativo de inscripción para cada estudiante
         foreach ($tournament->students as $student) {
-            $debtTracker[$student->id] = 0;
+            $debtTracker[$student->id] = $individualInscription;
         }
 
         $programmings->each(function($prog) use (&$debtTracker) {

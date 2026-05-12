@@ -18,32 +18,49 @@ class DatabaseSeeder extends Seeder
         // Ejecutar el RoleSeeder primero
         $this->call(RoleSeeder::class);
 
-        // Crear usuario Administrador
+        // 1. Administrador
         $admin = User::factory()->create([
             'name' => 'Admin Jackeline',
-            'email' => 'admin@admin.com',
+            'email' => 'admin@jackeline.com',
             'password' => bcrypt('password'),
         ]);
-
-        // Asignar rol de Admin
         $admin->assignRole('Admin');
 
-        // Crear estudiantes de prueba (Demo)
-        $this->call(StudentSeeder::class);
-
-        // Opcional: Crear el usuario de prueba que mencionaste
-        $testUser = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // 2. Profesor
+        $profesor = User::factory()->create([
+            'name' => 'Profesor de Prueba',
+            'email' => 'profesor@jackeline.com',
+            'password' => bcrypt('password'),
         ]);
-        $testUser->assignRole('Admin'); // También le damos admin para la demo
+        $profesor->assignRole('Profesor');
 
-        // Crear usuario Cliente (Demo restringida)
-        $client = User::factory()->create([
+        // 3. Padre
+        $padre = User::factory()->create([
             'name' => 'Padre de Familia',
-            'email' => 'padre@example.com',
+            'email' => 'padre@jackeline.com',
+            'password' => bcrypt('password'),
+            'documento_deportista' => '1001230001',
+        ]);
+        $padre->assignRole('Padre');
+
+        // 4. Deportista
+        $deportista = User::factory()->create([
+            'name' => 'Deportista de Prueba',
+            'email' => 'deportista@jackeline.com',
+            'password' => bcrypt('password'),
+            'documento_deportista' => '1001230001',
+        ]);
+        $deportista->assignRole('Deportista');
+
+        // 5. Client
+        $client = User::factory()->create([
+            'name' => 'Cliente de Prueba',
+            'email' => 'cliente@jackeline.com',
             'password' => bcrypt('password'),
         ]);
         $client->assignRole('client');
+
+        // Crear estudiantes de prueba (Demo)
+        $this->call(StudentSeeder::class);
     }
 }

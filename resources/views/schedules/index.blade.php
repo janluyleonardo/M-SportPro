@@ -1,27 +1,52 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-blue-50 rounded-lg text-club-primary">
                     <i class="bi bi-calendar3 text-xl"></i>
                 </div>
-                <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
-                    {{ __('Programación de Clases') }}
-                </h2>
+                <div>
+                    <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
+                        {{ __('Programación de Clases') }}
+                    </h2>
+                    <p class="text-[10px] font-black text-club-primary uppercase tracking-widest mt-1">
+                        {{ $startOfWeek->isoFormat('D [de] MMMM') }} - {{ $endOfWeek->isoFormat('D [de] MMMM, YYYY') }}
+                    </p>
+                </div>
             </div>
-            
-            @role('Admin')
-                <button
-                    onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'add-schedule' }))"
-                    class="inline-flex items-center px-6 py-3 bg-club-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-indigo-100">
-                    <i class="bi bi-plus-lg mr-2"></i> Programar Clase
-                </button>
-            @endrole
+
+            <div class="flex items-center space-x-4">
+                <!-- Filtro de Semana -->
+                <div class="flex items-center space-x-2 bg-white rounded-2xl p-1 shadow-sm border border-gray-100">
+                    <a href="{{ route('schedules.index', ['date' => $startOfWeek->copy()->subWeek()->toDateString()]) }}" 
+                       class="p-2 hover:bg-gray-50 rounded-xl transition-colors text-gray-400" title="Semana Anterior">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                    <form action="{{ route('schedules.index') }}" method="GET" class="flex items-center">
+                        <input type="date" name="date" value="{{ $selectedDate }}" 
+                               onchange="this.form.submit()"
+                               class="border-none bg-transparent font-bold text-[10px] text-gray-600 focus:ring-0 cursor-pointer uppercase tracking-widest">
+                    </form>
+                    <a href="{{ route('schedules.index', ['date' => $startOfWeek->copy()->addWeek()->toDateString()]) }}" 
+                       class="p-2 hover:bg-gray-50 rounded-xl transition-colors text-gray-400" title="Siguiente Semana">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+                
+                @role('Admin')
+                    <button
+                        onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'add-schedule' }))"
+                        class="inline-flex items-center px-6 py-3 bg-club-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-indigo-100">
+                        <i class="bi bi-plus-lg mr-2"></i> Programar
+                    </button>
+                @endrole
+            </div>
         </div>
     </x-slot>
 
     <div class="py-8" x-data="{ 
         editDay: '', 
+        editDate: '',
         editCategory: '', 
         editStart: '', 
         editEnd: '', 
@@ -79,6 +104,7 @@
                                             <button @click="
                                                 editUrl = '{{ route('schedules.update', $schedule) }}';
                                                 editDay = '{{ $schedule->day_of_week }}';
+                                                editDate = '{{ $schedule->date }}';
                                                 editCategory = '{{ $schedule->category }}';
                                                 editStart = '{{ $schedule->start_time }}';
                                                 editEnd = '{{ $schedule->end_time }}';
@@ -123,12 +149,8 @@
                     @csrf
                     <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Día de la Semana</label>
-                            <select name="day_of_week" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
-                                @foreach($days as $day)
-                                    <option value="{{ $day }}">{{ $day }}</option>
-                                @endforeach
-                            </select>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de la Clase</label>
+                            <input type="date" name="date" value="{{ $selectedDate }}" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Categoría</label>
@@ -200,12 +222,8 @@
                     @method('PUT')
                     <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Día de la Semana</label>
-                            <select name="day_of_week" x-model="editDay" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
-                                @foreach($days as $day)
-                                    <option value="{{ $day }}">{{ $day }}</option>
-                                @endforeach
-                            </select>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de la Clase</label>
+                            <input type="date" name="date" x-model="editDate" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Categoría</label>

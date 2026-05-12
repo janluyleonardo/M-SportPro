@@ -24,6 +24,43 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
             
+            <!-- TARJETAS DE REFERENCIA DE COSTOS (Visual Aid) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                    <div class="bg-indigo-50 p-3 rounded-2xl text-indigo-600">
+                        <i class="bi bi-trophy-fill text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Inscripción Torneo</p>
+                        <p class="text-xl font-black text-gray-900">${{ number_format($tournament->costo_total_inscripcion, 0) }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                    <div class="bg-blue-50 p-3 rounded-2xl text-blue-600">
+                        <i class="bi bi-people-fill text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Alumnos en Planilla</p>
+                        <p class="text-xl font-black text-gray-900">{{ $tournament->students->count() }} Jugadores</p>
+                    </div>
+                </div>
+
+                @php 
+                    $studentCount = $tournament->students->count();
+                    $individualInscription = $studentCount > 0 ? (float)$tournament->costo_total_inscripcion / $studentCount : 0;
+                @endphp
+                <div class="bg-club-primary p-6 rounded-3xl shadow-lg border border-club-primary/10 flex items-center space-x-4">
+                    <div class="bg-white/20 p-3 rounded-2xl text-white">
+                        <i class="bi bi-person-badge-fill text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-white/70 uppercase tracking-widest">Inscripción por Jugador</p>
+                        <p class="text-xl font-black text-white">${{ number_format($individualInscription, 0) }}</p>
+                    </div>
+                </div>
+            </div>
+            
             <!-- RESUMEN GENERAL DEL TORNEO (Unified Ledger) -->
             @if(!$programmings->isEmpty())
                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
@@ -40,22 +77,36 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Deportista</th>
-                                    <th class="px-6 py-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Cargos Totales</th>
+                                    <th class="px-6 py-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                        Cargos Totales
+                                        <span class="block text-[8px] font-bold text-gray-300 normal-case">(Inscrip. Inicial + Partidos)</span>
+                                    </th>
                                     <th class="px-6 py-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Pagado</th>
                                     <th class="px-6 py-3 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Saldo Pendiente</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-50">
                                 @php 
+                                    $studentCount = $tournament->students->count();
+                                    $individualInscription = $studentCount > 0 ? (float)$tournament->costo_total_inscripcion / $studentCount : 0;
+                                    
                                     $allStudentsData = [];
+                                    // Inicializar con la inscripción individual
+                                    foreach($tournament->students as $student) {
+                                        $allStudentsData[$student->id] = [
+                                            'name' => $student->nomDeportista, 
+                                            'total_cost' => $individualInscription, 
+                                            'total_paid' => 0
+                                        ];
+                                    }
+
                                     foreach($programmings as $prog) {
                                         foreach($prog->summoned_data as $data) {
                                             $sid = $data['student_id'];
-                                            if(!isset($allStudentsData[$sid])) {
-                                                $allStudentsData[$sid] = ['name' => $data['name'], 'total_cost' => 0, 'total_paid' => 0];
+                                            if(isset($allStudentsData[$sid])) {
+                                                $allStudentsData[$sid]['total_cost'] += ($prog->costo_inscripcion + $prog->costo_arbitraje);
+                                                $allStudentsData[$sid]['total_paid'] += ($data['pagado_inscripcion'] + $data['pagado_arbitraje']);
                                             }
-                                            $allStudentsData[$sid]['total_cost'] += ($prog->costo_inscripcion + $prog->costo_arbitraje);
-                                            $allStudentsData[$sid]['total_paid'] += ($data['pagado_inscripcion'] + $data['pagado_arbitraje']);
                                         }
                                     }
                                     $grandTotalDebt = 0;

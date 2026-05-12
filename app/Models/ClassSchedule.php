@@ -11,6 +11,7 @@ class ClassSchedule extends Model
 
     protected $fillable = [
         'day_of_week',
+        'date',
         'start_time',
         'end_time',
         'category',

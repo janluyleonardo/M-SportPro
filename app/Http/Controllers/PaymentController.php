@@ -24,7 +24,7 @@ class PaymentController extends Controller
             
             if (!$doc) {
                 return view('payments.index', [
-                    'students' => collect(), 
+                    'students' => Student::where('id', 0)->paginate(6), 
                     'search' => $search,
                     'error_message' => 'Tu cuenta no tiene un número de documento vinculado. Contacta al administrador.'
                 ]);
@@ -34,7 +34,7 @@ class PaymentController extends Controller
 
             if (!$student) {
                 return view('payments.index', [
-                    'students' => collect(), 
+                    'students' => Student::where('id', 0)->paginate(6), 
                     'search' => $search,
                     'error_message' => "No se encontró ningún deportista con el documento $doc. Verifica la información con el club."
                 ]);

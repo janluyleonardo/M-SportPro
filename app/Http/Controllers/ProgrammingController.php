@@ -20,7 +20,9 @@ class ProgrammingController extends Controller
             return back()->with('error', 'No hay programación para esta fecha.');
         }
 
-        $pdf = Pdf::loadView('Programming.pdf', compact('programming', 'date'));
+        $studentNames = Student::pluck('nomDeportista', 'id')->toArray();
+
+        $pdf = Pdf::loadView('Programming.pdf', compact('programming', 'date', 'studentNames'));
         return $pdf->stream('Programacion_'.$date.'.pdf');
     }
 
@@ -88,6 +90,11 @@ class ProgrammingController extends Controller
       }
 
       try {
+        $conflict = $this->checkConflict($validated['fecha'], $validated['hora'], $validated['cancha']);
+        if ($conflict) {
+            return back()->withInput()->with('error', "Conflicto de horario: Ya existe un partido programado a las $conflict->hora en la cancha $conflict->cancha. Los partidos duran 1 hora.");
+        }
+
         programming::create($validated);
         return redirect()->route('programming.index')->with('success', 'Registro creado correctamente.');
       } catch (\Throwable $th) {
@@ -142,6 +149,11 @@ class ProgrammingController extends Controller
       }
 
       try {
+        $conflict = $this->checkConflict($validated['fecha'], $validated['hora'], $validated['cancha'], $id);
+        if ($conflict) {
+            return back()->withInput()->with('error', "Conflicto de horario: Ya existe un partido programado a las $conflict->hora en la cancha $conflict->cancha.");
+        }
+
         $programming->update($validated);
         return redirect()->route('programming.index')->with('success', 'Registro actualizado correctamente.');
       } catch (\Throwable $th) {
@@ -203,5 +215,34 @@ class ProgrammingController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    private function checkConflict($date, $time, $court, $excludeId = null)
+    {
+        try {
+            $newStart = Carbon::parse("$date $time");
+            $newEnd = (clone $newStart)->addMinutes(59); // Consideramos 1 hora de duración (59 min para evitar borde exacto)
+
+            $conflicts = programming::where('fecha', $date)
+                ->where('cancha', $court)
+                ->when($excludeId, function($q) use ($excludeId) {
+                    $q->where('id', '!=', $excludeId);
+                })
+                ->get();
+
+            foreach ($conflicts as $conflict) {
+                $existingStart = Carbon::parse("$conflict->fecha $conflict->hora");
+                $existingEnd = (clone $existingStart)->addMinutes(59);
+
+                // Traslape: (InicioA <= FinB) y (FinA >= InicioB)
+                if ($newStart <= $existingEnd && $newEnd >= $existingStart) {
+                    return $conflict;
+                }
+            }
+        } catch (\Throwable $th) {
+            // Si falla el parseo de fecha, ignoramos el conflicto para no bloquear el flujo principal
+        }
+
+        return null;
     }
 }

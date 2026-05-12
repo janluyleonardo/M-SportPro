@@ -132,9 +132,13 @@
                 @php
                     $jugadores = explode(',', $match->jugadores_convocados);
                 @endphp
-                @foreach($jugadores as $jugador)
+                @foreach($jugadores as $jugadorId)
+                    @php
+                        $id = trim($jugadorId);
+                        $nombre = $studentNames[$id] ?? $id;
+                    @endphp
                     <span style="display: inline-block; background-color: #f9fafb; padding: 2px 8px; border-radius: 4px; margin: 2px; border: 1px solid #f3f4f6;">
-                        {{ trim($jugador) }}
+                        {{ $nombre }}
                     </span>
                 @endforeach
             </div>
