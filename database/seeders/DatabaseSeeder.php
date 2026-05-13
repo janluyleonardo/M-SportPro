@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,13 +16,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Obtener el dominio basado en el nombre de la app
+        $appName = config('app.name', 'Jackeline');
+        $domain = Str::slug($appName) . '.com';
+
         // Ejecutar el RoleSeeder primero
         $this->call(RoleSeeder::class);
 
         // 1. Administrador
         $admin = User::factory()->create([
-            'name' => 'Admin Jackeline',
-            'email' => 'admin@jackeline.com',
+            'name' => 'Admin ' . $appName,
+            'email' => 'admin@' . $domain,
             'password' => bcrypt('password'),
         ]);
         $admin->assignRole('Admin');
@@ -29,7 +34,7 @@ class DatabaseSeeder extends Seeder
         // 2. Profesor
         $profesor = User::factory()->create([
             'name' => 'Profesor de Prueba',
-            'email' => 'profesor@jackeline.com',
+            'email' => 'profesor@' . $domain,
             'password' => bcrypt('password'),
         ]);
         $profesor->assignRole('Profesor');
@@ -37,7 +42,7 @@ class DatabaseSeeder extends Seeder
         // 3. Padre
         $padre = User::factory()->create([
             'name' => 'Padre de Familia',
-            'email' => 'padre@jackeline.com',
+            'email' => 'padre@' . $domain,
             'password' => bcrypt('password'),
             'documento_deportista' => '1001230001',
         ]);
@@ -46,7 +51,7 @@ class DatabaseSeeder extends Seeder
         // 4. Deportista
         $deportista = User::factory()->create([
             'name' => 'Deportista de Prueba',
-            'email' => 'deportista@jackeline.com',
+            'email' => 'deportista@' . $domain,
             'password' => bcrypt('password'),
             'documento_deportista' => '1001230001',
         ]);
@@ -55,7 +60,7 @@ class DatabaseSeeder extends Seeder
         // 5. Client
         $client = User::factory()->create([
             'name' => 'Cliente de Prueba',
-            'email' => 'cliente@jackeline.com',
+            'email' => 'cliente@' . $domain,
             'password' => bcrypt('password'),
         ]);
         $client->assignRole('client');

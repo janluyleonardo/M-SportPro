@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <!--favicon-->
-        <link rel="shortcut icon" href="{{ asset('favicon.ico?v='.now()->format('H.s')) }}" type="image/x-icon">
+        <link rel="icon" href="{{ asset('images/logo/LOGO.png?v='.now()->format('H.s')) }}" type="image/png">
 
         <title>{{ config('app.name', 'Jackeline FS') }}</title>
 

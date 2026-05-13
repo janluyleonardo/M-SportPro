@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
     <!-- favicon -->
-    <link rel="shortcut icon" href="{{ asset('favicon.ico?v=' . now()->format('H.s')) }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/logo/LOGO.png?v=' . now()->format('H.s')) }}" type="image/png">
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/bootstrap.css?v=' . now()->format('H.s')) }}">

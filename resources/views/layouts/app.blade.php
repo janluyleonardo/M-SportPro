@@ -7,6 +7,10 @@
 
         <title>{{ config('app.name', 'Jackeline F.S.') }}</title>
 
+        <!-- Favicon -->
+        <link rel="icon" href="{{ asset('images/logo/LOGO.png?v=' . now()->format('H.s')) }}" type="image/png">
+
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
