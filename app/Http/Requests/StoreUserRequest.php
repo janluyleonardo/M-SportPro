@@ -19,6 +19,7 @@ class StoreUserRequest extends FormRequest
             'password' => 'required|string|min:8',
             'role' => 'required|exists:roles,name',
             'documento_deportista' => 'nullable|string',
+            'pay_per_session' => 'nullable|numeric|min:0',
         ];
     }
 }

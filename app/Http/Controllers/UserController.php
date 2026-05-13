@@ -44,6 +44,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'documento_deportista' => $request->documento_deportista,
+            'pay_per_session' => $request->pay_per_session ?? 0,
             'must_change_password' => true,
         ]);
 
@@ -60,10 +61,12 @@ class UserController extends Controller
         $request->validate([
             'role' => 'required|exists:roles,name',
             'documento_deportista' => 'nullable|string',
+            'pay_per_session' => 'nullable|numeric|min:0',
         ]);
 
         $user->update([
-            'documento_deportista' => $request->documento_deportista
+            'documento_deportista' => $request->documento_deportista,
+            'pay_per_session' => $request->pay_per_session ?? 0
         ]);
 
         $user->syncRoles([$request->role]);
