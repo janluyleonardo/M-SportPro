@@ -81,6 +81,24 @@ Este comando iniciará automáticamente:
 - El servidor de Laravel en [http://localhost:8000](http://localhost:8000)
 - El servidor de Vite para recarga en caliente (HMR).
 
+## 🎨 Configuración de Demos (Personalización)
+
+Para personalizar el sistema para una demo específica (otro club), ajusta las siguientes variables en tu archivo `.env`:
+
+1. **Nombre y Dominio**: 
+   - `APP_NAME`: Nombre del club. Afecta el título, nombres de admin y el dominio de correos en los seeders.
+2. **Identidad Visual**:
+   - `CLUB_COLOR_PRIMARY_RGB` y `CLUB_COLOR_SECONDARY_RGB`: Colores en formato RGB.
+3. **Credenciales**:
+   - `DEFAULT_USER_PASSWORD`: Contraseña base para seeders y creación manual.
+4. **Finanzas**:
+   - `DEFAULT_PAYMENT_AMOUNT` y `DEFAULT_TEACHER_PAY_PER_SESSION`: Valores base de cobros y pagos.
+
+Para aplicar cambios drásticos (como el nombre de los correos), recrea la base de datos:
+```bash
+php artisan migrate:fresh --seed
+```
+
 ## 📂 Notas de la Migración
 
 - El sistema utiliza **Tailwind CSS 4.0** para el diseño.

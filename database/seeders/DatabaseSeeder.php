@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::factory()->create([
             'name' => 'Admin ' . $appName,
             'email' => 'admin@' . $domain,
-            'password' => bcrypt('password'),
+            'password' => bcrypt(env('DEFAULT_USER_PASSWORD', 'password')),
         ]);
         $admin->assignRole('Admin');
 
@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
         $profesor = User::factory()->create([
             'name' => 'Profesor de Prueba',
             'email' => 'profesor@' . $domain,
-            'password' => bcrypt('password'),
+            'password' => bcrypt(env('DEFAULT_USER_PASSWORD', 'password')),
         ]);
         $profesor->assignRole('Profesor');
 
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
         $padre = User::factory()->create([
             'name' => 'Padre de Familia',
             'email' => 'padre@' . $domain,
-            'password' => bcrypt('password'),
+            'password' => bcrypt(env('DEFAULT_USER_PASSWORD', 'password')),
             'documento_deportista' => '1001230001',
         ]);
         $padre->assignRole('Padre');
@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
         $deportista = User::factory()->create([
             'name' => 'Deportista de Prueba',
             'email' => 'deportista@' . $domain,
-            'password' => bcrypt('password'),
+            'password' => bcrypt(env('DEFAULT_USER_PASSWORD', 'password')),
             'documento_deportista' => '1001230001',
         ]);
         $deportista->assignRole('Deportista');
@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
         $client = User::factory()->create([
             'name' => 'Cliente de Prueba',
             'email' => 'cliente@' . $domain,
-            'password' => bcrypt('password'),
+            'password' => bcrypt(env('DEFAULT_USER_PASSWORD', 'password')),
         ]);
         $client->assignRole('client');
 

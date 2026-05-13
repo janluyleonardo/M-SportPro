@@ -311,6 +311,15 @@
                     }
                 }
             });
+
+            // Ocultar el cargador cuando la página se muestra (especialmente al usar el botón 'atrás' del navegador)
+            window.addEventListener('pageshow', function(event) {
+                const loader = document.getElementById('global-loader');
+                if (loader) {
+                    loader.classList.add('pointer-events-none', 'opacity-0');
+                    loader.classList.remove('opacity-100');
+                }
+            });
         </script>
     </body>
 </html>
