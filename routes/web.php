@@ -19,6 +19,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Rutas de Super Admin
+Route::middleware(['auth', 'verified', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+    Route::get('clubs', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'index'])->name('clubs.index');
+    Route::post('clubs', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'store'])->name('clubs.store');
+    Route::post('clubs/{club}/toggle-module', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'toggleModule'])->name('clubs.toggleModule');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas de cambio de clave obligatoria (Fuera del middleware restrictivo para evitar bucles)
     Route::get('/password/change', [PasswordChangeController::class, 'show'])->name('password.change');
@@ -36,17 +43,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/imprimir/{id}', [StudentsController::class, 'imprimir'])->name('imprimir');
     });
 
-        // Rutas de Mensualidades y Asistencias (Lectura: Admin, Profesor, Padre, Deportista)
+        // Rutas de Mensualidades y Asistencias
         Route::middleware(['role:Admin|Profesor|Padre|Deportista'])->group(function () {
-            Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
-            Route::get('payments/student/{student}', [PaymentController::class, 'show'])->name('payments.show');
+            Route::middleware(['module:financial'])->group(function () {
+                Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+                Route::get('payments/student/{student}', [PaymentController::class, 'show'])->name('payments.show');
+            });
             
             // Visualización de Horarios para todos
-            Route::get('schedules', [ClassScheduleController::class, 'index'])->name('schedules.index');
+            Route::middleware(['module:classes'])->group(function () {
+                Route::get('schedules', [ClassScheduleController::class, 'index'])->name('schedules.index');
+            });
         });
 
-        // Rutas de Asistencia (Solo Profesores y Admin para tomar lista)
-        Route::middleware(['role:Admin|Profesor'])->group(function () {
+        // Rutas de Asistencia
+        Route::middleware(['role:Admin|Profesor', 'module:classes'])->group(function () {
             Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
             Route::get('attendances/class/{schedule}', [AttendanceController::class, 'show'])->name('attendances.show');
             Route::post('attendances', [AttendanceController::class, 'store'])->name('attendances.store');
@@ -54,14 +65,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Rutas de Gestión (Solo Admin)
         Route::middleware(['role:Admin'])->group(function () {
-            Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
-            Route::put('payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
-            Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+            Route::middleware(['module:financial'])->group(function () {
+                Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
+                Route::put('payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+                Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+            });
             
             // Rutas de Horarios (Solo Admin para crear/editar/eliminar)
-            Route::post('schedules', [ClassScheduleController::class, 'store'])->name('schedules.store');
-            Route::put('schedules/{classSchedule}', [ClassScheduleController::class, 'update'])->name('schedules.update');
-            Route::delete('schedules/{classSchedule}', [ClassScheduleController::class, 'destroy'])->name('schedules.destroy');
+            Route::middleware(['module:classes'])->group(function () {
+                Route::post('schedules', [ClassScheduleController::class, 'store'])->name('schedules.store');
+                Route::put('schedules/{classSchedule}', [ClassScheduleController::class, 'update'])->name('schedules.update');
+                Route::delete('schedules/{classSchedule}', [ClassScheduleController::class, 'destroy'])->name('schedules.destroy');
+            });
             
             Route::resource('users', UserController::class);
             Route::resource('locations', LocationController::class)->only(['index', 'store', 'update', 'destroy']);
@@ -84,24 +99,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware(['role:Admin'])->group(function () {
             // Módulo de Tesorería
             // Inventario y Productos
-    Route::get('products/template', [ProductController::class, 'downloadTemplate'])->name('products.template');
-    Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
-    Route::resource('products', ProductController::class);
-    
-    // Tesorería
-    Route::prefix('treasury')->name('treasury.')->group(function() {
-                Route::get('/', [TreasuryController::class, 'index'])->name('index');
-                Route::post('/', [TreasuryController::class, 'store'])->name('store');
-                Route::get('/salaries', [TreasuryController::class, 'salaries'])->name('salaries');
-                Route::post('/salaries/pay', [TreasuryController::class, 'payTeacher'])->name('pay_teacher');
-                Route::get('/teacher-history/{teacher}', [TreasuryController::class, 'teacherHistory'])->name('teacher_history');
-                Route::post('/settings', [TreasuryController::class, 'updateSettings'])->name('settings.update');
+            Route::middleware(['module:financial'])->group(function () {
+                Route::get('products/template', [ProductController::class, 'downloadTemplate'])->name('products.template');
+                Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
+                Route::resource('products', ProductController::class);
+                
+                // Tesorería
+                Route::prefix('treasury')->name('treasury.')->group(function() {
+                    Route::get('/', [TreasuryController::class, 'index'])->name('index');
+                    Route::post('/', [TreasuryController::class, 'store'])->name('store');
+                    Route::get('/salaries', [TreasuryController::class, 'salaries'])->name('salaries');
+                    Route::post('/salaries/pay', [TreasuryController::class, 'payTeacher'])->name('pay_teacher');
+                    Route::get('/teacher-history/{teacher}', [TreasuryController::class, 'teacherHistory'])->name('teacher_history');
+                    Route::post('/settings', [TreasuryController::class, 'updateSettings'])->name('settings.update');
+                });
             });
         });
 
     // 3. Módulo de Programación
-    // Lectura: Para todos
-    Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|Profesor|Padre|Deportista');
+    Route::middleware(['module:tournaments'])->group(function () {
+        // Lectura: Para todos
+        Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|Profesor|Padre|Deportista');
 
         Route::middleware(['role:Admin|Profesor'])->group(function () {
             Route::resource('programming', ProgrammingController::class)->except(['index', 'show', 'destroy']);
@@ -110,10 +128,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/programming/{id}/payments', [ProgrammingController::class, 'updatePayments'])->name('programming.payments.update');
         });
 
-    // 5. Módulo de Torneos
-    Route::middleware(['role:Admin|Profesor'])->group(function () {
-        Route::resource('tournaments', TournamentController::class);
-        Route::get('/tournaments/{tournament}/payments', [TournamentController::class, 'payments'])->name('tournaments.payments');
+        // 5. Módulo de Torneos
+        Route::middleware(['role:Admin|Profesor'])->group(function () {
+            Route::resource('tournaments', TournamentController::class);
+            Route::get('/tournaments/{tournament}/payments', [TournamentController::class, 'payments'])->name('tournaments.payments');
+        });
     });
 
     // 4. Perfil

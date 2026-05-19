@@ -16,6 +16,20 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+        <!-- Club / Equipo -->
+        <div class="mt-4">
+            <x-input-label for="club_id" :value="__('Club / Equipo')" />
+            <select id="club_id" name="club_id" required class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="">-- {{ __('Selecciona tu Club / Equipo') }} --</option>
+                @foreach($clubs as $club)
+                    <option value="{{ $club->id }}" {{ old('club_id') == $club->id ? 'selected' : '' }}>
+                        {{ $club->name }}
+                    </option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('club_id')" class="mt-2" />
+        </div>
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />

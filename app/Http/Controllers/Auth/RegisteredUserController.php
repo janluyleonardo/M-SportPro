@@ -20,7 +20,8 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        $clubs = \App\Models\Club::where('is_active', true)->get();
+        return view('auth.register', compact('clubs'));
     }
 
     /**
@@ -34,12 +35,14 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'club_id' => ['required', 'exists:clubs,id'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'club_id' => $request->club_id,
         ]);
 
         $user->assignRole('Padre');

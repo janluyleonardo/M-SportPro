@@ -16,24 +16,30 @@
                         {{ __('Galería') }}
                     </x-nav-link>
 
+                    @module('financial')
                     <x-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.*')">
                         {{ __('Mensualidades') }}
                     </x-nav-link>
+                    @endmodule
 
+                    @module('classes')
                     <x-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
                         {{ __('Horarios') }}
                     </x-nav-link>
+                    @endmodule
 
+                    @module('tournaments')
                     <x-nav-link :href="route('programming.index')" :active="request()->routeIs('programming.*')">
                         {{ __('Partidos') }}
                     </x-nav-link>
+                    @endmodule
 
 
                     @role('Admin')
                     @endrole
 
-                    {{-- Dropdown de Gestión: visible para Admin y Profesor --}}
-                    @hasanyrole('Admin|Profesor')
+                    {{-- Dropdown de Gestión: visible para Admin, Profesor y SuperAdmin --}}
+                    @if(auth()->user()->hasAnyRole(['Admin', 'Profesor']) || auth()->user()->is_super_admin)
                         <div class="relative" x-data="{ openGestion: false }" @click.outside="openGestion = false">
                             <button
                                 @click="openGestion = !openGestion"
@@ -75,6 +81,7 @@
                                         {{ __('Deportistas') }}
                                     </a>
 
+                                    @module('classes')
                                     <a href="{{ route('attendances.index') }}"
                                        class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
                                               {{ request()->routeIs('attendances.*') ? 'bg-blue-50 text-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
@@ -84,7 +91,9 @@
                                         </span>
                                         {{ __('Asistencias') }}
                                     </a>
+                                    @endmodule
 
+                                    @module('tournaments')
                                     <a href="{{ route('tournaments.index') }}"
                                        class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
                                               {{ request()->routeIs('tournaments.*') ? 'bg-blue-50 text-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
@@ -94,6 +103,7 @@
                                         </span>
                                         {{ __('Torneos') }}
                                     </a>
+                                    @endmodule
 
                                     @role('Admin')
                                         <div class="border-t border-gray-100 my-1.5"></div>
@@ -118,6 +128,7 @@
                                             <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">Admin</span>
                                         </a>
 
+                                        @module('financial')
                                         <div class="border-t border-gray-100 my-1.5"></div>
                                         <a href="{{ route('products.index') }}"
                                            class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
@@ -150,11 +161,26 @@
                                             {{ __('Nómina') }}
                                             <span class="ml-auto text-[9px] font-black bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase">Sueldos</span>
                                         </a>
+                                        @endmodule
                                     @endrole
+
+                                    @superadmin
+                                        <div class="border-t border-gray-100 my-1.5"></div>
+                                        <a href="{{ route('superadmin.clubs.index') }}"
+                                           class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
+                                                  {{ request()->routeIs('superadmin.clubs.*') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50' }}">
+                                            <span class="w-7 h-7 rounded-lg flex items-center justify-center mr-3
+                                                         {{ request()->routeIs('superadmin.clubs.*') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500' }}">
+                                                <i class="bi bi-gear-fill text-xs"></i>
+                                            </span>
+                                            {{ __('Módulos (SaaS)') }}
+                                            <span class="ml-auto text-[9px] font-black bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase">SaaS</span>
+                                        </a>
+                                    @endsuperadmin
                                 </div>
                             </div>
                         </div>
-                    @endhasanyrole
+                    @endif
                 </div>
             </div>
 
@@ -248,20 +274,26 @@
                     {{ __('Galería') }}
                 </a>
 
+                @module('financial')
                 <a href="{{ route('payments.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('payments.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                     <i class="bi bi-cash-coin mr-3 text-base {{ request()->routeIs('payments.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                     {{ __('Mensualidades') }}
                 </a>
+                @endmodule
 
+                @module('classes')
                 <a href="{{ route('schedules.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('schedules.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                     <i class="bi bi-calendar-week mr-3 text-base {{ request()->routeIs('schedules.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                     {{ __('Horarios') }}
                 </a>
+                @endmodule
 
+                @module('tournaments')
                 <a href="{{ route('programming.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('programming.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                     <i class="bi bi-trophy mr-3 text-base {{ request()->routeIs('programming.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                     {{ __('Partidos') }}
                 </a>
+                @endmodule
 
                 @hasanyrole('Admin|Profesor')
                 @endhasanyrole
@@ -271,7 +303,7 @@
             </div>
 
             {{-- Sección de Gestión en móvil --}}
-            @hasanyrole('Admin|Profesor')
+            @if(auth()->user()->hasAnyRole(['Admin', 'Profesor']) || auth()->user()->is_super_admin)
                 <div class="mt-4 px-3">
                     <div class="px-3 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center border-t border-gray-100 pt-4">
                         <i class="bi bi-shield-lock-fill mr-1.5 text-club-primary"></i> Gestión
@@ -283,15 +315,19 @@
                             {{ __('Deportistas') }}
                         </a>
 
+                        @module('classes')
                         <a href="{{ route('attendances.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('attendances.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                             <i class="bi bi-clipboard2-check mr-3 text-base {{ request()->routeIs('attendances.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                             {{ __('Asistencias') }}
                         </a>
+                        @endmodule
 
+                        @module('tournaments')
                         <a href="{{ route('tournaments.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('tournaments.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                             <i class="bi bi-flag mr-3 text-base {{ request()->routeIs('tournaments.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                             {{ __('Torneos') }}
                         </a>
+                        @endmodule
 
                         @role('Admin')
                             <a href="{{ route('users.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('users.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
@@ -306,6 +342,7 @@
                                 <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">Admin</span>
                             </a>
 
+                            @module('financial')
                             <a href="{{ route('products.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('products.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                                 <i class="bi bi-box-seam mr-3 text-base {{ request()->routeIs('products.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Inventario') }}
@@ -321,10 +358,20 @@
                                 <i class="bi bi-cash-stack mr-3 text-base {{ request()->routeIs('treasury.salaries') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Nómina') }}
                             </a>
+                            @endmodule
                         @endrole
+
+                        @superadmin
+                            <div class="border-t border-gray-100 my-2"></div>
+                            <a href="{{ route('superadmin.clubs.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('superadmin.clubs.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
+                                <i class="bi bi-gear-fill mr-3 text-base {{ request()->routeIs('superadmin.clubs.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
+                                {{ __('Módulos (SaaS)') }}
+                                <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">SaaS</span>
+                            </a>
+                        @endsuperadmin
                     </div>
                 </div>
-            @endhasanyrole
+            @endif
         </div>
 
         <!-- Footer: Usuario -->

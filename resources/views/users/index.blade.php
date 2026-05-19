@@ -38,6 +38,9 @@
                             <tr>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Usuario</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
+                                @if(auth()->user()->is_super_admin)
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Club/Equipo</th>
+                                @endif
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vínculo Deportista</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Cambiar Rol</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pago/Clase</th>
@@ -65,6 +68,18 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     {{ $user->email }}
                                 </td>
+                                @if(auth()->user()->is_super_admin)
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <select name="club_id" form="form-user-{{ $user->id }}" class="text-[10px] font-bold rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 pl-2 pr-8 transition-all bg-gray-50">
+                                            <option value="">-- Sin Club --</option>
+                                            @foreach($clubs as $club)
+                                                <option value="{{ $club->id }}" {{ $user->club_id == $club->id ? 'selected' : '' }}>
+                                                    {{ $club->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                @endif
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <form action="{{ route('users.update', $user) }}" method="POST" id="form-user-{{ $user->id }}" class="flex items-center space-x-2">
                                         @csrf
@@ -171,6 +186,19 @@
                             <form action="{{ route('users.update', $user) }}" method="POST" class="flex flex-col gap-2">
                                 @csrf
                                 @method('PATCH')
+                                @if(auth()->user()->is_super_admin)
+                                    <div class="mb-2">
+                                        <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Club / Equipo</label>
+                                        <select name="club_id" class="w-full text-[11px] font-black rounded-xl border-gray-200 bg-white focus:ring-club-primary focus:border-club-primary py-2.5 pl-3 transition-all uppercase tracking-tighter">
+                                            <option value="">-- Sin Club --</option>
+                                            @foreach($clubs as $club)
+                                                <option value="{{ $club->id }}" {{ $user->club_id == $club->id ? 'selected' : '' }}>
+                                                    {{ $club->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
                                 <div class="flex gap-2">
                                     <div class="relative flex-1">
                                         <i class="bi bi-person-badge absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -258,6 +286,19 @@
                                         <input type="number" name="pay_per_session" value="0" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
                                     </div>
                                 </div>
+                                @if(auth()->user()->is_super_admin)
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Club / Equipo</label>
+                                        <select name="club_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all">
+                                            <option value="">-- Sin Club --</option>
+                                            @foreach($clubs as $club)
+                                                <option value="{{ $club->id }}">
+                                                    {{ $club->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
                                 <p class="mt-1 text-[10px] text-gray-400 italic text-center" x-show="roleSelected == 'Profesor'">Define el pago por clase solo si el usuario es Profesor.</p>
                             </div>
                         </div>

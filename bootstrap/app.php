@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'must.change.password' => \App\Http\Middleware\CheckMustChangePassword::class,
+            'module' => \App\Http\Middleware\CheckModuleAccess::class,
+            'superadmin' => \App\Http\Middleware\IsSuperAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

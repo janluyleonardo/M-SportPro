@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Club;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Hash;
@@ -17,19 +18,26 @@ class UserController extends Controller
     {
         $search = $request->input('search');
         
-        $users = User::with('roles')
+        $users = User::with(['roles', 'club'])
+            ->when(!auth()->user()->is_super_admin, function($query) {
+                // Si no es super admin, solo ve los de su mismo club
+                return $query->where('club_id', auth()->user()->club_id);
+            })
             ->when($search, function($query, $search) {
-                return $query->where('name', 'like', "%{$search}%")
-                             ->orWhere('email', 'like', "%{$search}%")
-                             ->orWhereHas('roles', function($q) use ($search) {
-                                 $q->where('name', 'like', "%{$search}%");
-                             });
+                return $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhereHas('roles', function($roleQuery) use ($search) {
+                          $roleQuery->where('name', 'like', "%{$search}%");
+                      });
+                });
             })
             ->paginate(10)
-            ->withQueryString(); // Mantiene el parámetro de búsqueda al cambiar de página
+            ->withQueryString();
 
         $roles = Role::all();
-        return view('users.index', compact('users', 'roles', 'search'));
+        $clubs = Club::all(); // Obtenemos todos los clubes para el selector si es superadmin
+        return view('users.index', compact('users', 'roles', 'clubs', 'search'));
     }
 
     /**
@@ -39,6 +47,9 @@ class UserController extends Controller
     {
         $validated = $request->validated();
 
+        // Si es superadmin puede mandar club_id, de lo contrario toma el club del admin creador
+        $clubId = auth()->user()->is_super_admin ? $request->club_id : auth()->user()->club_id;
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -46,6 +57,7 @@ class UserController extends Controller
             'documento_deportista' => $request->documento_deportista,
             'pay_per_session' => $request->pay_per_session ?? 0,
             'must_change_password' => true,
+            'club_id' => $clubId,
         ]);
 
         $user->assignRole($validated['role']);
@@ -58,16 +70,34 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $rules = [
             'role' => 'required|exists:roles,name',
             'documento_deportista' => 'nullable|string',
             'pay_per_session' => 'nullable|numeric|min:0',
-        ]);
+        ];
 
-        $user->update([
+        // Solo superadmin puede cambiar o asociar clubes de forma directa
+        if (auth()->user()->is_super_admin) {
+            $rules['club_id'] = 'nullable|exists:clubs,id';
+        }
+
+        $request->validate($rules);
+
+        $updateData = [
             'documento_deportista' => $request->documento_deportista,
             'pay_per_session' => $request->pay_per_session ?? 0
-        ]);
+        ];
+
+        if (auth()->user()->is_super_admin) {
+            $updateData['club_id'] = $request->club_id;
+        } else {
+            // Si es un admin normal y el usuario modificado no tiene club, lo asociamos a su club
+            if (is_null($user->club_id)) {
+                $updateData['club_id'] = auth()->user()->club_id;
+            }
+        }
+
+        $user->update($updateData);
 
         $user->syncRoles([$request->role]);
 

@@ -26,6 +26,8 @@ class User extends Authenticatable
         'documento_deportista',
         'pay_per_session',
         'must_change_password',
+        'club_id',
+        'is_super_admin',
     ];
 
     /**
@@ -48,11 +50,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_super_admin' => 'boolean',
         ];
     }
 
     public function classSchedules()
     {
         return $this->hasMany(ClassSchedule::class);
+    }
+
+    public function club()
+    {
+        return $this->belongsTo(Club::class);
     }
 }

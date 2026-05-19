@@ -20,6 +20,7 @@ class StoreUserRequest extends FormRequest
             'role' => 'required|exists:roles,name',
             'documento_deportista' => 'nullable|string',
             'pay_per_session' => 'nullable|numeric|min:0',
+            'club_id' => 'nullable|exists:clubs,id',
         ];
     }
 }

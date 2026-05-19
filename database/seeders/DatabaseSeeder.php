@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
         // Ejecutar el RoleSeeder primero
         $this->call(RoleSeeder::class);
 
+        // Sembrar los módulos de la plataforma
+        $this->call(ModuleSeeder::class);
+
         // 1. Administrador
         $admin = User::factory()->create([
             'name' => 'Admin ' . $appName,
