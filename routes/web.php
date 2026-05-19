@@ -23,6 +23,8 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('clubs', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'index'])->name('clubs.index');
     Route::post('clubs', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'store'])->name('clubs.store');
+    Route::put('clubs/{club}', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'update'])->name('clubs.update');
+    Route::delete('clubs/{club}', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'destroy'])->name('clubs.destroy');
     Route::post('clubs/{club}/toggle-module', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'toggleModule'])->name('clubs.toggleModule');
 });
 
