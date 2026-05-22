@@ -65,6 +65,7 @@ class StudentSeeder extends Seeder
             Student::firstOrCreate(
                 ['numDocumento' => $data['numDocumento']],
                 array_merge($data, [
+                    'club_id'            => 1,
                     'Photo'              => '',
                     'PesoDeportista'     => rand(30, 65),
                     'EstaturaDeportista' => rand(120, 175) . ' cm',
