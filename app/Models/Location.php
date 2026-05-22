@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToClub;
 
 class Location extends Model
 {
-    protected $fillable = ['name', 'description', 'active'];
+    use BelongsToClub;
+
+    protected $fillable = ['club_id', 'name', 'description', 'active'];
 
     /**
      * Solo devuelve canchas activas.

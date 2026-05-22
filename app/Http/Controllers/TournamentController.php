@@ -13,19 +13,25 @@ class TournamentController extends Controller
     public function index()
     {
         $tournaments = Tournament::with(['students'])->withCount('programmings')->orderByDesc('created_at')->get();
-        $studentList = \App\Models\Student::select('id', 'nomDeportista', 'Categoria')->orderBy('nomDeportista')->get();
-        return view('Tournaments.index', compact('tournaments', 'studentList'));
+        $studentList = \App\Models\Student::select('id', 'nomDeportista', 'Categoria', 'club_id')->orderBy('nomDeportista')->get();
+        $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
+        return view('Tournaments.index', compact('tournaments', 'studentList', 'clubs'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'club_id' => 'nullable|exists:clubs,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category' => 'nullable|string',
             'costo_total_inscripcion' => 'nullable|numeric|min:0',
             'costo_total_arbitraje' => 'nullable|numeric|min:0',
         ]);
+
+        if (!auth()->user()->is_super_admin) {
+            unset($validated['club_id']);
+        }
 
         $tournament = Tournament::create($validated);
 
@@ -39,6 +45,7 @@ class TournamentController extends Controller
     public function update(Request $request, Tournament $tournament)
     {
         $validated = $request->validate([
+            'club_id' => 'nullable|exists:clubs,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category' => 'nullable|string',
@@ -46,6 +53,10 @@ class TournamentController extends Controller
             'costo_total_inscripcion' => 'nullable|numeric|min:0',
             'costo_total_arbitraje' => 'nullable|numeric|min:0',
         ]);
+
+        if (!auth()->user()->is_super_admin) {
+            unset($validated['club_id']);
+        }
 
         $tournament->update($validated);
 

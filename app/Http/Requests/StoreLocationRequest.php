@@ -17,6 +17,7 @@ class StoreLocationRequest extends FormRequest
         $locationId = $this->route('location') ? $this->route('location')->id : null;
 
         return [
+            'club_id' => 'nullable|exists:clubs,id',
             'name' => [
                 'required',
                 'string',

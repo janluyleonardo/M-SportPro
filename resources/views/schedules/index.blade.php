@@ -53,6 +53,7 @@
         editTeacher: '', 
         editLocation: '',
         editObservations: '',
+        editClubId: '',
         editUrl: ''
     }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
@@ -111,6 +112,7 @@
                                                 editTeacher = '{{ $schedule->user_id }}';
                                                 editLocation = '{{ $schedule->location }}';
                                                 editObservations = '{{ $schedule->observations }}';
+                                                editClubId = '{{ $schedule->club_id }}';
                                                 $dispatch('open-modal', 'edit-schedule');
                                             " class="text-blue-400 hover:text-blue-600 transition-colors">
                                                 <i class="bi bi-pencil-fill"></i>
@@ -147,6 +149,17 @@
 
                 <form action="{{ route('schedules.store') }}" method="POST" class="space-y-6">
                     @csrf
+                    @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
+                    <div class="mb-4">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Club</label>
+                        <select name="club_id" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
+                            <option value="">Seleccione el Club...</option>
+                            @foreach($clubs as $club)
+                                <option value="{{ $club->id }}">{{ $club->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de la Clase</label>
@@ -220,6 +233,17 @@
                 <form :action="editUrl" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')
+                    @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
+                    <div class="mb-4">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Club</label>
+                        <select name="club_id" x-model="editClubId" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
+                            <option value="">Seleccione el Club...</option>
+                            @foreach($clubs as $club)
+                                <option value="{{ $club->id }}">{{ $club->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de la Clase</label>

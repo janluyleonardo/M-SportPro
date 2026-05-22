@@ -27,8 +27,15 @@
                     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
                         <div class="p-6">
                             <div class="flex justify-between items-start mb-4">
-                                <div class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                    {{ $tournament->category ?? 'General' }}
+                                <div class="flex flex-wrap gap-2">
+                                    <div class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                        {{ $tournament->category ?? 'General' }}
+                                    </div>
+                                    @if(auth()->user()->is_super_admin)
+                                        <div class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                            {{ $tournament->club->name ?? 'N/A' }}
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="flex space-x-1">
                                     <button @click="openEdit({{ $tournament->toJson() }}, @js($tournament->students->pluck('id')))" class="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors">
@@ -97,6 +104,18 @@
                 <h2 class="text-2xl font-black text-gray-900 mb-6">Nuevo Torneo</h2>
                 
                 <div class="space-y-6">
+                    @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
+                    <div>
+                        <x-input-label for="club_id" value="Club" class="font-bold text-gray-700 mb-1" />
+                        <select id="club_id" name="club_id" x-model="selectedClubId" @change="onClubChange" class="w-full border-gray-200 rounded-2xl p-4 text-sm font-black text-gray-950 bg-gray-50 focus:bg-white transition-all" required>
+                            <option value="">Seleccione el Club...</option>
+                            @foreach($clubs as $club)
+                                <option value="{{ $club->id }}">{{ $club->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
                     <div>
                         <x-input-label for="name" value="Nombre del Torneo" class="font-bold text-gray-700 mb-1" />
                         <x-text-input id="name" name="name" type="text" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" placeholder="Ej: Copa Bogotanos 2024" required />
@@ -216,6 +235,18 @@
                 <h2 class="text-2xl font-black text-gray-900 mb-6">Editar Torneo</h2>
                 
                 <div class="space-y-6">
+                    @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
+                    <div>
+                        <x-input-label for="edit_club_id" value="Club" class="font-bold text-gray-700 mb-1" />
+                        <select id="edit_club_id" name="club_id" x-model="editSelectedClubId" @change="onEditClubChange" class="w-full border-gray-200 rounded-2xl p-4 text-sm font-black text-gray-950 bg-gray-50 focus:bg-white transition-all" required>
+                            <option value="">Seleccione el Club...</option>
+                            @foreach($clubs as $club)
+                                <option value="{{ $club->id }}">{{ $club->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
                     <div>
                         <x-input-label for="edit_name" value="Nombre del Torneo" class="font-bold text-gray-700 mb-1" />
                         <x-text-input id="edit_name" name="name" type="text" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" x-model="editingTournament.name" required />
@@ -339,12 +370,22 @@
     <script>
         function tournamentApp(studentList) {
             return {
-                allStudents: studentList.map(s => ({ id: s.id, name: s.nomDeportista, category: s.Categoria })),
+                allStudents: studentList.map(s => ({ id: s.id, name: s.nomDeportista, category: s.Categoria, clubId: s.club_id })),
                 editingTournament: null,
                 openCreate: false,
                 submitting: false,
 
                 // Create Transfer List
+                selectedClubId: '',
+                onClubChange() {
+                    const clubId = this.selectedClubId;
+                    if (clubId) {
+                        this.available = this.allStudents.filter(s => s.clubId == clubId);
+                    } else {
+                        this.available = [...this.allStudents];
+                    }
+                    this.selected = [];
+                },
                 searchLeft: '',
                 searchRight: '',
                 available: [],
@@ -386,6 +427,16 @@
                 },
 
                 // Edit Transfer List
+                editSelectedClubId: '',
+                onEditClubChange() {
+                    const clubId = this.editSelectedClubId;
+                    if (clubId) {
+                        this.editAvailable = this.allStudents.filter(s => s.clubId == clubId);
+                    } else {
+                        this.editAvailable = [...this.allStudents];
+                    }
+                    this.editSelected = [];
+                },
                 editSearchLeft: '',
                 editSearchRight: '',
                 editAvailable: [],
@@ -430,6 +481,7 @@
                     this.available = [...this.allStudents];
                     window.addEventListener('open-modal', (e) => {
                         if (e.detail === 'create-tournament') {
+                            this.selectedClubId = '';
                             this.available = [...this.allStudents];
                             this.selected = [];
                             this.submitting = false;
@@ -439,8 +491,15 @@
 
                 openEdit(tournament, studentIds) {
                     this.editingTournament = tournament;
+                    this.editSelectedClubId = tournament.club_id || '';
                     this.editSelected = this.allStudents.filter(s => studentIds.includes(s.id));
-                    this.editAvailable = this.allStudents.filter(s => !studentIds.includes(s.id));
+                    
+                    if (this.editSelectedClubId) {
+                        this.editAvailable = this.allStudents.filter(s => !studentIds.includes(s.id) && s.clubId == this.editSelectedClubId);
+                    } else {
+                        this.editAvailable = this.allStudents.filter(s => !studentIds.includes(s.id));
+                    }
+                    
                     this.submitting = false;
                     window.dispatchEvent(new CustomEvent('open-modal', { detail: 'edit-tournament' }));
                 }

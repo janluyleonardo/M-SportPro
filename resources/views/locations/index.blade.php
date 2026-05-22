@@ -13,7 +13,7 @@
         </div>
     </x-slot>
 
-    <div class="py-8" x-data="{ openEditModal: false, editName: '', editDescription: '', editUrl: '' }">
+    <div class="py-8" x-data="{ openEditModal: false, editName: '', editDescription: '', editClubId: '', editUrl: '' }">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
         {{-- El layout principal ya muestra las alertas de session('success') y errores --}}
@@ -25,6 +25,17 @@
                 </h3>
                 <form action="{{ route('locations.store') }}" method="POST" class="flex flex-col md:flex-row items-stretch md:items-end gap-4">
                     @csrf
+                    @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1.5">Club</label>
+                        <select name="club_id" required class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-800 focus:ring-club-primary focus:border-club-primary text-sm">
+                            <option value="">Seleccione el Club...</option>
+                            @foreach($clubs as $club)
+                                <option value="{{ $club->id }}">{{ $club->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <div class="flex-1">
                         <label class="block text-[10px] font-black text-gray-400 uppercase mb-1.5">Nombre de la Cancha</label>
                         <input type="text" name="name" placeholder="Ej: San José, El Campín..."
@@ -72,7 +83,7 @@
                                 </span>
 
                                 {{-- Botón Editar --}}
-                                <button @click="openEditModal = true; editName = '{{ $location->name }}'; editDescription = '{{ $location->description }}'; editUrl = '{{ route('locations.update', $location) }}'"
+                                <button @click="openEditModal = true; editName = '{{ $location->name }}'; editDescription = '{{ $location->description }}'; editClubId = '{{ $location->club_id }}'; editUrl = '{{ route('locations.update', $location) }}'"
                                         title="Editar"
                                         class="w-10 h-10 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all border border-blue-100 shadow-sm">
                                     <i class="bi bi-pencil-square text-lg"></i>
@@ -126,6 +137,17 @@
                                 </button>
                             </div>
                             <div class="space-y-4">
+                                @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Club</label>
+                                    <select name="club_id" x-model="editClubId" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-club-primary focus:ring-club-primary transition-all">
+                                        <option value="">Seleccione el Club...</option>
+                                        @foreach($clubs as $club)
+                                            <option value="{{ $club->id }}">{{ $club->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @endif
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre de la Cancha</label>
                                     <input type="text" name="name" x-model="editName" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-club-primary focus:ring-club-primary transition-all">

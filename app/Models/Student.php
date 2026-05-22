@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToClub;
 
 class Student extends Model
 {
-  use HasFactory;
+  use HasFactory, BelongsToClub;
 
   /**
    * The attributes that are mass assignable.
@@ -15,6 +16,7 @@ class Student extends Model
    * @var string[]
    */
   protected $fillable = [
+    'club_id',
     'Photo',
     'Categoria',
     'fechaInscripcion',

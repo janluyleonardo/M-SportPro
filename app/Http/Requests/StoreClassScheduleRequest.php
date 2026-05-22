@@ -14,6 +14,7 @@ class StoreClassScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'club_id' => 'nullable|exists:clubs,id',
             'day_of_week' => 'nullable|string',
             'date' => 'required|date',
             'start_time' => 'required',

@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToClub;
 
 class programming extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToClub;
 
     /**
    * The attributes that are mass assignable.
@@ -16,6 +17,7 @@ class programming extends Model
    * @var string[]
    */
     protected $fillable = [
+      'club_id',
       'torneo',
       'cancha',
       'categoriaUno',

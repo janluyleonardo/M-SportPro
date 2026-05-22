@@ -18,6 +18,18 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="space-y-6">
+                            @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
+                            <div>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Club</label>
+                                <select name="club_id" class="w-full border-gray-200 rounded-2xl p-4 text-sm font-black text-gray-950 bg-gray-50 focus:bg-white transition-all" required>
+                                    <option value="">Seleccione el Club...</option>
+                                    @foreach($clubs as $club)
+                                        <option value="{{ $club->id }}">{{ $club->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @endif
+
                             <div>
                                 <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Nombre del Producto</label>
                                 <input type="text" name="name" class="w-full border-gray-200 rounded-2xl p-4 text-sm font-black text-gray-900 bg-gray-50 focus:bg-white transition-all" placeholder="Ej: Camiseta Oficial Titular" required>

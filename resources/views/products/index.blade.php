@@ -33,6 +33,9 @@
                             <thead>
                                 <tr class="bg-gray-50/50">
                                     <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Producto</th>
+                                    @if(auth()->user()->is_super_admin)
+                                    <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Club</th>
+                                    @endif
                                     <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio</th>
                                     <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Stock</th>
                                     <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
@@ -56,6 +59,13 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        @if(auth()->user()->is_super_admin)
+                                        <td class="px-8 py-5">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100 shadow-sm">
+                                                {{ $p->club->name ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        @endif
                                         <td class="px-8 py-5">
                                             <span class="text-sm font-black text-gray-900">${{ number_format($p->price, 0, ',', '.') }}</span>
                                         </td>

@@ -14,6 +14,7 @@ class StoreStudentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'club_id' => 'nullable|exists:clubs,id',
             'Photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'Categoria' => 'required|string',
             'fechaInscripcion' => 'required|date',

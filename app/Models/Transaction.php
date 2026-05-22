@@ -3,10 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToClub;
 
 class Transaction extends Model
 {
+    use BelongsToClub;
+
     protected $fillable = [
+        'club_id',
         'type',
         'category',
         'custom_category',

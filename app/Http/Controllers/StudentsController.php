@@ -46,7 +46,8 @@ class StudentsController extends Controller
      */
     public function create()
     {
-      return view('students.create');
+      $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
+      return view('students.create', compact('clubs'));
     }
 
     /**
@@ -140,7 +141,8 @@ class StudentsController extends Controller
     {
       $hoy = now()->format('Y-m-d');
       $id = $student->id;
-      return view('students.edit', compact('student','hoy'));
+      $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
+      return view('students.edit', compact('student','hoy', 'clubs'));
     }
 
     /**

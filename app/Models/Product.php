@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToClub;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToClub;
 
     protected $fillable = [
+        'club_id',
         'name',
         'description',
         'price',

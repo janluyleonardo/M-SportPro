@@ -26,8 +26,14 @@ class ClassScheduleController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        $teachers  = User::role('Profesor')->get();
+        if (auth()->user()->is_super_admin) {
+            $teachers = User::role('Profesor')->get();
+        } else {
+            $teachers = User::role('Profesor')->where('club_id', auth()->user()->club_id)->get();
+        }
+        
         $locations = Location::active()->orderBy('name')->get();
+        $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
         
         return view('schedules.index', compact(
             'schedules', 
@@ -35,7 +41,8 @@ class ClassScheduleController extends Controller
             'locations', 
             'startOfWeek', 
             'endOfWeek', 
-            'selectedDate'
+            'selectedDate',
+            'clubs'
         ));
     }
 

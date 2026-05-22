@@ -11,23 +11,30 @@ class LocationController extends Controller
     public function index()
     {
         $locations = Location::orderBy('name')->get();
-        return view('locations.index', compact('locations'));
+        $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
+        return view('locations.index', compact('locations', 'clubs'));
     }
 
     public function store(StoreLocationRequest $request)
     {
         $validated = $request->validated();
 
-        Location::create([
+        $data = [
             'name'        => $validated['name'],
             'description' => $validated['description'] ?? null,
             'active'      => true,
-        ]);
+        ];
+
+        if (auth()->user()->is_super_admin && $request->has('club_id')) {
+            $data['club_id'] = $request->club_id;
+        }
+
+        Location::create($data);
 
         return back()->with('success', 'Cancha "' . $request->name . '" agregada correctamente.');
     }
 
-    public function update(Request $request, Location $location)
+    public function update(StoreLocationRequest $request, Location $location)
     {
         if ($request->has('toggle_active')) {
             $location->update(['active' => !$location->active]);
@@ -37,10 +44,16 @@ class LocationController extends Controller
 
         $validated = $request->validated();
 
-        $location->update([
+        $data = [
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
-        ]);
+        ];
+
+        if (auth()->user()->is_super_admin && $request->has('club_id')) {
+            $data['club_id'] = $request->club_id;
+        }
+
+        $location->update($data);
 
         return back()->with('success', 'Cancha actualizada correctamente.');
     }

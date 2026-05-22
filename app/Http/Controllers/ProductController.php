@@ -10,17 +10,20 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::orderBy('name')->paginate(10);
-        return view('products.index', compact('products'));
+        $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
+        return view('products.index', compact('products', 'clubs'));
     }
 
     public function create()
     {
-        return view('products.create');
+        $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
+        return view('products.create', compact('clubs'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'club_id' => 'nullable|exists:clubs,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
@@ -40,12 +43,14 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        return view('products.edit', compact('product'));
+        $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
+        return view('products.edit', compact('product', 'clubs'));
     }
 
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
+            'club_id' => 'nullable|exists:clubs,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
@@ -56,6 +61,10 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('products', 'public');
             $validated['image'] = $path;
+        }
+
+        if (auth()->user()->is_super_admin && $request->has('club_id')) {
+            $validated['club_id'] = $request->club_id;
         }
 
         $product->update($validated);

@@ -95,6 +95,19 @@
                        ">
               </div>
 
+              @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
+              <!-- Club Selection (Solo Super Admin) -->
+              <div class="lg:col-span-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Club <span class="text-red-500">*</span></label>
+                <select name="club_id" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-club-primary focus:ring focus:ring-club-primary/20 transition-all text-sm">
+                  <option value="">Seleccione el Club...</option>
+                  @foreach($clubs as $club)
+                    <option value="{{ $club->id }}" {{ old('club_id') == $club->id ? 'selected' : '' }}>{{ $club->name }}</option>
+                  @endforeach
+                </select>
+              </div>
+              @endif
+
               <!-- Nombres -->
               <div class="lg:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">{{ __('Full Name') }} <span class="text-red-500">*</span></label>
