@@ -20,10 +20,40 @@ class ProgrammingController extends Controller
             return back()->with('error', 'No hay programación para esta fecha.');
         }
 
+        // Determine club
+        $club = null;
+        if ($programming->first()->club) {
+            $club = $programming->first()->club;
+        } elseif (auth()->check() && auth()->user()->club) {
+            $club = auth()->user()->club;
+        }
+
+        $clubName = $club ? $club->name : 'Club Deportivo Jackeline FS';
+        
+        // Load logo and convert to base64
+        $logoPath = 'images/logo/LOGO.png';
+        if ($club && $club->logo && file_exists(public_path($club->logo))) {
+            $logoPath = $club->logo;
+        }
+        $base64Logo = $this->imageToBase64(public_path($logoPath));
+
         $studentNames = Student::pluck('nomDeportista', 'id')->toArray();
 
-        $pdf = Pdf::loadView('Programming.pdf', compact('programming', 'date', 'studentNames'));
+        $pdf = Pdf::loadView('Programming.pdf', compact('programming', 'date', 'studentNames', 'base64Logo', 'clubName'));
         return $pdf->stream('Programacion_'.$date.'.pdf');
+    }
+
+    /**
+     * Auxiliar para convertir imágenes a Base64
+     */
+    private function imageToBase64($path)
+    {
+        if (file_exists($path)) {
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            return 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+        return null;
     }
 
     /**

@@ -19,6 +19,14 @@
                 </div>
             </div>
 
+            @if(auth()->user()->hasRole('Admin') && auth()->user()->club_id)
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="max-w-3xl">
+                    @include('profile.partials.update-club-form')
+                </div>
+            </div>
+            @endif
+
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.delete-user-form')

@@ -89,8 +89,14 @@ class StudentsController extends Controller
     {
       $student = Student::findOrFail($id);
 
+      // Dynamically load the club logo (fallback to default)
+      $logoPath = 'images/logo/LOGO.png';
+      if ($student->club && $student->club->logo && file_exists(public_path($student->club->logo))) {
+          $logoPath = $student->club->logo;
+      }
+
       // Optimización: Convertir imágenes a Base64 para acelerar el procesamiento de DomPDF
-      $base64Logo = $this->imageToBase64(public_path('images/logo/LOGO.png'));
+      $base64Logo = $this->imageToBase64(public_path($logoPath));
       $base64Photo = $student->Photo ? $this->imageToBase64(public_path($student->Photo)) : null;
 
       $pdf = Pdf::loadView('students.pdf', compact('student', 'base64Logo', 'base64Photo'));

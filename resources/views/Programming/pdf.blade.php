@@ -11,7 +11,9 @@
       margin: 1cm;
     }
     body {
-      background-image: url("{{ public_path('images/logo/LOGO.png') }}");
+      @if(isset($base64Logo) && $base64Logo)
+      background-image: url("{{ $base64Logo }}");
+      @endif
       background-repeat: no-repeat;
       background-size:100%;
       background-position: 50% 50%;
@@ -85,13 +87,21 @@
     <table width="100%" border="0" cellpadding="0" cellspacing="0">
       <tr>
         <td width="15%" align="left" valign="middle">
-          <img src="{{ public_path('images/logo/LOGO.png') }}" alt="LOGO-jackeline" width="90">
+          @if(isset($base64Logo) && $base64Logo)
+          <img src="{{ $base64Logo }}" alt="LOGO-club" width="90">
+          @endif
         </td>
         <td width="85%" align="center" valign="middle">
-          <h2 style="text-shadow: 2px 2px #FF0000 !important; margin: 0; padding: 0;">{{__('CLUB DEPORTIVO JACKELINE FS A.F.A')}}</h2>
-          <h5 class="resolucion" style="margin: 5px 0 0 0; padding: 0; font-weight: normal;">
+          @php
+            $displayClubName = isset($clubName) ? $clubName : 'Club Deportivo Jackeline FS';
+            $showResolution = (Str::contains(Str::lower($displayClubName), 'jackeline') || Str::contains(Str::lower($displayClubName), 'jacqueline'));
+          @endphp
+          <h2 style="text-shadow: 2px 2px #FF0000 !important; margin: 0; padding: 0; font-size: 20px;">{{ Str::upper($displayClubName) }}</h2>
+          @if($showResolution)
+          <h5 class="resolucion" style="margin: 5px 0 0 0; padding: 0; font-weight: normal; font-size: 10px;">
             Resolución 175 del 13 de marzo de 2017, otorgada por el Instituto de Recreación y Deporte (IDRD).
           </h5>
+          @endif
           <h5 style="margin: 10px 0 0 0; padding: 0; font-size: 14px;">
             <strong>PROGRAMACIÓN DE ENCUENTROS - {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d \d\e F \d\e Y') }}</strong>
           </h5>

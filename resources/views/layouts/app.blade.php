@@ -8,7 +8,13 @@
         <title>{{ config('app.name', 'Jackeline F.S.') }}</title>
 
         <!-- Favicon -->
-        <link rel="icon" href="{{ asset('images/logo/LOGO.png?v=' . now()->format('H.s')) }}" type="image/png">
+        @php
+            $faviconUrl = asset('images/logo/LOGO.png');
+            if (auth()->check() && !auth()->user()->is_super_admin && auth()->user()->club && auth()->user()->club->logo) {
+                $faviconUrl = asset(auth()->user()->club->logo);
+            }
+        @endphp
+        <link rel="icon" href="{{ $faviconUrl . '?v=' . now()->format('H.s') }}" type="image/png">
 
 
         <!-- Fonts -->

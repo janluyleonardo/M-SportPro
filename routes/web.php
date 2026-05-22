@@ -36,8 +36,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['must.change.password'])->group(function () {
         // 1. Dashboard: Acceso para todos los roles definidos
         Route::get('/dashboard', function () {
+            if (auth()->user()->is_super_admin) {
+                $clubs = \App\Models\Club::with(['users.roles', 'modules'])->withCount('users')->get();
+                return view('dashboard', compact('clubs'));
+            }
+
+            if (!auth()->user()->hasAnyRole(['Admin', 'Profesor', 'Padre', 'Deportista'])) {
+                abort(403, 'Acción no autorizada.');
+            }
+
             return view('dashboard');
-        })->name('dashboard')->middleware('role:Admin|Profesor|Padre|Deportista');
+        })->name('dashboard');
 
     // 2. Módulo de Estudiantes (Solo Admin y Profesor)
     Route::middleware(['role:Admin|Profesor'])->group(function () {
@@ -141,6 +150,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(ProfileController::class)->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
         Route::patch('/profile', 'update')->name('profile.update');
+        Route::put('/profile/club', 'updateClub')->name('profile.club.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
 });

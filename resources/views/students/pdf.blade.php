@@ -36,11 +36,17 @@
       <img src="{{ $base64Logo }}" alt="LOGO-jackeline" width="100">
       @endif
     </div>
+    @php
+      $clubName = $student->club ? $student->club->name : 'Club Deportivo Jackeline FS';
+      $showResolution = (Str::contains(Str::lower($clubName), 'jackeline') || Str::contains(Str::lower($clubName), 'jacqueline'));
+    @endphp
     <div class="h-pdf-center">
-      <h2 style="text-shadow: 2px 2px #FF0000 !important;">{{__('CLUB DEPORTIVO JACKELINE FS A.F.A')}}</h2>
+      <h2 style="text-shadow: 2px 2px #FF0000 !important; font-size: 18px; margin-bottom: 5px;">{{ Str::upper($clubName) }}</h2>
+        @if($showResolution)
         <h5 class="resolucion" style="background-color: rgba(169, 45, 169,0);margin-top:-5%;">
           Resolución 175 del 13 de marzo de 2017, otorgada por el Instituto de Recreación y Deporte (IDRD).<br>
         </h5>
+        @endif
         <h5 style="background-color: rgba(215, 21, 215,0);margin-top:-2%;">
           <strong>FORMATO UNICO DE REGISTRO</strong>
         </h5>

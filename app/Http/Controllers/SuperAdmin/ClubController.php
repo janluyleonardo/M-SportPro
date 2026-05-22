@@ -93,7 +93,7 @@ class ClubController extends Controller
 
         $logoPath = $club->logo;
         if ($request->hasFile('logo')) {
-            if ($club->logo && file_exists(public_path($club->logo))) {
+            if ($club->logo && $club->logo !== 'images/logo/LOGO.png' && file_exists(public_path($club->logo))) {
                 @unlink(public_path($club->logo));
             }
 
@@ -135,7 +135,7 @@ class ClubController extends Controller
 
     public function destroy(Club $club)
     {
-        if ($club->logo && file_exists(public_path($club->logo))) {
+        if ($club->logo && $club->logo !== 'images/logo/LOGO.png' && file_exists(public_path($club->logo))) {
             @unlink(public_path($club->logo));
         }
 
