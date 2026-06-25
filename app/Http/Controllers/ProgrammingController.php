@@ -9,6 +9,7 @@ use App\Models\programming;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use App\Services\CustomLogger;
 
 class ProgrammingController extends Controller
 {
@@ -128,6 +129,7 @@ class ProgrammingController extends Controller
         programming::create($validated);
         return redirect()->route('programming.index')->with('success', 'Registro creado correctamente.');
       } catch (\Throwable $th) {
+        CustomLogger::logException($th);
         return back()->withInput()->with('error', 'No se pudo crear nuevo registro => '.$th->getMessage());
       }
     }
@@ -187,6 +189,7 @@ class ProgrammingController extends Controller
         $programming->update($validated);
         return redirect()->route('programming.index')->with('success', 'Registro actualizado correctamente.');
       } catch (\Throwable $th) {
+        CustomLogger::logException($th);
         return back()->withInput()->with('error', 'No se pudo actualizar registro porque => '.$th->getMessage());
       }
     }
@@ -204,6 +207,7 @@ class ProgrammingController extends Controller
         $programming->delete();
         return redirect()->route('programming.index')->with('success', 'Registro eliminado correctamente.');
       } catch (\Throwable $th) {
+        CustomLogger::logException($th);
         return redirect()->route('programming.index')->with('error', 'No se pudo eliminar registro porque => '.$th->getMessage());
       }
     }
@@ -270,6 +274,7 @@ class ProgrammingController extends Controller
                 }
             }
         } catch (\Throwable $th) {
+            CustomLogger::logException($th);
             // Si falla el parseo de fecha, ignoramos el conflicto para no bloquear el flujo principal
         }
 

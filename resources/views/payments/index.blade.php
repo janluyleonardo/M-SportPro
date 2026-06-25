@@ -1,12 +1,21 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center space-x-3">
-            <div class="p-2 bg-blue-50 rounded-lg text-club-primary">
+            <div class="p-2 bg-blue-50 rounded-lg text-club-primary flex-shrink-0">
                 <i class="bi bi-person-check-fill text-xl"></i>
             </div>
-            <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
-                {{ __('Mensualidades por Estudiante') }}
-            </h2>
+            <div>
+                <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
+                    {{ __('Mensualidades por Estudiante') }}
+                </h2>
+                <p class="text-xs text-gray-500 font-bold tracking-wide mt-0.5">
+                    @if(auth()->user()->club_id)
+                        {{ auth()->user()->club->name ?? 'Mi Club' }} &bull; {{ \App\Models\Student::where('club_id', auth()->user()->club_id)->count() }} estudiantes registrados
+                    @else
+                        {{ \App\Models\Student::count() }} estudiantes registrados en total
+                    @endif
+                </p>
+            </div>
         </div>
     </x-slot>
 

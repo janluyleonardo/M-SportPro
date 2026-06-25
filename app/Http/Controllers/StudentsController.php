@@ -11,6 +11,7 @@ use App\Exports\StudentsExport;
 use App\Exports\StudentTemplateExport;
 use App\Imports\StudentsImport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\CustomLogger;
 
 class StudentsController extends Controller
 {
@@ -22,9 +23,9 @@ class StudentsController extends Controller
     public function index(Request $request)
     {
       $search = $request->input('search');
-      
+
       $query = Student::orderBy('id', 'DESC');
-      
+
       if ($search) {
           $query->where(function($q) use ($search) {
               $q->where('nomDeportista', 'LIKE', "%{$search}%")
@@ -32,10 +33,10 @@ class StudentsController extends Controller
                 ->orWhere('numDocumento', 'LIKE', "%{$search}%");
           });
       }
-      
+
       $students = $query->paginate(5)->withQueryString();
-      $studentsCount = Student::count(); 
-      
+      $studentsCount = Student::count();
+
       return view('students.index', compact('students', 'studentsCount', 'search'));
     }
 
@@ -73,9 +74,10 @@ class StudentsController extends Controller
         $newStudent->save();
         $newStudent->updateBalance(); // Inicializar saldo
       } catch (\Throwable $th) {
+        CustomLogger::logException($th);
         return back()->withInput()->with('error', 'No se pudo agregar nuevo registro => '.$th->getMessage());
       }
-      
+
       return redirect()->route('imprimir', $newStudent->id);
     }
 
@@ -100,7 +102,7 @@ class StudentsController extends Controller
       $base64Photo = $student->Photo ? $this->imageToBase64(public_path($student->Photo)) : null;
 
       $pdf = Pdf::loadView('students.pdf', compact('student', 'base64Logo', 'base64Photo'));
-      
+
       // Configuraciones adicionales para mejorar rendimiento
       $pdf->setPaper('letter', 'portrait');
       $pdf->setOptions([
@@ -176,6 +178,7 @@ class StudentsController extends Controller
         $student->updateBalance();
         return redirect()->route('students.index')->with('success', 'Registro actualizado correctamente.');
       } catch (\Throwable $th) {
+        CustomLogger::logException($th);
         return back()->withInput()->with('error', 'No pudimos actualizar el registro: '.$th->getMessage());
       }
     }
@@ -197,7 +200,8 @@ class StudentsController extends Controller
       try {
         return Excel::download(new StudentsExport, 'Registros.xlsx');
       } catch (\Throwable $th) {
-        return redirect()->route('dashboard')->with('error', 'no se pudo generar registro excel => '.$th);
+        CustomLogger::logException($th);
+        return redirect()->route('dashboard')->with('error', 'no se pudo generar registro excel => '.$th->getMessage());
       }
     }
 
@@ -211,8 +215,85 @@ class StudentsController extends Controller
             Excel::import(new StudentsImport, $request->file('file'));
             return back()->with('success', 'Deportistas importados correctamente.');
         } catch (\Throwable $th) {
-            return back()->with('error', 'Error al importar deportistas: ' . $th->getMessage());
+            return $this->handleImportError($th);
         }
+    }
+
+    /**
+     * Procesa y limpia los errores de importación para mostrarlos de forma amigable.
+     */
+    private function handleImportError(\Throwable $th)
+    {
+        CustomLogger::logException($th);
+        $message = 'Ocurrió un error inesperado al importar.';
+
+        if ($th instanceof \Illuminate\Database\QueryException) {
+            $errorCode = $th->errorInfo[1] ?? null;
+            $errorMsg = $th->errorInfo[2] ?? '';
+
+            // Mapeo de columnas de base de datos a nombres legibles
+            $columnMap = [
+                'nomDeportista'       => 'Nombre del Deportista',
+                'numDocumento'        => 'Número de Documento',
+                'Categoria'           => 'Categoría',
+                'genero'              => 'Género',
+                'fechaNacimiento'     => 'Fecha de Nacimiento',
+                'fechaInscripcion'    => 'Fecha de Inscripción',
+                'RHDeportista'        => 'RH',
+                'PesoDeportista'      => 'Peso',
+                'EstaturaDeportista'  => 'Estatura',
+                'Ciudad'              => 'Ciudad',
+                'Departamento'        => 'Departamento',
+                'EPS'                 => 'EPS',
+                'Colegio'             => 'Colegio',
+                'Curso'               => 'Curso',
+                'numTelefonico'       => 'Teléfono',
+                'nombreMama'          => 'Nombre de la Madre',
+                'documentoMama'       => 'Documento de la Madre',
+                'telefonoMama'        => 'Teléfono de la Madre',
+                'direccionMama'       => 'Dirección de la Madre',
+                'correoMama'          => 'Correo de la Madre',
+                'nombrePapa'          => 'Nombre del Padre',
+                'documentoPapa'       => 'Documento del Padre',
+                'telefonoPapa'        => 'Teléfono del Padre',
+                'direccionPapa'       => 'Dirección del Padre',
+                'correoPapa'          => 'Correo del Padre',
+                'direccionDeportista' => 'Dirección del Deportista',
+                'barrio'              => 'Barrio',
+                'localidad'           => 'Localidad',
+            ];
+
+            if ($errorCode === 1048) {
+                if (preg_match("/Column '([^']+)' cannot be null/i", $errorMsg, $matches)) {
+                    $column = $matches[1];
+                    $friendlyName = $columnMap[$column] ?? $column;
+                    $message = "El campo '{$friendlyName}' no puede estar vacío en el archivo Excel.";
+                } else {
+                    $message = "Hay campos obligatorios vacíos en el archivo Excel.";
+                }
+            } elseif ($errorCode === 1364) {
+                if (preg_match("/Field '([^']+)' doesn't have a default value/i", $errorMsg, $matches)) {
+                    $column = $matches[1];
+                    $friendlyName = $columnMap[$column] ?? $column;
+                    $message = "El campo '{$friendlyName}' es obligatorio y no fue suministrado.";
+                } else {
+                    $message = "Faltan campos obligatorios en el archivo Excel.";
+                }
+            } elseif ($errorCode === 1062) {
+                if (preg_match("/Duplicate entry '([^']+)' for key/i", $errorMsg, $matches)) {
+                    $value = $matches[1];
+                    $message = "Ya existe un registro con el valor '{$value}' (ej. documento duplicado).";
+                } else {
+                    $message = "Hay datos duplicados en el archivo Excel.";
+                }
+            } else {
+                $message = "Error en base de datos: " . $errorMsg;
+            }
+        } else {
+            $message = $th->getMessage();
+        }
+
+        return back()->with('error', 'Error al importar deportistas: ' . $message);
     }
 
     public function exportTemplate()
@@ -220,7 +301,8 @@ class StudentsController extends Controller
       try {
         return Excel::download(new StudentTemplateExport, 'Plantilla_Deportistas.xlsx');
       } catch (\Throwable $th) {
-        return redirect()->route('dashboard')->with('error', 'no se pudo generar la plantilla excel => '.$th);
+        CustomLogger::logException($th);
+        return redirect()->route('dashboard')->with('error', 'no se pudo generar la plantilla excel => '.$th->getMessage());
       }
     }
 }

@@ -56,7 +56,7 @@
             }
             .toast-enter { animation: toast-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
             .toast-leave { animation: toast-out 0.3s ease-in forwards; }
-            .toast-progress { animation: progress-bar 4s linear forwards; }
+            .toast-progress { animation: progress-bar 8s linear forwards; }
         </style>
     </head>
     <body class="font-sans antialiased text-gray-900 bg-gray-50">
@@ -96,7 +96,7 @@
                 add(toast) {
                     const id = Date.now();
                     this.toasts.push({ id, ...toast, leaving: false });
-                    setTimeout(() => this.remove(id), 4000);
+                    setTimeout(() => this.remove(id), 8000);
                 },
                 remove(id) {
                     const t = this.toasts.find(t => t.id === id);
@@ -298,22 +298,27 @@
 
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('a');
-                if (link && 
-                    link.href && 
-                    !link.href.startsWith('#') && 
-                    !link.href.startsWith('javascript') && 
-                    !link.target &&
-                    link.hostname === window.location.hostname &&
-                    !link.hasAttribute('data-no-loader') &&
-                    link.getAttribute('data-no-loader') !== 'true' &&
-                    !link.href.includes('template') &&
-                    !link.href.includes('export') &&
-                    !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
-                    
-                    const loader = document.getElementById('global-loader');
-                    if (loader) {
-                        loader.classList.remove('pointer-events-none', 'opacity-0');
-                        loader.classList.add('opacity-100');
+                if (link) {
+                    const hrefAttr = link.getAttribute('href');
+                    if (hrefAttr && (hrefAttr.startsWith('#') || hrefAttr.startsWith('javascript:'))) {
+                        return;
+                    }
+                    if (link.href && 
+                        !link.target &&
+                        link.hostname === window.location.hostname &&
+                        !link.hasAttribute('data-no-loader') &&
+                        link.getAttribute('data-no-loader') !== 'true' &&
+                        !link.href.includes('template') &&
+                        !link.href.includes('export') &&
+                        !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                        
+                        setTimeout(() => {
+                            const loader = document.getElementById('global-loader');
+                            if (loader) {
+                                loader.classList.remove('pointer-events-none', 'opacity-0');
+                                loader.classList.add('opacity-100');
+                            }
+                        }, 50);
                     }
                 }
             });

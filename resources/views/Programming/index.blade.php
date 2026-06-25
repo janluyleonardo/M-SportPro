@@ -127,9 +127,9 @@
                                     <i class="bi bi-whatsapp mr-2"></i>
                                     WhatsApp Día
                                 </a>
-                                <a :href="'{{ route('programming.imprimir', 'DATE') }}'.replace('DATE', selectedDate)"
-                                    target="_blank" @click="printing = true; setTimeout(() => printing = false, 3000)"
-                                    :class="printing ? 'opacity-75 cursor-not-allowed pointer-events-none' : ''"
+                                <a href="#"
+                                     @click.prevent="if (!printing) { printing = true; window.open('{{ route('programming.imprimir', 'DATE') }}'.replace('DATE', selectedDate), '_blank'); setTimeout(() => printing = false, 3000); }"
+                                     :class="printing ? 'opacity-75 cursor-not-allowed pointer-events-none' : ''"
                                     class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center transition-all border border-white/20">
                                     <template x-if="!printing">
                                         <i class="bi bi-printer-fill mr-2"></i>

@@ -7,6 +7,7 @@ use App\Models\Location;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreClassScheduleRequest;
+use App\Services\CustomLogger;
 
 class ClassScheduleController extends Controller
 {
@@ -63,10 +64,15 @@ class ClassScheduleController extends Controller
         ];
         $validated['day_of_week'] = $dayMap[$date->dayOfWeek];
 
-        ClassSchedule::create($validated);
+        try {
+            ClassSchedule::create($validated);
 
-        return redirect()->route('schedules.index', ['date' => $validated['date']])
-            ->with('success', 'Clase programada correctamente.');
+            return redirect()->route('schedules.index', ['date' => $validated['date']])
+                ->with('success', 'Clase programada correctamente.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->withInput()->with('error', 'No se pudo programar la clase: ' . $th->getMessage());
+        }
     }
 
     public function update(StoreClassScheduleRequest $request, ClassSchedule $classSchedule)
@@ -86,15 +92,25 @@ class ClassScheduleController extends Controller
         ];
         $validated['day_of_week'] = $dayMap[$date->dayOfWeek];
 
-        $classSchedule->update($validated);
+        try {
+            $classSchedule->update($validated);
 
-        return redirect()->route('schedules.index', ['date' => $validated['date']])
-            ->with('success', 'Horario actualizado correctamente.');
+            return redirect()->route('schedules.index', ['date' => $validated['date']])
+                ->with('success', 'Horario actualizado correctamente.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->withInput()->with('error', 'No se pudo actualizar el horario: ' . $th->getMessage());
+        }
     }
 
     public function destroy(ClassSchedule $classSchedule)
     {
-        $classSchedule->delete();
-        return redirect()->route('schedules.index')->with('success', 'Horario eliminado.');
+        try {
+            $classSchedule->delete();
+            return redirect()->route('schedules.index')->with('success', 'Horario eliminado.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return redirect()->route('schedules.index')->with('error', 'No se pudo eliminar el horario: ' . $th->getMessage());
+        }
     }
 }

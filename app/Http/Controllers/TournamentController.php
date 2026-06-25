@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tournament;
 use Illuminate\Http\Request;
+use App\Services\CustomLogger;
 
 class TournamentController extends Controller
 {
@@ -33,13 +34,18 @@ class TournamentController extends Controller
             unset($validated['club_id']);
         }
 
-        $tournament = Tournament::create($validated);
+        try {
+            $tournament = Tournament::create($validated);
 
-        if ($request->has('student_ids')) {
-            $tournament->students()->sync($request->input('student_ids'));
+            if ($request->has('student_ids')) {
+                $tournament->students()->sync($request->input('student_ids'));
+            }
+
+            return redirect()->route('tournaments.index')->with('success', 'Torneo creado correctamente.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->withInput()->with('error', 'No se pudo crear el torneo: ' . $th->getMessage());
         }
-
-        return redirect()->route('tournaments.index')->with('success', 'Torneo creado correctamente.');
     }
 
     public function update(Request $request, Tournament $tournament)
@@ -58,19 +64,29 @@ class TournamentController extends Controller
             unset($validated['club_id']);
         }
 
-        $tournament->update($validated);
+        try {
+            $tournament->update($validated);
 
-        if ($request->has('student_ids')) {
-            $tournament->students()->sync($request->input('student_ids'));
+            if ($request->has('student_ids')) {
+                $tournament->students()->sync($request->input('student_ids'));
+            }
+
+            return redirect()->route('tournaments.index')->with('success', 'Torneo actualizado correctamente.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->withInput()->with('error', 'No se pudo actualizar el torneo: ' . $th->getMessage());
         }
-
-        return redirect()->route('tournaments.index')->with('success', 'Torneo actualizado correctamente.');
     }
 
     public function destroy(Tournament $tournament)
     {
-        $tournament->delete();
-        return redirect()->route('tournaments.index')->with('success', 'Torneo eliminado correctamente.');
+        try {
+            $tournament->delete();
+            return redirect()->route('tournaments.index')->with('success', 'Torneo eliminado correctamente.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return redirect()->route('tournaments.index')->with('error', 'No se pudo eliminar el torneo: ' . $th->getMessage());
+        }
     }
 
     public function payments(Tournament $tournament)

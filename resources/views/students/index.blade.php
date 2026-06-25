@@ -48,8 +48,8 @@
         <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-2" x-data="{ exporting: false, showImport: false }">
           @role('Admin')
           <!-- Botón Exportar -->
-          <a href="{{ route('export') }}" data-no-loader="true"
-             @click="exporting = true; setTimeout(() => exporting = false, 3000)"
+          <a href="#" data-no-loader="true"
+             @click.prevent="if (!exporting) { exporting = true; window.location.href = '{{ route('export') }}'; setTimeout(() => exporting = false, 3000); }"
              :class="exporting ? 'opacity-75 cursor-not-allowed pointer-events-none' : ''"
              class="flex-1 lg:flex-none inline-flex items-center justify-center px-4 py-2.5 bg-emerald-500 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-emerald-600 transition-colors duration-200 shadow-sm">
             <template x-if="!exporting">
@@ -122,10 +122,10 @@
                                       <span class="flex items-center">
                                           <i class="bi bi-info-circle-fill mr-1.5"></i> Sugerencia de Formato
                                       </span>
-                                      <a href="{{ route('export.template') }}" 
+                                      <a href="#" 
                                          data-no-loader="true"
                                          x-data="{ downloading: false }"
-                                         @click="downloading = true; setTimeout(() => downloading = false, 3000)"
+                                         @click.prevent="if (!downloading) { downloading = true; window.location.href = '{{ route('export.template') }}'; setTimeout(() => downloading = false, 3000); }"
                                          :class="downloading ? 'opacity-50 pointer-events-none' : ''"
                                          class="text-indigo-600 hover:text-indigo-800 flex items-center font-bold transition-colors">
                                           <template x-if="!downloading">

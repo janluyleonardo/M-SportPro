@@ -7,6 +7,7 @@ use App\Http\Requests\StorePaymentRequest;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\AttendanceSlot;
+use App\Services\CustomLogger;
 
 class PaymentController extends Controller
 {
@@ -99,34 +100,44 @@ class PaymentController extends Controller
         $validated['paid_at'] = $paidAt;
         $validated['user_id'] = auth()->id();
 
-        $payment = Payment::create($validated);
-        
-        // Registrar ingreso en Tesorería
-        \App\Models\Transaction::create([
-            'type' => 'income',
-            'category' => 'monthly_payment',
-            'amount' => $payment->amount,
-            'date' => now()->format('Y-m-d'),
-            'description' => "Pago manual mensualidad {$payment->month}/{$payment->year} - {$payment->student->nomDeportista}",
-            'student_id' => $payment->student_id,
-            'reference_id' => $payment->id,
-        ]);
+        try {
+            $payment = Payment::create($validated);
+            
+            // Registrar ingreso en Tesorería
+            \App\Models\Transaction::create([
+                'type' => 'income',
+                'category' => 'monthly_payment',
+                'amount' => $payment->amount,
+                'date' => now()->format('Y-m-d'),
+                'description' => "Pago manual mensualidad {$payment->month}/{$payment->year} - {$payment->student->nomDeportista}",
+                'student_id' => $payment->student_id,
+                'reference_id' => $payment->id,
+            ]);
 
-        $student = Student::find($validated['student_id']);
-        $student->updateBalance();
+            $student = Student::find($validated['student_id']);
+            $student->updateBalance();
 
-        return redirect()->route('payments.show', $validated['student_id'])
-            ->with('success', 'Pago registrado y contabilizado en tesorería.');
+            return redirect()->route('payments.show', $validated['student_id'])
+                ->with('success', 'Pago registrado y contabilizado en tesorería.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->withInput()->with('error', 'No se pudo registrar el pago: ' . $th->getMessage());
+        }
     }
     public function update(Request $request, $id)
     {
         if ($request->has('increment_classes')) {
-            $slot = AttendanceSlot::findOrFail($id);
-            if ($slot->classes_used < $slot->classes_allowed) {
-                $slot->increment('classes_used');
-                return back()->with('success', 'Asistencia registrada correctamente.');
+            try {
+                $slot = AttendanceSlot::findOrFail($id);
+                if ($slot->classes_used < $slot->classes_allowed) {
+                    $slot->increment('classes_used');
+                    return back()->with('success', 'Asistencia registrada correctamente.');
+                }
+                return back()->with('error', 'El estudiante ya cumplió sus clases de este mes.');
+            } catch (\Throwable $th) {
+                CustomLogger::logException($th);
+                return back()->with('error', 'No se pudo registrar la asistencia: ' . $th->getMessage());
             }
-            return back()->with('error', 'El estudiante ya cumplió sus clases de este mes.');
         }
 
         return back();
@@ -137,10 +148,15 @@ class PaymentController extends Controller
      */
     public function destroy(Payment $payment)
     {
-        $studentId = $payment->student_id;
-        $payment->delete();
-        Student::find($studentId)->updateBalance();
-        return back()->with('success', 'Pago eliminado correctamente.');
+        try {
+            $studentId = $payment->student_id;
+            $payment->delete();
+            Student::find($studentId)->updateBalance();
+            return back()->with('success', 'Pago eliminado correctamente.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->with('error', 'No se pudo eliminar el pago: ' . $th->getMessage());
+        }
     }
 
     public function uploadVoucher(Request $request)
@@ -153,50 +169,60 @@ class PaymentController extends Controller
             'voucher' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        $file = $request->file('voucher');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('vouchers'), $filename);
+        try {
+            $file = $request->file('voucher');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('vouchers'), $filename);
 
-        Payment::create([
-            'student_id' => $request->student_id,
-            'month' => $request->month,
-            'year' => $request->year,
-            'amount' => $request->amount,
-            'status' => 'pending',
-            'voucher' => 'vouchers/' . $filename,
-            'voucher_status' => 'pending',
-            'notes' => $request->notes,
-            'user_id' => auth()->id(),
-            'paid_at' => null,
-            'classes_available' => 8,
-            'classes_used' => 0,
-        ]);
+            Payment::create([
+                'student_id' => $request->student_id,
+                'month' => $request->month,
+                'year' => $request->year,
+                'amount' => $request->amount,
+                'status' => 'pending',
+                'voucher' => 'vouchers/' . $filename,
+                'voucher_status' => 'pending',
+                'notes' => $request->notes,
+                'user_id' => auth()->id(),
+                'paid_at' => null,
+                'classes_available' => 8,
+                'classes_used' => 0,
+            ]);
 
-        return back()->with('success', 'Comprobante subido correctamente. Pendiente de verificación por el administrador.');
+            return back()->with('success', 'Comprobante subido correctamente. Pendiente de verificación por el administrador.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->withInput()->with('error', 'No se pudo subir el comprobante: ' . $th->getMessage());
+        }
     }
 
     public function verifyVoucher(Payment $payment)
     {
-        $payment->update([
-            'status' => 'paid',
-            'voucher_status' => 'approved',
-            'paid_at' => now(),
-        ]);
+        try {
+            $payment->update([
+                'status' => 'paid',
+                'voucher_status' => 'approved',
+                'paid_at' => now(),
+            ]);
 
-        // Registrar ingreso en Tesorería
-        \App\Models\Transaction::create([
-            'type' => 'income',
-            'category' => 'monthly_payment',
-            'amount' => $payment->amount,
-            'date' => now()->format('Y-m-d'),
-            'description' => "Mensualidad {$payment->month}/{$payment->year} - {$payment->student->nomDeportista}",
-            'student_id' => $payment->student_id,
-            'reference_id' => $payment->id,
-        ]);
+            // Registrar ingreso en Tesorería
+            \App\Models\Transaction::create([
+                'type' => 'income',
+                'category' => 'monthly_payment',
+                'amount' => $payment->amount,
+                'date' => now()->format('Y-m-d'),
+                'description' => "Mensualidad {$payment->month}/{$payment->year} - {$payment->student->nomDeportista}",
+                'student_id' => $payment->student_id,
+                'reference_id' => $payment->id,
+            ]);
 
-        $payment->student->updateBalance();
+            $payment->student->updateBalance();
 
-        return back()->with('success', 'Pago verificado y registrado en tesorería.');
+            return back()->with('success', 'Pago verificado y registrado en tesorería.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->with('error', 'No se pudo verificar el pago: ' . $th->getMessage());
+        }
     }
 
     public function rejectVoucher(Request $request, Payment $payment)
@@ -205,11 +231,16 @@ class PaymentController extends Controller
             'rejection_reason' => 'required|string|max:255',
         ]);
 
-        $payment->update([
-            'voucher_status' => 'rejected',
-            'rejection_reason' => $request->rejection_reason,
-        ]);
+        try {
+            $payment->update([
+                'voucher_status' => 'rejected',
+                'rejection_reason' => $request->rejection_reason,
+            ]);
 
-        return back()->with('warning', 'Comprobante rechazado.');
+            return back()->with('warning', 'Comprobante rechazado.');
+        } catch (\Throwable $th) {
+            CustomLogger::logException($th);
+            return back()->with('error', 'No se pudo rechazar el comprobante: ' . $th->getMessage());
+        }
     }
 }

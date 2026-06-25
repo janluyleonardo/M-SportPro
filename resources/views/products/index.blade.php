@@ -152,10 +152,10 @@
                                         <i class="bi bi-info-circle-fill"></i>
                                         <span class="text-[10px] font-black uppercase tracking-widest">Sugerencia de Formato</span>
                                     </div>
-                                    <a href="{{ route('products.template') }}" 
+                                    <a href="#" 
                                        data-no-loader="true"
                                        x-data="{ downloading: false }"
-                                       @click="downloading = true; setTimeout(() => downloading = false, 3000)"
+                                       @click.prevent="if (!downloading) { downloading = true; window.location.href = '{{ route('products.template') }}'; setTimeout(() => downloading = false, 3000); }"
                                        :class="downloading ? 'opacity-50 pointer-events-none' : ''"
                                        class="flex items-center gap-1.5 text-blue-700 hover:text-blue-900 transition-colors">
                                         <template x-if="!downloading">
