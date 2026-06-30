@@ -12,7 +12,7 @@
 
   <div class="py-8">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-      
+
       <!-- Stats / Actions Row -->
       <div class="mb-6 flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div class="flex items-center space-x-3 w-full lg:w-auto">
@@ -28,10 +28,10 @@
         <!-- Search Bar -->
         <div class="w-full lg:flex-1 lg:max-w-md">
             <form action="{{ route('students.index') }}" method="GET" class="relative group">
-                <input type="text" 
-                       name="search" 
-                       value="{{ $search ?? '' }}" 
-                       placeholder="Buscar por nombre, categoría o documento..." 
+                <input type="text"
+                       name="search"
+                       value="{{ $search ?? '' }}"
+                       placeholder="{{ __('search_placeholder') }}"
                        class="w-full pl-10 pr-10 py-2.5 bg-gray-50 border-gray-200 rounded-xl text-sm focus:ring-club-primary focus:border-club-primary transition-all duration-200 group-hover:bg-white"
                 >
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -66,13 +66,13 @@
 
           <!-- Botón Importar -->
           <button @click="showImport = true" class="flex-1 lg:flex-none inline-flex items-center justify-center px-4 py-2.5 bg-indigo-500 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-indigo-600 transition-colors duration-200 shadow-sm">
-            <i class="bi bi-file-earmark-arrow-up-fill mr-2 text-lg"></i> {{ __('Import') }}
+            <i class="bi bi-file-earmark-arrow-down-fill mr-2 text-lg"></i> {{ __('Import') }}
           </button>
 
           <!-- Modal de Importación -->
-          <div x-show="showImport" 
-               x-cloak 
-               class="fixed inset-0 z-50 overflow-y-auto" 
+          <div x-show="showImport"
+               x-cloak
+               class="fixed inset-0 z-50 overflow-y-auto"
                x-transition:enter="transition ease-out duration-300"
                x-transition:enter-start="opacity-0"
                x-transition:enter-end="opacity-100"
@@ -82,47 +82,47 @@
               <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                   <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showImport = false"></div>
                   <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                  
+
                   <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
                       <form action="{{ route('import') }}" method="POST" enctype="multipart/form-data" class="p-8" x-data="{ importing: false, fileName: '' }" @submit="importing = true">
                           @csrf
                           <div class="flex items-center justify-between mb-6">
                               <h3 class="text-xl font-black text-gray-900 flex items-center">
-                                <i class="bi bi-cloud-arrow-up-fill mr-2 text-indigo-500"></i>
+                                <i class="bi bi-cloud-arrow-down-fill mr-2 text-indigo-500"></i>
                                 Importar Deportistas
                               </h3>
                               <button type="button" @click="showImport = false" class="text-gray-400 hover:text-gray-600 transition-colors" :disabled="importing">
                                   <i class="bi bi-x-lg"></i>
                               </button>
                           </div>
-                          
+
                           <div class="space-y-6">
-                              <p class="text-sm text-gray-500 leading-relaxed">Sube un archivo Excel (.xlsx, .xls) o CSV con la información de los deportistas para cargarlos masivamente al sistema.</p>
-                              
+                              <p class="text-sm text-gray-500 leading-relaxed">{{ __('upload_excel_or_csv') }}</p>
+
                               <div class="relative group">
-                                  <label for="file-upload" 
+                                  <label for="file-upload"
                                          :class="importing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-indigo-50/50 hover:border-indigo-400'"
                                          class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50 transition-all duration-300">
                                       <div class="flex flex-col items-center justify-center pt-5 pb-6">
                                           <i class="bi bi-file-earmark-spreadsheet text-3xl text-gray-400 group-hover:text-indigo-500 group-hover:scale-110 transition-all duration-300 mb-2"></i>
-                                          <p class="text-xs font-bold text-gray-500 group-hover:text-indigo-600 uppercase tracking-wider">Haga clic o arrastre su archivo</p>
-                                          <p class="text-[10px] text-gray-400 mt-1">XLSX, XLS, CSV (Máx. 10MB)</p>
+                                          <p class="text-xs font-bold text-gray-500 group-hover:text-indigo-600 uppercase tracking-wider">{{ __('click_or_drag_file') }}</p>
+                                          <p class="text-[10px] text-gray-400 mt-1">{{ __('file_formats') }}</p>
                                       </div>
                                       <input id="file-upload" name="file" type="file" class="hidden" required accept=".xlsx,.xls,.csv" @change="fileName = $event.target.files[0].name">
                                   </label>
                                   <template x-if="fileName">
                                       <div class="mt-2 text-xs font-bold text-indigo-600 flex items-center justify-center">
-                                          <i class="bi bi-check-circle-fill mr-1"></i> Seleccionado: <span x-text="fileName" class="ml-1"></span>
+                                          <i class="bi bi-check-circle-fill mr-1"></i> {{ __('Selected') }}: <span x-text="fileName" class="ml-1"></span>
                                       </div>
                                   </template>
                               </div>
-                              
+
                               <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
                                   <h4 class="text-xs font-black text-blue-700 uppercase tracking-widest mb-2 flex items-center justify-between">
                                       <span class="flex items-center">
-                                          <i class="bi bi-info-circle-fill mr-1.5"></i> Sugerencia de Formato
+                                          <i class="bi bi-info-circle-fill mr-1.5"></i> {{ __('format_suggestion') }}
                                       </span>
-                                      <a href="#" 
+                                      <a href="#"
                                          data-no-loader="true"
                                          x-data="{ downloading: false }"
                                          @click.prevent="if (!downloading) { downloading = true; window.location.href = '{{ route('export.template') }}'; setTimeout(() => downloading = false, 3000); }"
@@ -137,16 +137,14 @@
                                           <span x-text="downloading ? 'Generando...' : 'Descargar Plantilla'"></span>
                                       </a>
                                   </h4>
-                                  <p class="text-[10px] text-blue-600/80 leading-normal">
-                                      Para mejores resultados, use cabeceras como: <span class="font-bold">nombre_deportista, documento, categoria, genero, fecha_nacimiento, telefono</span>.
-                                  </p>
+                                  <p class="text-[10px] text-blue-600/80 leading-normal">{!! __("format_tip") !!}</p>
                               </div>
                           </div>
-                          
+
                           <div class="mt-8 flex flex-col sm:flex-row gap-3">
                               <button type="submit" :disabled="importing" class="flex-1 inline-flex justify-center items-center rounded-xl px-4 py-3 bg-indigo-600 text-sm font-black text-white hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                                   <template x-if="!importing">
-                                      <span>Iniciar Importación</span>
+                                      <span>{{ __('start_import') }}</span>
                                   </template>
                                   <template x-if="importing">
                                       <span class="flex items-center">
@@ -172,7 +170,7 @@
 
       <!-- Table / Cards Container -->
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
-        
+
         <!-- Desktop Table (Visible from sm up) -->
         <div class="hidden sm:block overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -310,7 +308,7 @@
             <div class="p-8 text-center text-gray-500 italic">No hay deportistas registrados.</div>
           @endforelse
         </div>
-        
+
         <!-- Pagination -->
         @if ($students->hasPages())
           <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">

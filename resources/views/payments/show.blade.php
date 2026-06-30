@@ -3,10 +3,10 @@
         <div class="flex items-center space-x-3">
             <a href="{{ route('payments.index') }}"
                 class="p-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-gray-300 transition-colors">
-                <i class="bi bi-arrow-left"></i> Volver
+                <i class="bi bi-arrow-left"></i> {{ __('Back') }}
             </a>
             <h2 class="font-bold text-xl text-black">
-                Historial de Pagos
+                {{ __('Payment History') }} - {{ $student->nomDeportista ?? 'Estudiante' }}
             </h2>
         </div>
     </x-slot>
@@ -69,7 +69,7 @@
                     <!-- Resumen de Deuda -->
                     <div
                         class="px-5 py-3 rounded-2xl border-2 {{ $student->balance > 0 ? 'bg-red-50 border-red-100 text-red-600' : 'bg-green-50 border-green-100 text-green-600' }} text-center min-w-[140px]">
-                        <p class="text-[8px] font-black uppercase tracking-[0.2em] opacity-70 mb-0.5">Saldo Pendiente</p>
+                        <p class="text-[8px] font-black uppercase tracking-[0.2em] opacity-70 mb-0.5">{{ __('Pending Balance') }}</p>
                         <p class="text-xl font-black">${{ number_format($student->balance, 0, ',', '.') }}</p>
                     </div>
 
@@ -78,12 +78,12 @@
                     @if($student->balance > 0)
                         <button @click="$dispatch('open-payment-modal')"
                             class="px-6 py-4 bg-club-primary hover:opacity-90 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 transform active:scale-95 transition-all text-[9px] uppercase tracking-widest flex items-center justify-center whitespace-nowrap">
-                            <i class="bi bi-plus-circle-fill mr-2"></i> Registrar Pago
+                            <i class="bi bi-plus-circle-fill mr-2"></i> {{ __('Register Payment') }}
                         </button>
                     @else
                         <button disabled
                             class="px-6 py-4 bg-gray-100 text-gray-400 font-black rounded-2xl border border-gray-200 cursor-not-allowed text-[9px] uppercase tracking-widest flex items-center justify-center whitespace-nowrap">
-                            <i class="bi bi-check-circle-fill mr-2 text-green-500"></i> Al día
+                            <i class="bi bi-check-circle-fill mr-2 text-green-500"></i> {{ __('Fully Paid') }}
                         </button>
                     @endif
                     @endrole
@@ -93,7 +93,7 @@
             <!-- Listado de Estados por Mes -->
             <div class="mt-12 max-w-2xl mx-auto">
                 <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.3em] mb-6 flex items-center justify-center">
-                    <i class="bi bi-clock-history mr-2"></i> Línea de Tiempo de Mensualidades
+                    <i class="bi bi-clock-history mr-2"></i> {{ __('Monthly Payment Timeline') }}
                 </h3>
 
                 <div class="space-y-3">
@@ -111,11 +111,11 @@
                                     <div class="flex items-center">
                                         @if ($status['is_paid'])
                                             <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                                                Saldado Totalmente
+                                                {{ __('Fully Paid') }}
                                             </span>
                                         @elseif ($status['covered'] > 0)
                                             <span class="text-[9px] font-black text-orange-500 uppercase tracking-wider">
-                                                Abono Parcial: ${{ number_format($status['covered'], 0, ',', '.') }}
+                                                {{ __('Partial Payment') }}: ${{ number_format($status['covered'], 0, ',', '.') }}
                                             </span>
                                         @else
                                             <span class="text-[9px] font-black uppercase tracking-wider {{ $status['is_late'] ? 'text-red-500' : 'text-blue-500' }}">
@@ -124,7 +124,7 @@
                                             @if ($status['is_late'])
                                                 <span
                                                     class="ml-2 text-[8px] font-black text-red-400 bg-red-50 px-1.5 py-0.5 rounded-md border border-red-100">
-                                                    Con Recargo
+                                                    {{ __('With Surcharge') }}
                                                 </span>
                                             @endif
                                         @endif
@@ -177,7 +177,7 @@
                                             <button
                                                 @click="$dispatch('open-payment-modal', { month: {{ $status['month_num'] }}, year: {{ $status['year'] }} })"
                                                 class="px-3 py-1.5 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors {{ $status['is_late'] ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700' }}">
-                                                Abonar
+                                                {{ __('Pay') }}
                                             </button>
                                         </div>
                                     @endrole
@@ -186,7 +186,7 @@
                                             <button
                                                 @click="$dispatch('open-voucher-modal', { month: {{ $status['month_num'] }}, year: {{ $status['year'] }}, amount: {{ $status['amount'] }}, monthName: '{{ $status['month_name'] }}' })"
                                                 class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors">
-                                                <i class="bi bi-cloud-upload-fill mr-1"></i> Subir Recibo
+                                                <i class="bi bi-cloud-upload-fill mr-1"></i> {{ __('Upload Receipt') }}
                                             </button>
                                         </div>
                                     @endunlessrole
@@ -200,7 +200,7 @@
                         @endphp
                         @if($monthAbonos->count() > 0)
                             <div class="mx-6 mb-4 -mt-2 bg-gray-50/50 rounded-b-xl border-x border-b border-gray-100 p-2 space-y-1">
-                                <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest px-2 mb-1">Historial de abonos registrados para este mes:</p>
+                                <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest px-2 mb-1">{{ __('Payment history recorded for this month') }}:</p>
                                 @foreach($monthAbonos as $abono)
                                     <div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg border border-gray-100 text-[10px]">
                                         <div class="flex flex-col">
@@ -217,21 +217,21 @@
                                             @if($abono->voucher)
                                                 <div class="ml-6 mt-2 flex items-center gap-2">
                                                     <a href="{{ asset($abono->voucher) }}" target="_blank" class="flex items-center px-2 py-1 bg-indigo-50 text-indigo-600 rounded border border-indigo-100 hover:bg-indigo-100 transition-colors">
-                                                        <i class="bi bi-file-earmark-image mr-1"></i> Ver Comprobante
+                                                        <i class="bi bi-file-earmark-image mr-1"></i> {{ __('View Receipt') }}
                                                     </a>
                                                     @if($abono->voucher_status == 'pending')
-                                                        <span class="px-2 py-1 bg-yellow-50 text-yellow-600 rounded border border-yellow-100 font-bold uppercase tracking-widest text-[8px]">Pendiente Verificación</span>
+                                                        <span class="px-2 py-1 bg-yellow-50 text-yellow-600 rounded border border-yellow-100 font-bold uppercase tracking-widest text-[8px]">{{ __('Pending Balance') }}</span>
                                                     @elseif($abono->voucher_status == 'approved')
-                                                        <span class="px-2 py-1 bg-green-50 text-green-600 rounded border border-green-100 font-bold uppercase tracking-widest text-[8px]">Verificado</span>
+                                                        <span class="px-2 py-1 bg-green-50 text-green-600 rounded border border-green-100 font-bold uppercase tracking-widest text-[8px]">{{ __('Fully Paid') }}
                                                     @elseif($abono->voucher_status == 'rejected')
-                                                        <span class="px-2 py-1 bg-red-50 text-red-600 rounded border border-red-100 font-bold uppercase tracking-widest text-[8px]">Rechazado: {{ $abono->rejection_reason }}</span>
+                                                        <span class="px-2 py-1 bg-red-50 text-red-600 rounded border border-red-100 font-bold uppercase tracking-widest text-[8px]">{{ __('Rejected') }}: {{ $abono->rejection_reason }}</span>
                                                     @endif
                                                 </div>
                                             @endif
                                         </div>
                                         <div class="flex items-center gap-3">
                                             <span class="font-black text-gray-900">${{ number_format($abono->amount, 0, ',', '.') }}</span>
-                                            
+
                                             @role('Admin')
                                                 @if($abono->voucher && $abono->voucher_status == 'pending')
                                                     <div class="flex gap-1" x-data="{ rejecting: false }">
@@ -249,13 +249,13 @@
                                                         <template x-if="rejecting">
                                                             <div class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                                                                 <div class="bg-white p-6 rounded-2xl w-full max-w-xs shadow-2xl" @click.away="rejecting = false">
-                                                                    <h5 class="font-black text-sm mb-4">Motivo de Rechazo</h5>
+                                                                    <h5 class="font-black text-sm mb-4">{{ __('Rejection Reason') }}</h5>
                                                                     <form action="{{ route('payments.reject', $abono) }}" method="POST">
                                                                         @csrf
                                                                         <textarea name="rejection_reason" class="w-full border-gray-200 rounded-xl text-xs mb-4" placeholder="Ej: No se ve bien la fecha, monto incorrecto..." required></textarea>
                                                                         <div class="flex gap-2">
-                                                                            <button type="button" @click="rejecting = false" class="flex-1 py-2 bg-gray-100 rounded-lg text-xs font-bold">Cancelar</button>
-                                                                            <button type="submit" class="flex-1 py-2 bg-red-600 text-white rounded-lg text-xs font-black">Confirmar</button>
+                                                                            <button type="button" @click="rejecting = false" class="flex-1 py-2 bg-gray-100 rounded-lg text-xs font-bold">{{ __('Cancel') }}</button>
+                                                                            <button type="submit" class="flex-1 py-2 bg-red-600 text-white rounded-lg text-xs font-black">{{ __('Confirm') }}</button>
                                                                         </div>
                                                                     </form>
                                                                 </div>
@@ -280,8 +280,7 @@
                     @empty
                         <div class="p-20 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-200 text-center">
                             <i class="bi bi-calendar-x text-5xl text-gray-300 mb-4 block"></i>
-                            <p class="text-gray-400 font-bold italic">No se puede determinar el historial (falta fecha de
-                                inscripción).</p>
+                            <p class="text-gray-400 font-bold italic">{{ __('No payment history available (missing enrollment date).') }}</p>
                         </div>
                     @endforelse
                 </div>
@@ -291,8 +290,8 @@
 
     @role('Admin')
     <!-- Modal de Pago con Lógica de Recargo Dinámica -->
-    <div id="modal-pago" x-data="{ 
-            open: false, 
+    <div id="modal-pago" x-data="{
+            open: false,
             loading: false,
             baseAmount: {{ config('app.default_payment_amount', 50000) }},
             month: {{ date('n') }},
@@ -313,7 +312,7 @@
                 let selectedMonth = parseInt(this.month);
                 let selectedYear = parseInt(this.year);
                 let day = parseInt(this.paidAt.split('-')[2]);
-                
+
                 this.hasLateFee = false;
                 if (selectedYear < this.currentYear) {
                     this.hasLateFee = true;
@@ -328,11 +327,11 @@
          }"
         x-init="calculate(); $watch('paidAt', () => calculate()); $watch('month', () => calculate()); $watch('year', () => calculate())"
         @open-payment-modal.window="
-            open = true; 
-            if($event.detail) { 
-                month = $event.detail.month || month; 
-                year = $event.detail.year || year; 
-                calculate(); 
+            open = true;
+            if($event.detail) {
+                month = $event.detail.month || month;
+                year = $event.detail.year || year;
+                calculate();
             }
         "
         x-cloak x-show="open" class="fixed inset-0 z-[100] overflow-y-auto">
@@ -377,24 +376,24 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Monto Recibido ($)</label>
+                                <label class="text-xs font-bold text-gray-400 uppercase">{{ __('Amount Received') }} ($)</label>
                                 <input type="number" name="amount" x-model="baseAmount"
                                     class="w-full border-gray-200 rounded-xl mt-1 p-3 font-black text-lg text-black"
                                     placeholder="Ej: 55000"
                                     required>
                             </div>
                             <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Fecha de Pago</label>
+                                <label class="text-xs font-bold text-gray-400 uppercase">{{ __('Payment Date') }}</label>
                                 <input type="date" name="paid_at" x-model="paidAt"
                                     class="w-full border-gray-200 rounded-xl mt-1 p-3 font-bold text-black" required>
                             </div>
                         </div>
 
                         <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase">Observaciones / Notas</label>
+                            <label class="text-xs font-bold text-gray-400 uppercase">{{ __('Observations / Notes') }}</label>
                             <textarea name="notes" rows="2"
                                 class="w-full border-gray-200 rounded-xl mt-1 p-3 text-sm text-gray-600 font-medium"
-                                placeholder="Ej: Pago en efectivo, Nequi, abono de deuda, etc. (Opcional)"></textarea>
+                                placeholder="{{ __('E.g.: Cash payment, Nequi, debt payment, etc. (Optional)') }}"></textarea>
                         </div>
 
                         <div :class="hasLateFee ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'"
@@ -409,7 +408,7 @@
                                     </p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-[10px] text-gray-400 font-bold uppercase">Monto a Registrar</p>
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase">{{ __('Amount to Register') }}</p>
                                     <p class="text-2xl font-black"
                                         :class="hasLateFee ? 'text-red-600' : 'text-club-primary'">
                                         $<span x-text="new Intl.NumberFormat('es-CO').format(baseAmount)"></span>
@@ -425,9 +424,9 @@
                             </button>
                             <button type="submit" :disabled="loading"
                                 class="flex-[2] py-4 bg-club-primary text-white font-black rounded-2xl shadow-lg shadow-blue-200 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center">
-                                <span x-show="!loading">Guardar Pago</span>
+                                <span x-show="!loading">{{ __('Save Payment') }}</span>
                                 <span x-show="loading" class="flex items-center">
-                                    <i class="bi bi-arrow-repeat animate-spin mr-2"></i> Procesando...
+                                    <i class="bi bi-arrow-repeat animate-spin mr-2"></i> {{ __('Processing payment...') }}
                                 </span>
                             </button>
                         </div>
@@ -439,8 +438,8 @@
     @endrole
 
     <!-- Modal para Subir Comprobante (Padres/Deportistas) -->
-    <div id="modal-voucher" x-data="{ 
-            open: false, 
+    <div id="modal-voucher" x-data="{
+            open: false,
             loading: false,
             month: 1,
             year: 2024,
@@ -448,9 +447,9 @@
             monthName: ''
         }"
         @open-voucher-modal.window="
-            open = true; 
-            month = $event.detail.month; 
-            year = $event.detail.year; 
+            open = true;
+            month = $event.detail.month;
+            year = $event.detail.year;
             amount = $event.detail.amount;
             monthName = $event.detail.monthName;
         "
@@ -463,9 +462,9 @@
                     <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
                         <i class="bi bi-cloud-arrow-up-fill text-4xl"></i>
                     </div>
-                    
-                    <h2 class="text-2xl font-black text-black mb-2">Subir Comprobante</h2>
-                    <p class="text-sm text-gray-500 mb-8 font-medium">Carga la foto o PDF de tu pago para <span class="text-indigo-600 font-bold" x-text="monthName + ' ' + year"></span></p>
+
+                    <h2 class="text-2xl font-black text-black mb-2">{{ __('Upload receipt') }}</h2>
+                    <p class="text-sm text-gray-500 mb-8 font-medium">{{ __('Upload the photo or PDF of your payment for') }} <span class="text-indigo-600 font-bold" x-text="monthName + ' ' + year"></span></p>
 
                     <form action="{{ route('payments.upload_voucher') }}" method="POST" enctype="multipart/form-data" class="space-y-5 text-left"
                         @submit="loading = true">
@@ -476,15 +475,15 @@
                         <input type="hidden" name="amount" x-model="amount">
 
                         <div>
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Selecciona tu archivo</label>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">{{ __('Select your file') }}</label>
                             <input type="file" name="voucher" accept="image/*,application/pdf"
                                 class="w-full border-2 border-dashed border-gray-200 rounded-2xl p-4 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-white hover:border-indigo-300 transition-all cursor-pointer"
                                 required>
-                            <p class="text-[9px] text-gray-400 mt-2 px-2 italic text-center">Formatos aceptados: JPG, PNG, PDF. Máximo 5MB.</p>
+                            <p class="text-[9px] text-gray-400 mt-2 px-2 italic text-center">{{ __('Accepted formats: JPG, PNG, PDF. Max 5MB.') }}</p>
                         </div>
 
                         <div>
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Nota adicional (Opcional)</label>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">{{ __('Additional Note (Optional)') }}</label>
                             <textarea name="notes" rows="2"
                                 class="w-full border-gray-200 rounded-2xl p-4 text-sm font-medium focus:ring-indigo-500 focus:border-indigo-500"
                                 placeholder="Ej: Pago realizado por Nequi #123456"></textarea>
@@ -497,9 +496,9 @@
                             </button>
                             <button type="submit" :disabled="loading"
                                 class="flex-[2] py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-indigo-100 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center">
-                                <span x-show="!loading">Subir Recibo</span>
+                                <span x-show="!loading">{{ __('Upload receipt') }}</span>
                                 <span x-show="loading" class="flex items-center">
-                                    <i class="bi bi-arrow-repeat animate-spin mr-2"></i> Procesando...
+                                    <i class="bi bi-arrow-repeat animate-spin mr-2"></i> {{ __('Processing payment...') }}
                                 </span>
                             </button>
                         </div>
