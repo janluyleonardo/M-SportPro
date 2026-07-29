@@ -16,6 +16,13 @@ class StoreLocationRequest extends FormRequest
     {
         $locationId = $this->route('location') ? $this->route('location')->id : null;
 
+        // Si es un toggle de estado, no se necesita validar name ni description
+        if ($this->has('toggle_active')) {
+            return [
+                'toggle_active' => 'required',
+            ];
+        }
+
         return [
             'club_id' => 'nullable|exists:clubs,id',
             'name' => [

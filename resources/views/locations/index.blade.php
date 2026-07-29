@@ -23,7 +23,13 @@
                 <h3 class="text-sm font-black text-gray-700 uppercase tracking-widest mb-4 flex items-center">
                     <i class="bi bi-plus-circle-fill mr-2 text-club-primary"></i> Agregar Nueva Cancha
                 </h3>
-                <form action="{{ route('locations.store') }}" method="POST" class="flex flex-col md:flex-row items-stretch md:items-end gap-4">
+                <form action="{{ route('locations.store') }}" method="POST" class="flex flex-col md:flex-row items-stretch md:items-end gap-4"
+                      onsubmit="
+                        var btn = this.querySelector('button[type=submit]');
+                        btn.disabled = true;
+                        btn.classList.add('opacity-75', 'cursor-not-allowed');
+                        btn.innerHTML = '<svg class=\'animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block\' xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\'><circle class=\'opacity-25\' cx=\'12\' cy=\'12\' r=\'10\' stroke=\'currentColor\' stroke-width=\'4\'></circle><path class=\'opacity-75\' fill=\'currentColor\' d=\'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\'></path></svg> Guardando...';
+                      ">
                     @csrf
                     @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
                     <div class="flex-1">
@@ -51,6 +57,7 @@
                         <i class="bi bi-plus-lg mr-1"></i> Agregar
                     </button>
                 </form>
+
             </div>
 
             {{-- Listado de canchas --}}
