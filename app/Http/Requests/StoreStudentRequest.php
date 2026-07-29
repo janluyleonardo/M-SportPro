@@ -15,7 +15,7 @@ class StoreStudentRequest extends FormRequest
     {
         return [
             'club_id' => 'nullable|exists:clubs,id',
-            'Photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'Photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'Categoria' => 'required|string',
             'fechaInscripcion' => 'required|date',
             'nomDeportista' => 'required|string|max:255',
@@ -26,10 +26,10 @@ class StoreStudentRequest extends FormRequest
             'RHDeportista' => 'nullable|string',
             'fechaNacimiento' => 'required|date',
             'Ciudad' => 'nullable|string',
-            'Departamento' => 'nullable|string',
-            'EPS' => 'nullable|string',
-            'Colegio' => 'nullable|string',
-            'Curso' => 'nullable|string',
+            // 'Departamento' => 'nullable|string',
+            // 'EPS' => 'nullable|string',
+            // 'Colegio' => 'nullable|string',
+            // 'Curso' => 'nullable|string',
             'numTelefonico' => 'required|string',
             'numTelefonicoUno' => 'nullable|string',
             'numTelefonicoDos' => 'nullable|string',
