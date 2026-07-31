@@ -25,6 +25,7 @@ class Payment extends Model
         'voucher',
         'voucher_status',
         'rejection_reason',
+        'waive_late_fee',
     ];
 
     protected $casts = [

@@ -110,9 +110,33 @@
                                         {{ $status['year'] }}</h4>
                                     <div class="flex items-center">
                                         @if ($status['is_paid'])
-                                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                                                {{ __('Fully Paid') }}
-                                            </span>
+                                            <div class="flex flex-col gap-0.5">
+                                                <span class="text-[9px] font-bold text-green-600 uppercase tracking-wider">
+                                                    {{ __('Fully Paid') }}
+                                                </span>
+                                                @if($status['paid_at'])
+                                                    <span class="text-[8px] font-medium text-gray-400 italic">
+                                                        Pagado el {{ \Carbon\Carbon::parse($status['paid_at'])->format('d/m/Y') }}
+                                                    </span>
+                                                @endif
+                                                @if(($status['carry_used'] ?? 0) > 0)
+                                                    <span class="text-[8px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100 w-fit">
+                                                        <i class="bi bi-arrow-left-circle-fill mr-0.5"></i>
+                                                        Crédito aplicado: ${{ number_format($status['carry_used'], 0, ',', '.') }}
+                                                    </span>
+                                                @endif
+                                                @if(($status['surplus_generated'] ?? 0) > 0)
+                                                    <span class="text-[8px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md border border-blue-100 w-fit">
+                                                        <i class="bi bi-arrow-right-circle-fill mr-0.5"></i>
+                                                        Genera crédito: ${{ number_format($status['surplus_generated'], 0, ',', '.') }}
+                                                    </span>
+                                                @endif
+                                                @if(($status['waive_late_fee'] ?? false))
+                                                    <span class="text-[8px] font-black text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-200 w-fit">
+                                                        <i class="bi bi-shield-check mr-0.5"></i> Recargo exonerado por autorización
+                                                    </span>
+                                                @endif
+                                            </div>
                                         @elseif ($status['covered'] > 0)
                                             <span class="text-[9px] font-black text-orange-500 uppercase tracking-wider">
                                                 {{ __('Partial Payment') }}: ${{ number_format($status['covered'], 0, ',', '.') }}
@@ -302,8 +326,9 @@
             threshold: {{ config('app.payment_late_day_threshold', 10) }},
             percentage: {{ config('app.payment_late_fee_percentage', 10) }},
             hasLateFee: false,
+            waiveLateFee: false,
             get totalWithFee() {
-                if (this.hasLateFee) {
+                if (this.hasLateFee && !this.waiveLateFee) {
                     return Math.round(this.baseAmount * (1 + (this.percentage / 100)));
                 }
                 return this.baseAmount;
@@ -323,6 +348,8 @@
                         this.hasLateFee = true;
                     }
                 }
+                // Si se cambia a un mes sin recargo, desactivar la exoneración
+                if (!this.hasLateFee) { this.waiveLateFee = false; }
             }
          }"
         x-init="calculate(); $watch('paidAt', () => calculate()); $watch('month', () => calculate()); $watch('year', () => calculate())"
@@ -390,27 +417,50 @@
                         </div>
 
                         <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase">{{ __('Observations / Notes') }}</label>
+                            <label class="text-xs font-bold text-gray-400 uppercase">{{ __('Observations / Notes') }}
+                                <span x-show="waiveLateFee" class="text-red-500 ml-1">*Obligatorio</span>
+                            </label>
                             <textarea name="notes" rows="2"
+                                :required="waiveLateFee"
                                 class="w-full border-gray-200 rounded-xl mt-1 p-3 text-sm text-gray-600 font-medium"
+                                :class="waiveLateFee ? 'border-orange-300 ring-1 ring-orange-200' : ''"
                                 placeholder="{{ __('E.g.: Cash payment, Nequi, debt payment, etc. (Optional)') }}"></textarea>
                         </div>
 
-                        <div :class="hasLateFee ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'"
+                        {{-- Checkbox de exoneración: solo visible si hay recargo --}}
+                        <div x-show="hasLateFee" x-cloak
+                            class="flex items-start gap-3 p-3 rounded-xl border"
+                            :class="waiveLateFee ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-100'">
+                            <input type="checkbox" id="waive_late_fee_check"
+                                x-model="waiveLateFee"
+                                class="mt-0.5 w-4 h-4 text-orange-500 rounded border-gray-300 cursor-pointer">
+                            <input type="hidden" name="waive_late_fee" :value="waiveLateFee ? '1' : '0'">
+                            <label for="waive_late_fee_check" class="cursor-pointer flex-1">
+                                <span class="text-[10px] font-black text-orange-600 uppercase tracking-widest block">
+                                    <i class="bi bi-shield-check mr-1"></i> Exonerar pago tardío
+                                </span>
+                                <span class="text-[9px] text-gray-500 font-medium">
+                                    Autorizado por el dueño. Se acepta solo el valor base sin recargo.
+                                    La observación es obligatoria.
+                                </span>
+                            </label>
+                        </div>
+
+                        <div :class="hasLateFee && !waiveLateFee ? 'bg-red-50 border-red-100' : (waiveLateFee ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-100')"
                             class="p-4 rounded-xl border transition-colors duration-300">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-[10px] font-black uppercase tracking-widest"
-                                        :class="hasLateFee ? 'text-red-600' : 'text-green-600'"
-                                        x-text="hasLateFee ? 'Mes con recargo (10%)' : 'Mes sin recargo'"></p>
+                                        :class="hasLateFee && !waiveLateFee ? 'text-red-600' : (waiveLateFee ? 'text-orange-600' : 'text-green-600')"
+                                        x-text="waiveLateFee ? '⚠️ Recargo exonerado (autorizado)' : (hasLateFee ? 'Mes con recargo (10%)' : 'Mes sin recargo')"></p>
                                     <p class="text-xs font-bold text-gray-500"
-                                        x-text="hasLateFee ? 'El abono cubrirá primero el recargo y luego la base.' : 'El abono cubrirá la base del mes.'">
+                                        x-text="waiveLateFee ? 'Se registra solo el valor base. La observación quedará como constancia.' : (hasLateFee ? 'El abono cubrirá primero el recargo y luego la base.' : 'El abono cubrirá la base del mes.')">
                                     </p>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[10px] text-gray-400 font-bold uppercase">{{ __('Amount to Register') }}</p>
                                     <p class="text-2xl font-black"
-                                        :class="hasLateFee ? 'text-red-600' : 'text-club-primary'">
+                                        :class="hasLateFee && !waiveLateFee ? 'text-red-600' : (waiveLateFee ? 'text-orange-500' : 'text-club-primary')">
                                         $<span x-text="new Intl.NumberFormat('es-CO').format(baseAmount)"></span>
                                     </p>
                                 </div>

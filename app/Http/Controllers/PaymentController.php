@@ -89,28 +89,35 @@ class PaymentController extends Controller
     public function store(StorePaymentRequest $request)
     {
         $validated = $request->validated();
-        
+
+        // Si se exonera el recargo, la observación es obligatoria
+        if ($request->boolean('waive_late_fee') && empty($request->notes)) {
+            return back()->withInput()->with('error', 'La observación es obligatoria al exonerar el pago tardío.');
+        }
+
         // Si viene una fecha manual, la parseamos y le ponemos la hora actual
         // Si no viene fecha, usamos el momento exacto (ahora)
-        $paidAt = $request->paid_at 
-            ? \Carbon\Carbon::parse($request->paid_at)->setTimeFrom(now()) 
+        $paidAt = $request->paid_at
+            ? \Carbon\Carbon::parse($request->paid_at)->setTimeFrom(now())
             : now();
 
-        $validated['status'] = 'paid';
-        $validated['paid_at'] = $paidAt;
-        $validated['user_id'] = auth()->id();
+        $validated['status']        = 'paid';
+        $validated['paid_at']       = $paidAt;
+        $validated['user_id']       = auth()->id();
+        $validated['waive_late_fee'] = $request->boolean('waive_late_fee');
 
         try {
             $payment = Payment::create($validated);
-            
+
             // Registrar ingreso en Tesorería
             \App\Models\Transaction::create([
-                'type' => 'income',
-                'category' => 'monthly_payment',
-                'amount' => $payment->amount,
-                'date' => now()->format('Y-m-d'),
-                'description' => "Pago manual mensualidad {$payment->month}/{$payment->year} - {$payment->student->nomDeportista}",
-                'student_id' => $payment->student_id,
+                'type'        => 'income',
+                'category'    => 'monthly_payment',
+                'amount'      => $payment->amount,
+                'date'        => now()->format('Y-m-d'),
+                'description' => "Pago manual mensualidad {$payment->month}/{$payment->year} - {$payment->student->nomDeportista}" .
+                                 ($payment->waive_late_fee ? ' [PAGO TARDÍO EXONERADO]' : ''),
+                'student_id'  => $payment->student_id,
                 'reference_id' => $payment->id,
             ]);
 

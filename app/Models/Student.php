@@ -73,49 +73,57 @@ class Student extends Model
   }
 
   /**
-   * Calcula la deuda total acumulada del estudiante como una cuenta corriente.
-   * Total de cargos requeridos - Total de abonos realizados.
+   * Calcula la deuda total del estudiante mes a mes con carry-forward.
+   * El excedente de un mes (pago de más) se arrastra como crédito al mes siguiente.
    */
   public function calculateDebt()
   {
       if (!$this->fechaInscripcion) return 0;
 
       $startDate = \Carbon\Carbon::parse($this->fechaInscripcion)->startOfMonth();
-      $endDate = now()->startOfMonth();
-      
-      $dayThreshold = config('app.payment_late_day_threshold', 10);
-      $feePercentage = config('app.payment_late_fee_percentage', 10);
-      $baseAmount = config('app.default_payment_amount', 50000);
+      $endDate   = now()->startOfMonth();
 
-      $totalRequired = 0;
+      $dayThreshold  = config('app.payment_late_day_threshold', 10);
+      $feePercentage = config('app.payment_late_fee_percentage', 10);
+      $baseAmount    = config('app.default_payment_amount', 50000);
+
+      // Agrupar pagos por año-mes: suma de montos, si alguno tiene waive y fecha último pago
+      $paidByMonth = $this->payments()
+          ->where('status', 'paid')
+          ->get()
+          ->groupBy(fn($p) => $p->year . '-' . $p->month)
+          ->map(fn($group) => [
+              'total'          => $group->sum('amount'),
+              'waive_late_fee' => $group->contains('waive_late_fee', true),
+          ]);
+
+      $totalDebt   = 0;
+      $carry       = 0; // saldo a favor acumulado
       $currentDate = $startDate->copy();
 
-      // 1. Calcular todo lo que el estudiante DEBERÍA haber pagado hasta hoy
       while ($currentDate <= $endDate) {
-          $amount = $baseAmount;
-          $isLate = false;
-
-          if ($currentDate < $endDate) {
-              // Mes pasado y no se pagó en su momento (o ya pasó)
-              $isLate = true;
-          } elseif ($currentDate->isSameMonth(now()) && now()->day > $dayThreshold) {
-              // Mes actual y ya pasó el día límite
-              $isLate = true;
-          }
+          $amountDue = $baseAmount;
+          $isLate    = ($currentDate < $endDate) ||
+                       ($currentDate->isSameMonth(now()) && now()->day > $dayThreshold);
 
           if ($isLate) {
-              $amount += ($amount * ($feePercentage / 100));
+              $amountDue += ($amountDue * ($feePercentage / 100));
           }
 
-          $totalRequired += $amount;
+          $key        = $currentDate->year . '-' . $currentDate->month;
+          $monthData  = $paidByMonth[$key] ?? null;
+          $paid       = ($monthData ? $monthData['total'] : 0) + $carry;
+
+          // Si el pago tiene exoneración, el umbral es el monto base (sin recargo)
+          $threshold  = ($monthData && $monthData['waive_late_fee']) ? $baseAmount : $amountDue;
+          $carry      = max(0, $paid - $threshold);
+          $pending    = max(0, $threshold - $paid);
+          $totalDebt += $pending;
+
           $currentDate->addMonth();
       }
 
-      // 2. Calcular todo lo que el estudiante HA PAGADO en su historia
-      $totalPaid = $this->payments()->where('status', 'paid')->sum('amount');
-
-      // 3. El saldo es la diferencia
-      return $totalRequired - $totalPaid;
+      return $totalDebt;
   }
 
   public function updateBalance()
@@ -127,68 +135,83 @@ class Student extends Model
   }
 
   /**
-   * Obtiene el listado de estados por mes repartiendo el dinero total pagado
-   * de forma cronológica (FIFO - Primero en entrar, primero en salir).
+   * Obtiene el listado de estados por mes con carry-forward (saldo a favor).
+   * El excedente de un mes se arrastra automáticamente al mes siguiente como crédito.
+   * Expone carry_used y surplus_generated para mostrar en la vista.
    */
   public function getPaymentStatusByMonth()
   {
       if (!$this->fechaInscripcion) return [];
 
       $startDate = \Carbon\Carbon::parse($this->fechaInscripcion)->startOfMonth();
-      $endDate = now()->startOfMonth();
-      
-      $dayThreshold = config('app.payment_late_day_threshold', 10);
+      $endDate   = now()->startOfMonth();
+
+      $dayThreshold  = config('app.payment_late_day_threshold', 10);
       $feePercentage = config('app.payment_late_fee_percentage', 10);
-      $baseAmount = config('app.default_payment_amount', 50000);
+      $baseAmount    = config('app.default_payment_amount', 50000);
 
-      // Total de dinero disponible del estudiante
-      $remainingPaid = $this->payments()->where('status', 'paid')->sum('amount');
+      // Agrupar pagos por año-mes: suma de montos, waive y fecha del último pago
+      $allPayments = $this->payments()->where('status', 'paid')->get();
 
-      $statusList = [];
+      $paidByMonth = $allPayments
+          ->groupBy(fn($p) => $p->year . '-' . $p->month)
+          ->map(fn($group) => [
+              'total'          => $group->sum('amount'),
+              'paid_at'        => $group->sortByDesc('paid_at')->first()->paid_at,
+              'waive_late_fee' => $group->contains('waive_late_fee', true),
+          ]);
+
+      $statusList  = [];
+      $carry       = 0; // saldo a favor acumulado
       $currentDate = $startDate->copy();
       $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-      // Calculamos mes a mes desde el principio para repartir el dinero
-      $months = [];
       while ($currentDate <= $endDate) {
-          $months[] = $currentDate->copy();
-          $currentDate->addMonth();
-      }
-
-      foreach ($months as $date) {
           $amountDue = $baseAmount;
-          $isLate = false;
-
-          if ($date < $endDate) {
-              $isLate = true;
-          } elseif ($date->isSameMonth(now()) && now()->day > $dayThreshold) {
-              $isLate = true;
-          }
+          $isLate    = ($currentDate < $endDate) ||
+                       ($currentDate->isSameMonth(now()) && now()->day > $dayThreshold);
 
           if ($isLate) {
               $amountDue += ($amountDue * ($feePercentage / 100));
           }
 
-          // Repartir el dinero disponible a este mes
-          $covered = min($remainingPaid, $amountDue);
-          $remainingPaid -= $covered;
+          $key           = $currentDate->year . '-' . $currentDate->month;
+          $monthData     = $paidByMonth[$key] ?? null;
+          $paidThisMonth = $monthData ? $monthData['total'] : 0;
+          $waived        = $monthData && $monthData['waive_late_fee'];
+
+          // Si hay exoneración, el umbral para considerar saldado es el monto base
+          $threshold         = $waived ? $baseAmount : $amountDue;
+
+          // Disponible = pago real de este mes + crédito arrastrado del anterior
+          $available         = $paidThisMonth + $carry;
+          $covered           = min($available, $threshold);
+          $isPaid            = $available >= $threshold;
+          $surplusGenerated  = max(0, $available - $threshold);
+          $carryUsed         = min($carry, $covered);
+          $carry             = $surplusGenerated;
 
           $statusList[] = [
-              'month_name' => $meses[$date->month - 1],
-              'year' => $date->year,
-              'month_num' => $date->month,
-              'is_paid' => $covered >= $amountDue,
-              'amount' => $amountDue,
-              'covered' => $covered,
-              'pending' => $amountDue - $covered,
-              'is_late' => $isLate,
-              // Para compatibilidad con la vista
-              'paid_at' => ($covered >= $amountDue) ? now() : null 
+              'month_name'        => $meses[$currentDate->month - 1],
+              'year'              => $currentDate->year,
+              'month_num'         => $currentDate->month,
+              'is_paid'           => $isPaid,
+              'amount'            => $amountDue,
+              'threshold'         => $threshold,
+              'covered'           => $covered,
+              'pending'           => max(0, $threshold - $available),
+              'is_late'           => $isLate,
+              'paid_at'           => $monthData ? $monthData['paid_at'] : null,
+              'carry_used'        => $carryUsed,
+              'surplus_generated' => $surplusGenerated,
+              'waive_late_fee'    => $waived,
           ];
+
+          $currentDate->addMonth();
       }
 
-        return array_reverse($statusList);
-    }
+      return array_reverse($statusList);
+  }
 
     public function attendanceSlots()
     {
