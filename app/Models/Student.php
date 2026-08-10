@@ -84,7 +84,7 @@ class Student extends Model
       $endDate   = now()->startOfMonth();
 
       $dayThreshold  = config('app.payment_late_day_threshold', 10);
-      $feePercentage = config('app.payment_late_fee_percentage', 10);
+      $lateFeeAmount = config('app.payment_late_fee_amount', 5000);
       $baseAmount    = config('app.default_payment_amount', 50000);
 
       // Agrupar pagos por año-mes: suma de montos, si alguno tiene waive y fecha último pago
@@ -107,7 +107,7 @@ class Student extends Model
                        ($currentDate->isSameMonth(now()) && now()->day > $dayThreshold);
 
           if ($isLate) {
-              $amountDue += ($amountDue * ($feePercentage / 100));
+              $amountDue += $lateFeeAmount; // recargo fijo en moneda local
           }
 
           $key        = $currentDate->year . '-' . $currentDate->month;
@@ -147,7 +147,7 @@ class Student extends Model
       $endDate   = now()->startOfMonth();
 
       $dayThreshold  = config('app.payment_late_day_threshold', 10);
-      $feePercentage = config('app.payment_late_fee_percentage', 10);
+      $lateFeeAmount = config('app.payment_late_fee_amount', 5000);
       $baseAmount    = config('app.default_payment_amount', 50000);
 
       // Agrupar pagos por año-mes: suma de montos, waive y fecha del último pago
@@ -172,7 +172,7 @@ class Student extends Model
                        ($currentDate->isSameMonth(now()) && now()->day > $dayThreshold);
 
           if ($isLate) {
-              $amountDue += ($amountDue * ($feePercentage / 100));
+              $amountDue += $lateFeeAmount; // recargo fijo en moneda local
           }
 
           $key           = $currentDate->year . '-' . $currentDate->month;
