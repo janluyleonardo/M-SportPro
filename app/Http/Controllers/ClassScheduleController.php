@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassSchedule;
 use App\Models\Location;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreClassScheduleRequest;
@@ -35,6 +36,17 @@ class ClassScheduleController extends Controller
         
         $locations = Location::active()->orderBy('name')->get();
         $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
+
+        $categoriesQuery = Student::query()
+            ->whereNotNull('Categoria')
+            ->where('Categoria', '!=', '');
+        if (!auth()->user()->is_super_admin) {
+            $categoriesQuery->where('club_id', auth()->user()->club_id);
+        }
+        $categories = $categoriesQuery
+            ->distinct()
+            ->orderBy('Categoria')
+            ->pluck('Categoria');
         
         return view('schedules.index', compact(
             'schedules', 
@@ -43,7 +55,8 @@ class ClassScheduleController extends Controller
             'startOfWeek', 
             'endOfWeek', 
             'selectedDate',
-            'clubs'
+            'clubs',
+            'categories'
         ));
     }
 

@@ -147,7 +147,8 @@
                     <i class="bi bi-calendar-plus text-club-primary mr-3"></i> Nueva Programación
                 </h2>
 
-                <form action="{{ route('schedules.store') }}" method="POST" class="space-y-6">
+                <form action="{{ route('schedules.store') }}" method="POST" class="space-y-6"
+                      x-data="{ loading: false }" @submit="loading = true">
                     @csrf
                     @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
                     <div class="mb-4">
@@ -165,9 +166,66 @@
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de la Clase</label>
                             <input type="date" name="date" value="{{ $selectedDate }}" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
                         </div>
-                        <div>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selected: '',
+                                categories: {{ $categories->toJson() }},
+                                get filtered() {
+                                    if (!this.search) return this.categories;
+                                    return this.categories.filter(c => c.toLowerCase().includes(this.search.toLowerCase()));
+                                },
+                                choose(val) {
+                                    this.selected = val;
+                                    this.search = val;
+                                    this.open = false;
+                                }
+                            }"
+                            class="relative"
+                            @click.outside="open = false"
+                        >
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Categoría</label>
-                            <input type="text" name="category" placeholder="Ej: 2010" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold" required>
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true; selected = ''"
+                                    placeholder="Buscar o elegir categoría..."
+                                    autocomplete="off"
+                                    class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 pr-10 font-bold text-gray-700 focus:ring-club-primary focus:border-club-primary"
+                                    required
+                                >
+                                <button type="button" @click="open = !open" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-club-primary transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                            </div>
+                            <!-- Hidden input for form submission -->
+                            <input type="hidden" name="category" :value="search">
+                            <!-- Dropdown list -->
+                            <div
+                                x-show="open && filtered.length > 0"
+                                x-transition
+                                class="absolute z-50 mt-1 w-full bg-white border border-gray-100 rounded-2xl shadow-lg max-h-48 overflow-y-auto"
+                            >
+                                <template x-for="cat in filtered" :key="cat">
+                                    <button
+                                        type="button"
+                                        @click="choose(cat)"
+                                        class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-club-primary/10 hover:text-club-primary transition-colors first:rounded-t-2xl last:rounded-b-2xl"
+                                        :class="{'bg-club-primary/10 text-club-primary': selected === cat}"
+                                        x-text="cat"
+                                    ></button>
+                                </template>
+                            </div>
+                            <!-- No results -->
+                            <div
+                                x-show="open && filtered.length === 0 && search.length > 0"
+                                class="absolute z-50 mt-1 w-full bg-white border border-gray-100 rounded-2xl shadow-lg px-4 py-3 text-xs text-gray-400 italic"
+                            >
+                                No hay categorías que coincidan. Se usará "<span class="font-bold text-gray-600" x-text="search"></span>".
+                            </div>
                         </div>
                     </div>
 
@@ -211,12 +269,20 @@
 
                     <div class="flex items-center justify-end gap-3 mt-10">
                         <button type="button"
+                                :disabled="loading"
                                 onclick="window.dispatchEvent(new CustomEvent('close-modal', { detail: 'add-schedule' }))"
-                                class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-all">
+                                class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                             Cancelar
                         </button>
-                        <button type="submit" class="px-10 py-4 bg-club-primary text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-indigo-100">
-                            Guardar Horario
+                        <button type="submit"
+                                :disabled="loading"
+                                class="inline-flex items-center gap-2 px-10 py-4 bg-club-primary text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-indigo-100 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <svg x-show="loading" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <i x-show="!loading" class="bi bi-floppy-fill"></i>
+                            <span x-text="loading ? 'Guardando...' : 'Guardar Horario'"></span>
                         </button>
                     </div>
                 </form>
@@ -230,7 +296,8 @@
                     <i class="bi bi-pencil-square text-blue-500 mr-3"></i> Editar Programación
                 </h2>
 
-                <form :action="editUrl" method="POST" class="space-y-6">
+                <form :action="editUrl" method="POST" class="space-y-6"
+                      x-data="{ loading: false }" @submit="loading = true">
                     @csrf
                     @method('PUT')
                     @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
@@ -249,9 +316,68 @@
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de la Clase</label>
                             <input type="date" name="date" x-model="editDate" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
                         </div>
-                        <div>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: editCategory,
+                                selected: editCategory,
+                                categories: {{ $categories->toJson() }},
+                                get filtered() {
+                                    if (!this.search) return this.categories;
+                                    return this.categories.filter(c => c.toLowerCase().includes(this.search.toLowerCase()));
+                                },
+                                choose(val) {
+                                    this.selected = val;
+                                    this.search = val;
+                                    editCategory = val;
+                                    this.open = false;
+                                }
+                            }"
+                            x-init="$watch('editCategory', val => { search = val; selected = val; })"
+                            class="relative"
+                            @click.outside="open = false"
+                        >
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Categoría</label>
-                            <input type="text" name="category" x-model="editCategory" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold" required>
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="search"
+                                    @focus="open = true"
+                                    @input="open = true; selected = ''"
+                                    placeholder="Buscar o elegir categoría..."
+                                    autocomplete="off"
+                                    class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 pr-10 font-bold text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+                                    required
+                                >
+                                <button type="button" @click="open = !open" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                            </div>
+                            <!-- Hidden input for form submission -->
+                            <input type="hidden" name="category" :value="search">
+                            <!-- Dropdown list -->
+                            <div
+                                x-show="open && filtered.length > 0"
+                                x-transition
+                                class="absolute z-50 mt-1 w-full bg-white border border-gray-100 rounded-2xl shadow-lg max-h-48 overflow-y-auto"
+                            >
+                                <template x-for="cat in filtered" :key="cat">
+                                    <button
+                                        type="button"
+                                        @click="choose(cat)"
+                                        class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-500 transition-colors first:rounded-t-2xl last:rounded-b-2xl"
+                                        :class="{'bg-blue-50 text-blue-500': selected === cat}"
+                                        x-text="cat"
+                                    ></button>
+                                </template>
+                            </div>
+                            <!-- No results -->
+                            <div
+                                x-show="open && filtered.length === 0 && search.length > 0"
+                                class="absolute z-50 mt-1 w-full bg-white border border-gray-100 rounded-2xl shadow-lg px-4 py-3 text-xs text-gray-400 italic"
+                            >
+                                No hay categorías que coincidan. Se usará "<span class="font-bold text-gray-600" x-text="search"></span>".
+                            </div>
                         </div>
                     </div>
 
@@ -295,12 +421,20 @@
 
                     <div class="flex items-center justify-end gap-3 mt-10">
                         <button type="button"
+                                :disabled="loading"
                                 onclick="window.dispatchEvent(new CustomEvent('close-modal', { detail: 'edit-schedule' }))"
-                                class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-all">
+                                class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                             Cancelar
                         </button>
-                        <button type="submit" class="px-10 py-4 bg-blue-500 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-blue-100">
-                            Actualizar Horario
+                        <button type="submit"
+                                :disabled="loading"
+                                class="inline-flex items-center gap-2 px-10 py-4 bg-blue-500 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-blue-100 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <svg x-show="loading" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <i x-show="!loading" class="bi bi-floppy-fill"></i>
+                            <span x-text="loading ? 'Actualizando...' : 'Actualizar Horario'"></span>
                         </button>
                     </div>
                 </form>
