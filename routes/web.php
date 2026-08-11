@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 return view('dashboard', compact('clubs'));
             }
 
-            if (!auth()->user()->hasAnyRole(['Admin', 'Profesor', 'Padre', 'Deportista'])) {
+            if (!auth()->user()->hasAnyRole(['Admin', 'SubAdmin', 'Profesor', 'Padre', 'Deportista'])) {
                 abort(403, 'Acción no autorizada.');
             }
 
@@ -49,7 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('dashboard');
 
     // 2. Módulo de Estudiantes (Solo Admin y Profesor)
-    Route::middleware(['role:Admin|Profesor'])->group(function () {
+    Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
         Route::resource('students', StudentsController::class)->except(['destroy']);
         Route::get('/imprimir/{id}', [StudentsController::class, 'imprimir'])->name('imprimir');
     });
@@ -68,38 +68,58 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         // Rutas de Asistencia
-        Route::middleware(['role:Admin|Profesor', 'module:classes'])->group(function () {
+        Route::middleware(['role:Admin|SubAdmin|Profesor', 'module:classes'])->group(function () {
             Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
             Route::get('attendances/class/{schedule}', [AttendanceController::class, 'show'])->name('attendances.show');
             Route::post('attendances', [AttendanceController::class, 'store'])->name('attendances.store');
         });
 
-        // Rutas de Gestión (Solo Admin)
-        Route::middleware(['role:Admin'])->group(function () {
+        // Override de asistencia — crear: Admin|SubAdmin / revocar: solo Admin
+        Route::middleware(['role:Admin|SubAdmin', 'module:classes'])->group(function () {
+            Route::post('attendances/override', [AttendanceController::class, 'storeOverride'])->name('attendances.override.store');
+        });
+        Route::middleware(['role:Admin', 'module:classes'])->group(function () {
+            Route::delete('attendances/override/{override}', [AttendanceController::class, 'destroyOverride'])->name('attendances.override.destroy');
+        });
+
+
+        // ── Rutas de Gestión: Admin y SubAdmin (crear / editar) ────────────────
+        Route::middleware(['role:Admin|SubAdmin'])->group(function () {
             Route::middleware(['module:financial'])->group(function () {
                 Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
                 Route::put('payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
-                Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+                Route::post('payments/{payment}/verify', [PaymentController::class, 'verifyVoucher'])->name('payments.verify');
+                Route::post('payments/{payment}/reject', [PaymentController::class, 'rejectVoucher'])->name('payments.reject');
             });
-            
-            // Rutas de Horarios (Solo Admin para crear/editar/eliminar)
+
+            // Horarios: crear y editar
             Route::middleware(['module:classes'])->group(function () {
                 Route::post('schedules', [ClassScheduleController::class, 'store'])->name('schedules.store');
                 Route::put('schedules/{classSchedule}', [ClassScheduleController::class, 'update'])->name('schedules.update');
-                Route::delete('schedules/{classSchedule}', [ClassScheduleController::class, 'destroy'])->name('schedules.destroy');
             });
-            
-            Route::resource('users', UserController::class);
-            Route::resource('locations', LocationController::class)->only(['index', 'store', 'update', 'destroy']);
-            Route::delete('/students/{student}', [StudentsController::class, 'destroy'])->name('students.destroy');
-            Route::delete('/programming/{programming}', [ProgrammingController::class, 'destroy'])->name('programming.destroy');
+
+            Route::resource('users', UserController::class)->except(['destroy']);
+            Route::resource('locations', LocationController::class)->only(['index', 'store', 'update']);
             Route::get('/export', [StudentsController::class, 'export'])->name('export');
             Route::get('/export-template', [StudentsController::class, 'exportTemplate'])->name('export.template');
             Route::post('/import', [StudentsController::class, 'import'])->name('import');
-            
-            // Verificación de comprobantes
-            Route::post('payments/{payment}/verify', [PaymentController::class, 'verifyVoucher'])->name('payments.verify');
-            Route::post('payments/{payment}/reject', [PaymentController::class, 'rejectVoucher'])->name('payments.reject');
+        });
+
+        // ── Rutas exclusivas de Admin (SOLO ELIMINAR) ────────────────────────────
+        Route::middleware(['role:Admin'])->group(function () {
+            Route::middleware(['module:financial'])->group(function () {
+                Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+            });
+
+            // Horarios: eliminar
+            Route::middleware(['module:classes'])->group(function () {
+                Route::delete('schedules/{classSchedule}', [ClassScheduleController::class, 'destroy'])->name('schedules.destroy');
+            });
+
+            Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+            Route::delete('locations/{location}', [LocationController::class, 'destroy'])->name('locations.destroy');
+            Route::delete('/students/{student}', [StudentsController::class, 'destroy'])->name('students.destroy');
+            Route::delete('/programming/{programming}', [ProgrammingController::class, 'destroy'])->name('programming.destroy');
         });
 
         // Ruta para que padres/deportistas suban comprobantes
@@ -107,14 +127,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('payments/upload-voucher', [PaymentController::class, 'uploadVoucher'])->name('payments.upload_voucher');
         });
 
-        Route::middleware(['role:Admin'])->group(function () {
-            // Módulo de Tesorería
-            // Inventario y Productos
+        // ── Tesorería e Inventario: Admin y SubAdmin (crear / editar / ver) ─────
+        Route::middleware(['role:Admin|SubAdmin'])->group(function () {
             Route::middleware(['module:financial'])->group(function () {
                 Route::get('products/template', [ProductController::class, 'downloadTemplate'])->name('products.template');
                 Route::post('products/import', [ProductController::class, 'import'])->name('products.import');
-                Route::resource('products', ProductController::class);
-                
+                Route::resource('products', ProductController::class)->except(['destroy']);
+
                 // Tesorería
                 Route::prefix('treasury')->name('treasury.')->group(function() {
                     Route::get('/', [TreasuryController::class, 'index'])->name('index');
@@ -127,22 +146,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
             });
         });
 
+        // Productos: eliminar (solo Admin)
+        Route::middleware(['role:Admin', 'module:financial'])->group(function () {
+            Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+        });
+
     // 3. Módulo de Programación
     Route::middleware(['module:tournaments'])->group(function () {
         // Lectura: Para todos
         Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|Profesor|Padre|Deportista');
 
-        Route::middleware(['role:Admin|Profesor'])->group(function () {
+        Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
             Route::resource('programming', ProgrammingController::class)->except(['index', 'show', 'destroy']);
             Route::get('/programming/imprimir/{date}', [ProgrammingController::class, 'imprimir'])->name('programming.imprimir');
             Route::get('/programming/{id}/payments', [ProgrammingController::class, 'getPayments'])->name('programming.payments.get');
             Route::post('/programming/{id}/payments', [ProgrammingController::class, 'updatePayments'])->name('programming.payments.update');
         });
 
-        // 5. Módulo de Torneos
-        Route::middleware(['role:Admin|Profesor'])->group(function () {
-            Route::resource('tournaments', TournamentController::class);
+        // 5. Módulo de Torneos — crear/editar: Admin|SubAdmin|Profesor
+        Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
+            Route::resource('tournaments', TournamentController::class)->except(['destroy']);
             Route::get('/tournaments/{tournament}/payments', [TournamentController::class, 'payments'])->name('tournaments.payments');
+        });
+        // Torneos: eliminar — solo Admin y Profesor (mantenemos igual que antes)
+        Route::middleware(['role:Admin|Profesor'])->group(function () {
+            Route::delete('tournaments/{tournament}', [TournamentController::class, 'destroy'])->name('tournaments.destroy');
         });
     });
 

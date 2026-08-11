@@ -33,7 +33,7 @@
                     </a>
                 </div>
                 
-                @role('Admin')
+                @role('Admin|SubAdmin')
                     <button
                         onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'add-schedule' }))"
                         class="inline-flex items-center px-6 py-3 bg-club-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-indigo-100">
@@ -85,7 +85,7 @@
                                         </div>
                                     @endif
 
-                                    @role('Admin')
+                                    @role('Admin|SubAdmin')
                                         @if($schedule->attendances_exists)
                                             <div class="mt-2 flex items-center text-[8px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-lg border border-green-100 uppercase tracking-widest">
                                                 <i class="bi bi-check-all text-sm mr-1"></i> Asistencia Tomada

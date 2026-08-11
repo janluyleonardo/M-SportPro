@@ -39,7 +39,7 @@
                     @endrole
 
                     {{-- Dropdown de Gestión: visible para Admin, Profesor y SuperAdmin --}}
-                    @if(auth()->user()->hasAnyRole(['Admin', 'Profesor']) || auth()->user()->is_super_admin)
+                    @if(auth()->user()->hasAnyRole(['Admin', 'SubAdmin', 'Profesor']) || auth()->user()->is_super_admin)
                         <div class="relative" x-data="{ openGestion: false }" @click.outside="openGestion = false">
                             <button
                                 @click="openGestion = !openGestion"
@@ -105,7 +105,7 @@
                                     </a>
                                     @endmodule
 
-                                    @role('Admin')
+                                    @role('Admin|SubAdmin')
                                         <div class="border-t border-gray-100 my-1.5"></div>
                                         <a href="{{ route('users.index') }}"
                                            class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
@@ -303,7 +303,7 @@
             </div>
 
             {{-- Sección de Gestión en móvil --}}
-            @if(auth()->user()->hasAnyRole(['Admin', 'Profesor']) || auth()->user()->is_super_admin)
+            @if(auth()->user()->hasAnyRole(['Admin', 'SubAdmin', 'Profesor']) || auth()->user()->is_super_admin)
                 <div class="mt-4 px-3">
                     <div class="px-3 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center border-t border-gray-100 pt-4">
                         <i class="bi bi-shield-lock-fill mr-1.5 text-club-primary"></i> Gestión
@@ -329,7 +329,7 @@
                         </a>
                         @endmodule
 
-                        @role('Admin')
+                        @role('Admin|SubAdmin')
                             <a href="{{ route('users.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('users.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                                 <i class="bi bi-people-fill mr-3 text-base {{ request()->routeIs('users.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Usuarios') }}

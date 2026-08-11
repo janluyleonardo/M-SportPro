@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassSchedule;
 use App\Models\Attendance;
+use App\Models\AttendanceOverride;
 use App\Models\Student;
 use App\Models\Payment;
 use Illuminate\Http\Request;
@@ -45,7 +46,13 @@ class AttendanceController extends Controller
             ->get()
             ->pluck('status', 'student_id');
 
-        return view('attendances.show', compact('schedule', 'students', 'existingAttendances'));
+        // Cargar overrides activos para esta clase (indexados por student_id)
+        $overrides = AttendanceOverride::where('class_schedule_id', $schedule->id)
+            ->with('authorizedBy')
+            ->get()
+            ->keyBy('student_id');
+
+        return view('attendances.show', compact('schedule', 'students', 'existingAttendances', 'overrides'));
     }
 
     public function store(StoreAttendanceRequest $request)
@@ -107,4 +114,47 @@ class AttendanceController extends Controller
 
         return redirect()->route('attendances.index')->with('success', 'Asistencia registrada correctamente.');
     }
+
+    /**
+     * Admin habilita manualmente a un estudiante bloqueado para una clase específica.
+     */
+    public function storeOverride(Request $request)
+    {
+        $request->validate([
+            'student_id'        => 'required|exists:students,id',
+            'class_schedule_id' => 'required|exists:class_schedules,id',
+            'reason'            => 'nullable|string|max:500',
+        ]);
+
+        AttendanceOverride::updateOrCreate(
+            [
+                'student_id'        => $request->student_id,
+                'class_schedule_id' => $request->class_schedule_id,
+            ],
+            [
+                'authorized_by' => Auth::id(),
+                'reason'        => $request->reason,
+            ]
+        );
+
+        $schedule = ClassSchedule::findOrFail($request->class_schedule_id);
+
+        return redirect()
+            ->route('attendances.show', $schedule)
+            ->with('success', 'Estudiante habilitado para esta clase.');
+    }
+
+    /**
+     * Admin revoca la habilitación de un estudiante.
+     */
+    public function destroyOverride(AttendanceOverride $override)
+    {
+        $schedule = $override->classSchedule;
+        $override->delete();
+
+        return redirect()
+            ->route('attendances.show', $schedule)
+            ->with('success', 'Habilitación revocada.');
+    }
 }
+

@@ -74,7 +74,7 @@
                     </div>
 
                     <!-- Botón de Acción Directo (Solo Admin) -->
-                    @role('Admin')
+                    @role('Admin|SubAdmin')
                     @if($student->balance > 0)
                         <button @click="$dispatch('open-payment-modal')"
                             class="px-6 py-4 bg-club-primary hover:opacity-90 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 transform active:scale-95 transition-all text-[9px] uppercase tracking-widest flex items-center justify-center whitespace-nowrap">
@@ -170,7 +170,7 @@
                                 </div>
 
                                 @if ($status['is_paid'])
-                                    @role('Admin')
+                                    @role('Admin|SubAdmin')
                                         <div class="border-l border-gray-100 pl-4 flex items-center space-x-2">
                                             @php
                                                 // Buscamos directamente en la base de datos para asegurar el dato más fresco
@@ -196,7 +196,7 @@
                                         </div>
                                     @endrole
                                 @else
-                                    @role('Admin')
+                                    @role('Admin|SubAdmin')
                                         <div class="border-l border-gray-100 pl-4">
                                             <button
                                                 @click="$dispatch('open-payment-modal', { month: {{ $status['month_num'] }}, year: {{ $status['year'] }} })"
@@ -256,7 +256,7 @@
                                         <div class="flex items-center gap-3">
                                             <span class="font-black text-gray-900">${{ number_format($abono->amount, 0, ',', '.') }}</span>
 
-                                            @role('Admin')
+                                            @role('Admin|SubAdmin')
                                                 @if($abono->voucher && $abono->voucher_status == 'pending')
                                                     <div class="flex gap-1" x-data="{ rejecting: false }">
                                                         <form action="{{ route('payments.verify', $abono) }}" method="POST">
@@ -287,7 +287,10 @@
                                                         </template>
                                                     </div>
                                                 @endif
+                                            @endrole
 
+                                            {{-- Eliminar abono: SOLO Admin --}}
+                                            @role('Admin')
                                                 <form action="{{ route('payments.destroy', $abono) }}" method="POST"
                                                     onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar abono', '¿Estás seguro de eliminar este abono de ${{ number_format($abono->amount, 0, ',', '.') }}?')">
                                                     @csrf @method('DELETE')
@@ -312,7 +315,7 @@
         </div>
     </div>
 
-    @role('Admin')
+    @role('Admin|SubAdmin')
     <!-- Modal de Pago con Lógica de Recargo Dinámica -->
     <div id="modal-pago" x-data="{
             open: false,
