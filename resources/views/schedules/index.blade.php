@@ -100,7 +100,7 @@
                                     @endif
 
                                     <!-- Actions -->
-                                    @role('Admin')
+                                    @role('Admin|SubAdmin')
                                         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2">
                                             <button @click="
                                                 editUrl = '{{ route('schedules.update', $schedule) }}';
@@ -118,14 +118,16 @@
                                                 <i class="bi bi-pencil-fill"></i>
                                             </button>
 
-                                            <form action="{{ route('schedules.destroy', $schedule) }}" method="POST"
-                                                  onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar horario', '¿Deseas eliminar esta clase programada?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-400 hover:text-red-600 transition-colors">
-                                                    <i class="bi bi-x-circle-fill"></i>
-                                                </button>
-                                            </form>
+                                            @role('Admin')
+                                                <form action="{{ route('schedules.destroy', $schedule) }}" method="POST"
+                                                      onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar horario', '¿Deseas eliminar esta clase programada?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-400 hover:text-red-600 transition-colors">
+                                                        <i class="bi bi-x-circle-fill"></i>
+                                                    </button>
+                                                </form>
+                                            @endrole
                                         </div>
                                     @endrole
                                 </div>

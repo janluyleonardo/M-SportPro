@@ -107,7 +107,7 @@
 
                             <div class="inline-flex items-center justify-center w-full py-3.5 bg-club-primary text-white rounded-2xl text-[10px] uppercase tracking-widest font-black group-hover:opacity-90 transition-all shadow-lg shadow-gray-200 group-hover:shadow-indigo-100">
                                 <i class="bi bi-wallet2 mr-2"></i>
-                                {{ Auth::user()->hasRole('Admin') ? 'Gestionar Mensualidades' : 'Ver Historial de Pagos' }}
+                                {{ Auth::user()->hasAnyRole(['Admin', 'SubAdmin']) ? 'Gestionar Mensualidades' : 'Ver Historial de Pagos' }}
                             </div>
                         </div>
                     </div>

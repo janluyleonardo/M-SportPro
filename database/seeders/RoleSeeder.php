@@ -34,10 +34,22 @@ class RoleSeeder extends Seeder
         }
 
         // Crear Roles y asignar permisos
-        
+
         // ADMIN: CRUD completo
         $roleAdmin = Role::firstOrCreate(['name' => 'Admin']);
         $roleAdmin->syncPermissions(Permission::all());
+
+        // SUBADMIN: Igual que Admin pero sin poder eliminar
+        $roleSubAdmin = Role::firstOrCreate(['name' => 'SubAdmin']);
+        $roleSubAdmin->syncPermissions([
+            'view dashboard',
+            'view programming',
+            'create programming',
+            'edit programming',
+            'view students',
+            'create students',
+            'edit students',
+        ]);
 
         // PROFESOR: Dashboard + Programación/Estudiantes (Crear/Editar pero NO eliminar)
         $roleProfesor = Role::firstOrCreate(['name' => 'Profesor']);

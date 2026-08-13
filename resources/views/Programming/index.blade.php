@@ -36,7 +36,7 @@
                     </button>
                 </div>
 
-                @hasanyrole('Admin|Profesor')
+                @hasanyrole('Admin|SubAdmin|Profesor')
                 <button @click="openCreateModal = true"
                     class="w-full md:w-auto inline-flex items-center justify-center px-6 py-3 bg-club-primary border border-transparent rounded-xl font-bold text-sm text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-club-primary focus:ring-offset-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                     <i class="bi bi-plus-circle mr-2 text-lg"></i> {{__('Nueva Programación')}}
@@ -228,14 +228,14 @@
                                                             <i class="bi bi-eye text-lg"></i>
                                                         </button>
 
-                                                        @hasanyrole('Admin|Profesor')
+                                                        @hasanyrole('Admin|SubAdmin|Profesor')
                                                         <button @click="openEdit(item)" title="Editar"
                                                             class="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors focus:outline-none">
                                                             <i class="bi bi-pencil-square text-lg"></i>
                                                         </button>
                                                         @endhasanyrole
 
-                                                        @hasanyrole('Admin|Profesor')
+                                                        @hasanyrole('Admin|SubAdmin|Profesor')
                                                         <button @click="openPayments(item)" title="Control de Pagos"
                                                             class="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors focus:outline-none">
                                                             <i class="bi bi-cash-coin text-lg"></i>
@@ -296,7 +296,7 @@
                                                 class="flex-1 flex items-center justify-center py-2.5 bg-blue-50 text-club-primary rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
                                                 <i class="bi bi-eye mr-2"></i> Detalles
                                             </button>
-                                            @hasanyrole('Admin|Profesor')
+                                            @hasanyrole('Admin|SubAdmin|Profesor')
                                             <button @click="openEdit(item)"
                                                 class="flex-1 flex items-center justify-center py-2.5 bg-amber-50 text-amber-600 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border border-amber-100">
                                                 <i class="bi bi-pencil mr-2"></i> Editar
@@ -489,18 +489,16 @@
                                         <div>
                                             <h5
                                                 class="text-indigo-900 font-black text-sm uppercase tracking-wider mb-1">
-                                                Planilla Automática Activada</h5>
+                                                Jugadores del Torneo Precargados</h5>
                                             <p class="text-indigo-700 text-sm leading-relaxed">
                                                 Este partido está vinculado al torneo <strong
                                                     x-text="selectedTournament ? selectedTournament.name : ''"></strong>.
-                                                El sistema usará automáticamente los <strong
-                                                    x-text="selectedTournament ? selectedTournament.students.length : 0"></strong>
-                                                deportistas que asociaste a este torneo en la planilla oficial.
+                                                Se han precargado automáticamente sus jugadores. Puedes desconvocar o agregar más jugadores utilizando el panel inferior.
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div x-show="!selectedTournament">
+                                    <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Seleccionar
                                             Jugadores Convocados <span class="text-red-500">*</span></label>
 
@@ -524,17 +522,26 @@
                                                         class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">Convocar
                                                         Visibles <i class="bi bi-chevron-double-right"></i></button>
                                                 </div>
-                                                <div class="p-2 border-b border-gray-100 bg-gray-50/50">
-                                                    <div class="relative">
+                                                <div class="p-2 border-b border-gray-100 bg-gray-50/50 flex gap-2">
+                                                    <div class="relative flex-1">
                                                         <i
                                                             class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
                                                         <input type="text" x-model="searchLeft"
-                                                            placeholder="Buscar nombre o año..."
+                                                            placeholder="Buscar por nombre..."
                                                             class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                                                    </div>
+                                                    <div class="w-1/3">
+                                                        <select x-model="categoryFilterLeft"
+                                                            class="w-full text-xs py-1.5 px-2 rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                                                            <option value="">Todas las Cat.</option>
+                                                            <template x-for="cat in availableCategories" :key="cat">
+                                                                <option :value="cat" x-text="cat"></option>
+                                                            </template>
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div
-                                                    class="flex-1 overflow-y-auto h-auto min-h-[12rem] p-2 space-y-1 bg-gray-50/30">
+                                                    class="flex-1 overflow-y-auto min-h-[12rem] p-2 space-y-1 bg-gray-50/30" style="max-height: 320px;">
                                                     <template x-for="player in filteredAvailable" :key="player.id">
                                                         <div @click="moveToSelected(player)"
                                                             class="flex justify-between items-center p-2 rounded-lg hover:bg-indigo-50 cursor-pointer border border-transparent hover:border-indigo-100 transition-colors group">
@@ -578,7 +585,7 @@
                                                     </div>
                                                 </div>
                                                 <div
-                                                    class="flex-1 overflow-y-auto h-auto min-h-[12rem] p-2 space-y-1 bg-white">
+                                                    class="flex-1 overflow-y-auto min-h-[12rem] p-2 space-y-1 bg-white" style="max-height: 320px;">
                                                     <template x-for="player in filteredSelected" :key="player.id">
                                                         <div @click="moveToAvailable(player)"
                                                             class="flex justify-between items-center p-2 rounded-lg bg-green-50 hover:bg-red-50 cursor-pointer border border-green-100 hover:border-red-100 transition-colors group">
@@ -601,8 +608,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <input type="checkbox" x-show="!selectedTournament"
-                                            :checked="selected.length > 0" :required="!selectedTournament"
+                                        <input type="checkbox"
+                                            :checked="selected.length > 0" :required="true"
                                             class="opacity-0 absolute -z-10"
                                             oninvalid="this.setCustomValidity('Debes convocar al menos un jugador')"
                                             oninput="this.setCustomValidity('')">
@@ -770,26 +777,23 @@
                                 <!-- Edit Transfer List -->
                                 <div class="col-span-1 md:col-span-2 lg:col-span-3 w-full">
                                     <div x-show="selectedTournamentEdit"
-                                        class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mb-4 flex items-start space-x-4 shadow-sm"
-                                        style="display: none;">
+                                        class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mb-4 flex items-start space-x-4 shadow-sm">
                                         <div class="bg-indigo-100 p-3 rounded-xl">
                                             <i class="bi bi-people-fill text-indigo-600 text-2xl"></i>
                                         </div>
                                         <div>
                                             <h5
                                                 class="text-indigo-900 font-black text-sm uppercase tracking-wider mb-1">
-                                                Planilla Automática Activada</h5>
+                                                Jugadores del Torneo Precargados</h5>
                                             <p class="text-indigo-700 text-sm leading-relaxed">
                                                 Este partido está vinculado al torneo <strong
                                                     x-text="selectedTournamentEdit ? selectedTournamentEdit.name : ''"></strong>.
-                                                El sistema mantendrá sincronizados a los <strong
-                                                    x-text="selectedTournamentEdit ? (selectedTournamentEdit.students ? selectedTournamentEdit.students.length : 0) : 0"></strong>
-                                                deportistas de la planilla oficial del torneo.
+                                                Se han precargado automáticamente sus jugadores. Puedes desconvocar o agregar más jugadores utilizando el panel inferior.
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div x-show="!selectedTournamentEdit">
+                                    <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Editar Jugadores
                                             Convocados</label>
 
@@ -811,17 +815,26 @@
                                                         class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">Convocar
                                                         Visibles <i class="bi bi-chevron-double-right"></i></button>
                                                 </div>
-                                                <div class="p-2 border-b border-gray-100 bg-gray-50/50">
-                                                    <div class="relative">
+                                                <div class="p-2 border-b border-gray-100 bg-gray-50/50 flex gap-2">
+                                                    <div class="relative flex-1">
                                                         <i
                                                             class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
                                                         <input type="text" x-model="editSearchLeft"
-                                                            placeholder="Buscar..."
+                                                            placeholder="Buscar por nombre..."
                                                             class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border-gray-300 focus:ring-indigo-500">
+                                                    </div>
+                                                    <div class="w-1/3">
+                                                        <select x-model="categoryFilterEditLeft"
+                                                            class="w-full text-xs py-1.5 px-2 rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                                                            <option value="">Todas las Cat.</option>
+                                                            <template x-for="cat in availableCategories" :key="cat">
+                                                                <option :value="cat" x-text="cat"></option>
+                                                            </template>
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div
-                                                    class="flex-1 overflow-y-auto h-auto min-h-[12rem] p-2 space-y-1 bg-gray-50/30">
+                                                    class="flex-1 overflow-y-auto min-h-[12rem] p-2 space-y-1 bg-gray-50/30" style="max-height: 320px;">
                                                     <template x-for="player in editFilteredAvailable" :key="player.id">
                                                         <div @click="editMoveToSelected(player)"
                                                             class="flex justify-between items-center p-2 rounded-lg hover:bg-indigo-50 cursor-pointer border border-transparent hover:border-indigo-100 transition-colors group">
@@ -865,7 +878,7 @@
                                                     </div>
                                                 </div>
                                                 <div
-                                                    class="flex-1 overflow-y-auto h-auto min-h-[12rem] p-2 space-y-1 bg-white">
+                                                    class="flex-1 overflow-y-auto min-h-[12rem] p-2 space-y-1 bg-white" style="max-height: 320px;">
                                                     <template x-for="player in editFilteredSelected" :key="player.id">
                                                         <div @click="editMoveToAvailable(player)"
                                                             class="flex justify-between items-center p-2 rounded-lg bg-green-50 hover:bg-red-50 cursor-pointer border border-green-100 hover:border-red-100 transition-colors group">
@@ -1238,6 +1251,7 @@
                 selected: [],
                 searchLeft: '',
                 searchRight: '',
+                categoryFilterLeft: '',
 
                 // Edit Modal Transfer List
                 selectedTournamentIdEdit: '',
@@ -1245,6 +1259,7 @@
                 editSearchRight: '',
                 editAvailable: [],
                 editSelected: [],
+                categoryFilterEditLeft: '',
                 eventName: '',
                 eventNameEdit: '',
                 selectedTime: '',
@@ -1277,21 +1292,43 @@
                     return 'https://wa.me/?text=' + encodeURIComponent(message);
                 },
 
+                get availableCategories() {
+                    const cats = this.allStudents.map(s => s.category).filter(c => c && c.trim() !== '');
+                    return [...new Set(cats)].sort();
+                },
+
                 init() {
                     this.available = [...this.allStudents];
 
-                    // Auto-fill event name on tournament selection (Create)
+                    // Auto-fill event name and PRELOAD students on tournament selection (Create)
                     this.$watch('selectedTournamentId', (value) => {
                         if (value && this.selectedTournament) {
                             this.eventName = this.selectedTournament.name;
+                            // Preload students of this tournament as selected
+                            const studentIds = this.selectedTournament.students.map(s => s.id);
+                            this.selected = this.allStudents.filter(s => studentIds.includes(s.id));
+                            this.available = this.allStudents.filter(s => !studentIds.includes(s.id));
+                        } else {
+                            this.selected = [];
+                            this.available = [...this.allStudents];
                         }
+                        this.categoryFilterLeft = '';
+                        this.searchLeft = '';
                     });
 
-                    // Auto-fill event name on tournament selection (Edit)
+                    // Auto-fill event name and PRELOAD students on tournament selection (Edit)
                     this.$watch('selectedTournamentIdEdit', (value) => {
                         if (value && this.selectedTournamentEdit) {
                             this.eventNameEdit = this.selectedTournamentEdit.name;
+                            // Preload students of this tournament as selected
+                            const studentIds = this.selectedTournamentEdit.students.map(s => s.id);
+                            this.editSelected = this.allStudents.filter(s => studentIds.includes(s.id));
+                            this.editAvailable = this.allStudents.filter(s => !studentIds.includes(s.id));
+                        } else {
+                            // If tournament deselected, keep current selected but reset filters
                         }
+                        this.categoryFilterEditLeft = '';
+                        this.editSearchLeft = '';
                     });
                 },
 
@@ -1512,6 +1549,7 @@
 
                     this.editSearchLeft = '';
                     this.editSearchRight = '';
+                    this.categoryFilterEditLeft = '';
                     this.eventNameEdit = item.torneo || '';
                     this.selectedTimeEdit = item.hora || '';
                     this.selectedDateEdit = item.fecha || '';
@@ -1521,10 +1559,8 @@
                 get editFilteredAvailable() {
                     let filtered = this.editAvailable;
 
-                    // Filter by tournament if selected
-                    if (this.selectedTournamentEdit) {
-                        const studentIds = this.selectedTournamentEdit.students.map(s => s.id);
-                        filtered = filtered.filter(p => studentIds.includes(p.id));
+                    if (this.categoryFilterEditLeft !== '') {
+                        filtered = filtered.filter(p => p.category === this.categoryFilterEditLeft);
                     }
 
                     if (this.editSearchLeft !== '') {
@@ -1559,10 +1595,8 @@
                 get filteredAvailable() {
                     let filtered = this.available;
 
-                    // Filter by tournament if selected
-                    if (this.selectedTournament) {
-                        const studentIds = this.selectedTournament.students.map(s => s.id);
-                        filtered = filtered.filter(p => studentIds.includes(p.id));
+                    if (this.categoryFilterLeft !== '') {
+                        filtered = filtered.filter(p => p.category === this.categoryFilterLeft);
                     }
 
                     if (this.searchLeft !== '') {

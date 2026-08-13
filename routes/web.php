@@ -55,12 +55,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
         // Rutas de Mensualidades y Asistencias
-        Route::middleware(['role:Admin|Profesor|Padre|Deportista'])->group(function () {
+        Route::middleware(['role:Admin|SubAdmin|Profesor|Padre|Deportista'])->group(function () {
             Route::middleware(['module:financial'])->group(function () {
                 Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
                 Route::get('payments/student/{student}', [PaymentController::class, 'show'])->name('payments.show');
             });
-            
+
             // Visualización de Horarios para todos
             Route::middleware(['module:classes'])->group(function () {
                 Route::get('schedules', [ClassScheduleController::class, 'index'])->name('schedules.index');
@@ -123,7 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         // Ruta para que padres/deportistas suban comprobantes
-        Route::middleware(['role:Admin|Profesor|Padre|Deportista'])->group(function () {
+        Route::middleware(['role:Admin|SubAdmin|Profesor|Padre|Deportista'])->group(function () {
             Route::post('payments/upload-voucher', [PaymentController::class, 'uploadVoucher'])->name('payments.upload_voucher');
         });
 
@@ -153,8 +153,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // 3. Módulo de Programación
     Route::middleware(['module:tournaments'])->group(function () {
-        // Lectura: Para todos
-        Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|Profesor|Padre|Deportista');
+        // Lectura: Para todos (incluyendo SubAdmin)
+        Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|SubAdmin|Profesor|Padre|Deportista');
 
         Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
             Route::resource('programming', ProgrammingController::class)->except(['index', 'show', 'destroy']);

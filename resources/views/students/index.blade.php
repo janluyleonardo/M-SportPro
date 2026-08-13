@@ -46,7 +46,7 @@
         </div>
 
         <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-2" x-data="{ exporting: false, showImport: false }">
-          @role('Admin')
+          @role('Admin|SubAdmin')
           <!-- Botón Exportar -->
           <a href="#" data-no-loader="true"
              @click.prevent="if (!exporting) { exporting = true; window.location.href = '{{ route('export') }}'; setTimeout(() => exporting = false, 3000); }"

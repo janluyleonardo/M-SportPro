@@ -9,7 +9,7 @@
                     {{ __('Gestión de Torneos') }}
                 </h2>
             </div>
-            @hasanyrole('Admin|Profesor')
+            @hasanyrole('Admin|SubAdmin|Profesor')
                 <div x-data="{}">
                     <button @click="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'create-tournament' }))" class="inline-flex items-center px-4 py-2 bg-club-primary border border-transparent rounded-xl font-bold text-sm text-white hover:opacity-90 transition-all shadow-md">
                         <i class="bi bi-plus-circle mr-2"></i> Nuevo Torneo
@@ -41,6 +41,7 @@
                                     <button @click="openEdit({{ $tournament->toJson() }}, @js($tournament->students->pluck('id')))" class="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
+                                    @hasanyrole('Admin|Profesor')
                                     <form action="{{ route('tournaments.destroy', $tournament) }}" method="POST" class="inline" id="delete-form-{{ $tournament->id }}">
                                         @csrf
                                         @method('DELETE')
@@ -48,6 +49,7 @@
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
+                                    @endhasanyrole
                                 </div>
                             </div>
                             
