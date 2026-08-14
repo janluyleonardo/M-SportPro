@@ -41,6 +41,12 @@ class ProgrammingController extends Controller
         $studentNames = Student::pluck('nomDeportista', 'id')->toArray();
 
         $pdf = Pdf::loadView('Programming.pdf', compact('programming', 'date', 'studentNames', 'base64Logo', 'clubName'));
+        $pdf->setPaper('letter', 'portrait');
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'Arial'
+        ]);
         return $pdf->stream('Programacion_'.$date.'.pdf');
     }
 
