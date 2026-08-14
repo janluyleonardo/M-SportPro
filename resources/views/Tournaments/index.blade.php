@@ -124,8 +124,7 @@
                     </div>
                     
                     <div>
-                        <x-input-label for="category" value="Categoría" class="font-bold text-gray-700 mb-1" />
-                        <x-text-input id="category" name="category" type="text" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" placeholder="Ej: Sub-15 / Mayores" />
+                        <x-category-select :categories="$categories" name="category" label="Categoría" placeholder="Ej: Sub-15 / Mayores" />
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -255,8 +254,7 @@
                     </div>
                     
                     <div>
-                        <x-input-label for="edit_category" value="Categoría" class="font-bold text-gray-700 mb-1" />
-                        <x-text-input id="edit_category" name="category" type="text" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" x-model="editingTournament.category" />
+                        <x-category-select :categories="$categories" name="category" label="Categoría" placeholder="Ej: Sub-15 / Mayores" modelName="editCategory" />
                     </div>
 
                     <div>
@@ -376,6 +374,7 @@
                 editingTournament: null,
                 openCreate: false,
                 submitting: false,
+                editCategory: '',
 
                 // Create Transfer List
                 selectedClubId: '',
@@ -493,6 +492,7 @@
 
                 openEdit(tournament, studentIds) {
                     this.editingTournament = tournament;
+                    this.editCategory = tournament.category || '';
                     this.editSelectedClubId = tournament.club_id || '';
                     this.editSelected = this.allStudents.filter(s => studentIds.includes(s.id));
                     

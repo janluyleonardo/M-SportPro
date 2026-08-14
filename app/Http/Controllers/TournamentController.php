@@ -16,7 +16,19 @@ class TournamentController extends Controller
         $tournaments = Tournament::with(['students'])->withCount('programmings')->orderByDesc('created_at')->get();
         $studentList = \App\Models\Student::select('id', 'nomDeportista', 'Categoria', 'club_id')->orderBy('nomDeportista')->get();
         $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
-        return view('Tournaments.index', compact('tournaments', 'studentList', 'clubs'));
+
+        $categoriesQuery = \App\Models\Student::query()
+            ->whereNotNull('Categoria')
+            ->where('Categoria', '!=', '');
+        if (!auth()->user()->is_super_admin) {
+            $categoriesQuery->where('club_id', auth()->user()->club_id);
+        }
+        $categories = $categoriesQuery
+            ->distinct()
+            ->orderBy('Categoria')
+            ->pluck('Categoria');
+
+        return view('Tournaments.index', compact('tournaments', 'studentList', 'clubs', 'categories'));
     }
 
     public function store(Request $request)

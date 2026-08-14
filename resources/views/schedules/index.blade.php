@@ -168,67 +168,7 @@
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de la Clase</label>
                             <input type="date" name="date" value="{{ $selectedDate }}" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
                         </div>
-                        <div
-                            x-data="{
-                                open: false,
-                                search: '',
-                                selected: '',
-                                categories: {{ $categories->toJson() }},
-                                get filtered() {
-                                    if (!this.search) return this.categories;
-                                    return this.categories.filter(c => c.toLowerCase().includes(this.search.toLowerCase()));
-                                },
-                                choose(val) {
-                                    this.selected = val;
-                                    this.search = val;
-                                    this.open = false;
-                                }
-                            }"
-                            class="relative"
-                            @click.outside="open = false"
-                        >
-                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Categoría</label>
-                            <div class="relative">
-                                <input
-                                    type="text"
-                                    x-model="search"
-                                    @focus="open = true"
-                                    @input="open = true; selected = ''"
-                                    placeholder="Buscar o elegir categoría..."
-                                    autocomplete="off"
-                                    class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 pr-10 font-bold text-gray-700 focus:ring-club-primary focus:border-club-primary"
-                                    required
-                                >
-                                <button type="button" @click="open = !open" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-club-primary transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </button>
-                            </div>
-                            <!-- Hidden input for form submission -->
-                            <input type="hidden" name="category" :value="search">
-                            <!-- Dropdown list -->
-                            <div
-                                x-show="open && filtered.length > 0"
-                                x-transition
-                                class="absolute z-50 mt-1 w-full bg-white border border-gray-100 rounded-2xl shadow-lg max-h-48 overflow-y-auto"
-                            >
-                                <template x-for="cat in filtered" :key="cat">
-                                    <button
-                                        type="button"
-                                        @click="choose(cat)"
-                                        class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-club-primary/10 hover:text-club-primary transition-colors first:rounded-t-2xl last:rounded-b-2xl"
-                                        :class="{'bg-club-primary/10 text-club-primary': selected === cat}"
-                                        x-text="cat"
-                                    ></button>
-                                </template>
-                            </div>
-                            <!-- No results -->
-                            <div
-                                x-show="open && filtered.length === 0 && search.length > 0"
-                                class="absolute z-50 mt-1 w-full bg-white border border-gray-100 rounded-2xl shadow-lg px-4 py-3 text-xs text-gray-400 italic"
-                            >
-                                No hay categorías que coincidan. Se usará "<span class="font-bold text-gray-600" x-text="search"></span>".
-                            </div>
-                        </div>
+                        <x-category-select :categories="$categories" name="category" label="Categoría" required="true" />
                     </div>
 
                     <div class="grid grid-cols-2 gap-6">
@@ -318,69 +258,7 @@
                             <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de la Clase</label>
                             <input type="date" name="date" x-model="editDate" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
                         </div>
-                        <div
-                            x-data="{
-                                open: false,
-                                search: editCategory,
-                                selected: editCategory,
-                                categories: {{ $categories->toJson() }},
-                                get filtered() {
-                                    if (!this.search) return this.categories;
-                                    return this.categories.filter(c => c.toLowerCase().includes(this.search.toLowerCase()));
-                                },
-                                choose(val) {
-                                    this.selected = val;
-                                    this.search = val;
-                                    editCategory = val;
-                                    this.open = false;
-                                }
-                            }"
-                            x-init="$watch('editCategory', val => { search = val; selected = val; })"
-                            class="relative"
-                            @click.outside="open = false"
-                        >
-                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Categoría</label>
-                            <div class="relative">
-                                <input
-                                    type="text"
-                                    x-model="search"
-                                    @focus="open = true"
-                                    @input="open = true; selected = ''"
-                                    placeholder="Buscar o elegir categoría..."
-                                    autocomplete="off"
-                                    class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 pr-10 font-bold text-gray-700 focus:ring-blue-500 focus:border-blue-500"
-                                    required
-                                >
-                                <button type="button" @click="open = !open" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </button>
-                            </div>
-                            <!-- Hidden input for form submission -->
-                            <input type="hidden" name="category" :value="search">
-                            <!-- Dropdown list -->
-                            <div
-                                x-show="open && filtered.length > 0"
-                                x-transition
-                                class="absolute z-50 mt-1 w-full bg-white border border-gray-100 rounded-2xl shadow-lg max-h-48 overflow-y-auto"
-                            >
-                                <template x-for="cat in filtered" :key="cat">
-                                    <button
-                                        type="button"
-                                        @click="choose(cat)"
-                                        class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-500 transition-colors first:rounded-t-2xl last:rounded-b-2xl"
-                                        :class="{'bg-blue-50 text-blue-500': selected === cat}"
-                                        x-text="cat"
-                                    ></button>
-                                </template>
-                            </div>
-                            <!-- No results -->
-                            <div
-                                x-show="open && filtered.length === 0 && search.length > 0"
-                                class="absolute z-50 mt-1 w-full bg-white border border-gray-100 rounded-2xl shadow-lg px-4 py-3 text-xs text-gray-400 italic"
-                            >
-                                No hay categorías que coincidan. Se usará "<span class="font-bold text-gray-600" x-text="search"></span>".
-                            </div>
-                        </div>
+                        <x-category-select :categories="$categories" name="category" label="Categoría" required="true" modelName="editCategory" inputClass="focus:ring-blue-500 focus:border-blue-500" hoverBgClass="hover:bg-blue-50 hover:text-blue-500" selectedBgClass="bg-blue-50 text-blue-500" />
                     </div>
 
                     <div class="grid grid-cols-2 gap-6">
