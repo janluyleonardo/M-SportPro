@@ -85,12 +85,21 @@ class TreasuryController extends Controller
 
         $transaction = Transaction::create($validated);
 
-        // Si es venta de artículos y hay un producto seleccionado, descontar stock
+        // Si es venta de artículos y hay un producto seleccionado, descontar stock (Venta)
         if ($validated['type'] == 'income' && $validated['category'] == 'sporting_goods' && !empty($validated['product_id'])) {
             $product = \App\Models\Product::find($validated['product_id']);
             if ($product) {
                 $qty = $validated['quantity'] ?? 1;
                 $product->decrement('stock', $qty);
+            }
+        }
+
+        // Si es compra de artículos y hay un producto seleccionado, aumentar stock (Reabastecimiento)
+        if ($validated['type'] == 'expense' && $validated['category'] == 'sporting_goods' && !empty($validated['product_id'])) {
+            $product = \App\Models\Product::find($validated['product_id']);
+            if ($product) {
+                $qty = $validated['quantity'] ?? 1;
+                $product->increment('stock', $qty);
             }
         }
 
