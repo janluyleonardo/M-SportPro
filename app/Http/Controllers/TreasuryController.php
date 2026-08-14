@@ -39,12 +39,13 @@ class TreasuryController extends Controller
             ->sum('amount');
 
         $products = \App\Models\Product::orderBy('name')->get();
+        $teachers = User::role('Profesor')->get();
         $invoiceSettings = \App\Models\InvoiceSetting::firstOrCreate([], [
             'prefix' => 'JFS-',
             'next_number' => 1001
         ]);
 
-        return view('treasury.index', compact('transactions', 'totalIncome', 'totalExpense', 'month', 'year', 'products', 'invoiceSettings'));
+        return view('treasury.index', compact('transactions', 'totalIncome', 'totalExpense', 'month', 'year', 'products', 'teachers', 'invoiceSettings'));
     }
 
     public function updateSettings(Request $request)
@@ -135,12 +136,24 @@ class TreasuryController extends Controller
                 ->whereYear('date', $year)
                 ->sum('amount');
 
+            // Calcular préstamos y abonos
+            $totalLoans = Transaction::where('user_id', $teacher->id)
+                ->where('category', 'teacher_loan')
+                ->sum('amount');
+            
+            $totalRepayments = Transaction::where('user_id', $teacher->id)
+                ->where('category', 'loan_repayment')
+                ->sum('amount');
+
+            $pendingLoan = max(0, $totalLoans - $totalRepayments);
+
             return [
                 'teacher' => $teacher,
                 'sessions_count' => $sessionsCount,
                 'total_earned' => $totalEarned,
                 'paid' => $paid,
-                'pending' => $totalEarned - $paid
+                'pending' => $totalEarned - $paid,
+                'pending_loan' => $pendingLoan
             ];
         });
 
@@ -151,11 +164,45 @@ class TreasuryController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'amount' => 'required|numeric|min:1',
             'month' => 'required|integer',
             'year' => 'required|integer',
+            'loan_deduction' => 'nullable|numeric|min:0',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
+
+        $teacher = User::findOrFail($request->user_id);
+
+        $sessions = DB::table('attendances')
+            ->join('class_schedules', 'attendances.class_schedule_id', '=', 'class_schedules.id')
+            ->where('class_schedules.user_id', $teacher->id)
+            ->whereMonth('attendances.date', $request->month)
+            ->whereYear('attendances.date', $request->year)
+            ->select('attendances.date', 'attendances.class_schedule_id')
+            ->distinct()
+            ->get();
+
+        $sessionsCount = $sessions->count();
+        $payRate = $teacher->pay_per_session > 0 ? $teacher->pay_per_session : config('app.default_teacher_pay_per_session', 30000);
+        $totalEarned = $sessionsCount * $payRate;
+        
+        $paid = Transaction::where('user_id', $teacher->id)
+            ->where('category', 'teacher_salary')
+            ->whereMonth('date', $request->month)
+            ->whereYear('date', $request->year)
+            ->sum('amount');
+
+        $pending = $totalEarned - $paid;
+
+        if ($pending <= 0) {
+            return back()->with('error', 'El profesor ya no tiene saldo pendiente por pagar para este mes.');
+        }
+
+        $deduction = (float)($request->loan_deduction ?? 0);
+        if ($deduction > $pending) {
+            $deduction = $pending;
+        }
+
+        $netToPay = $pending - $deduction;
 
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
@@ -164,15 +211,32 @@ class TreasuryController extends Controller
             $attachmentPath = $file->storeAs('vouchers/payroll', $fileName, 'public');
         }
 
-        Transaction::create([
-            'type' => 'expense',
-            'category' => 'teacher_salary',
-            'amount' => $request->amount,
-            'date' => now()->format('Y-m-d'),
-            'description' => "Pago de nómina mes {$request->month}/{$request->year}",
-            'user_id' => $request->user_id,
-            'attachment' => $attachmentPath,
-        ]);
+        DB::transaction(function() use ($request, $netToPay, $deduction, $attachmentPath) {
+            // 1. Registrar el egreso neto de nómina
+            if ($netToPay > 0) {
+                Transaction::create([
+                    'type' => 'expense',
+                    'category' => 'teacher_salary',
+                    'amount' => $netToPay,
+                    'date' => now()->format('Y-m-d'),
+                    'description' => "Pago de nómina mes {$request->month}/{$request->year}" . ($deduction > 0 ? " (Descuento de préstamo: $$deduction)" : ""),
+                    'user_id' => $request->user_id,
+                    'attachment' => $attachmentPath,
+                ]);
+            }
+
+            // 2. Registrar el abono al préstamo (Ingreso contable de balance)
+            if ($deduction > 0) {
+                Transaction::create([
+                    'type' => 'income',
+                    'category' => 'loan_repayment',
+                    'amount' => $deduction,
+                    'date' => now()->format('Y-m-d'),
+                    'description' => "Abono préstamo por descuento en nómina mes {$request->month}/{$request->year}",
+                    'user_id' => $request->user_id,
+                ]);
+            }
+        });
 
         return back()->with('success', 'Pago de nómina registrado con soporte.');
     }

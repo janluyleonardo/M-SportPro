@@ -239,6 +239,7 @@
                                         <optgroup label="{{ __('Incomes') }}">
                                             <option value="monthly_payment">{{ __('monthly_payment') }}</option>
                                             <option value="sporting_goods">{{ __('sporting_goods') }}</option>
+                                            <option value="loan_repayment">{{ __('loan_repayment') }}</option>
                                             <option value="other">{{ __('other') }}</option>
                                         </optgroup>
                                     </template>
@@ -246,6 +247,7 @@
                                         <optgroup label="{{ __('Exchanges') }}">
                                             <option value="rent">{{ __('rent') }}</option>
                                             <option value="teacher_salary">{{ __('teacher_salary') }}</option>
+                                            <option value="teacher_loan">{{ __('teacher_loan') }}</option>
                                             <option value="supplies">{{ __('supplies') }}</option>
                                             <option value="sporting_goods">{{ __('sporting_goods') }}</option>
                                             <option value="other">{{ __('other') }}</option>
@@ -265,6 +267,28 @@
                                 <textarea name="custom_category" rows="2"
                                     class="w-full border-blue-200 rounded-2xl p-4 text-xs font-bold text-gray-700 bg-blue-50/30 focus:bg-white transition-all"
                                     placeholder="Ej: Arriendo de Cancha, Donación, etc."></textarea>
+                            </div>
+
+                            <!-- Selector de Profesor (Solo si es préstamo o abono de préstamo) -->
+                            <div x-show="selectedCategory == 'teacher_loan' || selectedCategory == 'loan_repayment'"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0"
+                                class="col-span-2 bg-amber-50/50 p-6 rounded-[2rem] border border-amber-100/50 space-y-4">
+                                <h4 class="text-[9px] font-black text-amber-600 uppercase tracking-widest flex items-center">
+                                    <i class="bi bi-person-badge-fill mr-2"></i> Seleccionar Profesor
+                                </h4>
+                                <div>
+                                    <select name="user_id"
+                                        class="w-full border-gray-200 rounded-2xl p-4 text-xs font-black text-gray-700 bg-white focus:ring-2 focus:ring-amber-100 transition-all">
+                                        <option value="">-- Seleccionar Profesor --</option>
+                                        @foreach($teachers as $teacher)
+                                            <option value="{{ $teacher->id }}">
+                                                {{ $teacher->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
 
                             <!-- Selector de Producto (Solo si es movimiento de artículos) -->

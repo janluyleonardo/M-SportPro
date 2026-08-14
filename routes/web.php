@@ -14,6 +14,7 @@ use App\Http\Controllers\TreasuryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PasswordChangeController;
 use App\Http\Controllers\TournamentController;
+use App\Http\Controllers\SuperAdmin\ClubController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,11 +22,11 @@ Route::get('/', function () {
 
 // Rutas de Super Admin
 Route::middleware(['auth', 'verified', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
-    Route::get('clubs', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'index'])->name('clubs.index');
-    Route::post('clubs', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'store'])->name('clubs.store');
-    Route::put('clubs/{club}', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'update'])->name('clubs.update');
-    Route::delete('clubs/{club}', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'destroy'])->name('clubs.destroy');
-    Route::post('clubs/{club}/toggle-module', [\App\Http\Controllers\SuperAdmin\ClubController::class, 'toggleModule'])->name('clubs.toggleModule');
+    Route::get('clubs', [ClubController::class, 'index'])->name('clubs.index');
+    Route::post('clubs', [ClubController::class, 'store'])->name('clubs.store');
+    Route::put('clubs/{club}', [ClubController::class, 'update'])->name('clubs.update');
+    Route::delete('clubs/{club}', [ClubController::class, 'destroy'])->name('clubs.destroy');
+    Route::post('clubs/{club}/toggle-module', [ClubController::class, 'toggleModule'])->name('clubs.toggleModule');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -48,11 +49,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('dashboard');
         })->name('dashboard');
 
-    // 2. Módulo de Estudiantes (Solo Admin y Profesor)
-    Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
-        Route::resource('students', StudentsController::class)->except(['destroy']);
-        Route::get('/imprimir/{id}', [StudentsController::class, 'imprimir'])->name('imprimir');
-    });
+        // 2. Módulo de Estudiantes (Solo Admin y Profesor)
+        Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
+            Route::resource('students', StudentsController::class)->except(['destroy']);
+            Route::get('/imprimir/{id}', [StudentsController::class, 'imprimir'])->name('imprimir');
+        });
 
         // Rutas de Mensualidades y Asistencias
         Route::middleware(['role:Admin|SubAdmin|Profesor|Padre|Deportista'])->group(function () {
@@ -135,7 +136,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::resource('products', ProductController::class)->except(['destroy']);
 
                 // Tesorería
-                Route::prefix('treasury')->name('treasury.')->group(function() {
+                Route::prefix('treasury')->name('treasury.')->group(function () {
                     Route::get('/', [TreasuryController::class, 'index'])->name('index');
                     Route::post('/', [TreasuryController::class, 'store'])->name('store');
                     Route::get('/salaries', [TreasuryController::class, 'salaries'])->name('salaries');
@@ -151,41 +152,41 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
         });
 
-    // 3. Módulo de Programación
-    Route::middleware(['module:tournaments'])->group(function () {
-        // Lectura: Para todos (incluyendo SubAdmin)
-        Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|SubAdmin|Profesor|Padre|Deportista');
+        // 3. Módulo de Programación
+        Route::middleware(['module:tournaments'])->group(function () {
+            // Lectura: Para todos (incluyendo SubAdmin)
+            Route::resource('programming', ProgrammingController::class)->only(['index', 'show'])->middleware('role:Admin|SubAdmin|Profesor|Padre|Deportista');
 
-        Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
-            Route::resource('programming', ProgrammingController::class)->except(['index', 'show', 'destroy']);
-            Route::get('/programming/imprimir/{date}', [ProgrammingController::class, 'imprimir'])->name('programming.imprimir');
-            Route::get('/programming/{id}/payments', [ProgrammingController::class, 'getPayments'])->name('programming.payments.get');
-            Route::post('/programming/{id}/payments', [ProgrammingController::class, 'updatePayments'])->name('programming.payments.update');
+            Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
+                Route::resource('programming', ProgrammingController::class)->except(['index', 'show', 'destroy']);
+                Route::get('/programming/imprimir/{date}', [ProgrammingController::class, 'imprimir'])->name('programming.imprimir');
+                Route::get('/programming/{id}/payments', [ProgrammingController::class, 'getPayments'])->name('programming.payments.get');
+                Route::post('/programming/{id}/payments', [ProgrammingController::class, 'updatePayments'])->name('programming.payments.update');
+            });
+
+            // 5. Módulo de Torneos — crear/editar: Admin|SubAdmin|Profesor
+            Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
+                Route::resource('tournaments', TournamentController::class)->except(['destroy']);
+                Route::get('/tournaments/{tournament}/payments', [TournamentController::class, 'payments'])->name('tournaments.payments');
+            });
+            // Torneos: eliminar — solo Admin y Profesor (mantenemos igual que antes)
+            Route::middleware(['role:Admin|Profesor'])->group(function () {
+                Route::delete('tournaments/{tournament}', [TournamentController::class, 'destroy'])->name('tournaments.destroy');
+            });
         });
 
-        // 5. Módulo de Torneos — crear/editar: Admin|SubAdmin|Profesor
-        Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
-            Route::resource('tournaments', TournamentController::class)->except(['destroy']);
-            Route::get('/tournaments/{tournament}/payments', [TournamentController::class, 'payments'])->name('tournaments.payments');
-        });
-        // Torneos: eliminar — solo Admin y Profesor (mantenemos igual que antes)
-        Route::middleware(['role:Admin|Profesor'])->group(function () {
-            Route::delete('tournaments/{tournament}', [TournamentController::class, 'destroy'])->name('tournaments.destroy');
+        // 4. Perfil
+        Route::controller(ProfileController::class)->group(function () {
+            Route::get('/profile', 'edit')->name('profile.edit');
+            Route::patch('/profile', 'update')->name('profile.update');
+            Route::put('/profile/club', 'updateClub')->name('profile.club.update');
+            Route::delete('/profile', 'destroy')->name('profile.destroy');
         });
     });
-
-    // 4. Perfil
-    Route::controller(ProfileController::class)->group(function () {
-        Route::get('/profile', 'edit')->name('profile.edit');
-        Route::patch('/profile', 'update')->name('profile.update');
-        Route::put('/profile/club', 'updateClub')->name('profile.club.update');
-        Route::delete('/profile', 'destroy')->name('profile.destroy');
-    });
-});
 });
 
 Route::get('/index', [generalController::class, 'index'])->name('index');
 Route::get('/Programming', [generalController::class, 'Programming'])->name('Programming');
 Route::get('/Announcements', [generalController::class, 'Announcements'])->name('Announcements');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
