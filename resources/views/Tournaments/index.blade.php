@@ -127,14 +127,14 @@
                         <x-category-select :categories="$categories" name="category" label="Categoría" placeholder="Ej: Sub-15 / Mayores" />
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="costo_total_inscripcion" value="Total Inscripción" class="font-bold text-gray-700 mb-1" />
-                            <x-text-input id="costo_total_inscripcion" name="costo_total_inscripcion" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" placeholder="Costo total equipo" />
+                            <x-text-input id="costo_total_inscripcion" name="costo_total_inscripcion" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" placeholder="Costo total" />
                         </div>
                         <div>
-                            <x-input-label for="costo_total_arbitraje" value="Total Arbitraje" class="font-bold text-gray-700 mb-1" />
-                            <x-text-input id="costo_total_arbitraje" name="costo_total_arbitraje" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" placeholder="Costo total equipo" />
+                            <x-input-label for="costo_arbitraje_partido" value="Arbitraje por Partido" class="font-bold text-gray-700 mb-1" />
+                            <x-text-input id="costo_arbitraje_partido" name="costo_arbitraje_partido" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" placeholder="Costo por fecha" />
                         </div>
                     </div>
                     
@@ -265,14 +265,14 @@
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="edit_costo_total_inscripcion" value="Total Inscripción" class="font-bold text-gray-700 mb-1" />
                             <x-text-input id="edit_costo_total_inscripcion" name="costo_total_inscripcion" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" x-model="editingTournament.costo_total_inscripcion" />
                         </div>
                         <div>
-                            <x-input-label for="edit_costo_total_arbitraje" value="Total Arbitraje" class="font-bold text-gray-700 mb-1" />
-                            <x-text-input id="edit_costo_total_arbitraje" name="costo_total_arbitraje" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" x-model="editingTournament.costo_total_arbitraje" />
+                            <x-input-label for="edit_costo_arbitraje_partido" value="Arbitraje por Partido" class="font-bold text-gray-700 mb-1" />
+                            <x-text-input id="edit_costo_arbitraje_partido" name="costo_arbitraje_partido" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" x-model="editingTournament.costo_arbitraje_partido" />
                         </div>
                     </div>
                     

@@ -1395,7 +1395,7 @@
                     const tour = this.selectedTournament;
                     const count = tour ? tour.students.length : this.selected.length;
                     if (!tour || count === 0) return 0;
-                    return Math.round(tour.costo_total_arbitraje / count);
+                    return Math.round((tour.costo_arbitraje_partido || tour.costo_total_arbitraje || 0) / count);
                 },
 
                 get calculatedInscripEdit() {
@@ -1409,11 +1409,11 @@
 
                 get calculatedArbitrEdit() {
                     const tour = this.selectedTournamentEdit;
-                    if (!tour || (!tour.costo_total_arbitraje && this.editingItem.costo_arbitraje > 0)) {
+                    if (!tour || (!(tour.costo_arbitraje_partido || tour.costo_total_arbitraje) && this.editingItem.costo_arbitraje > 0)) {
                         return this.editingItem.costo_arbitraje;
                     }
                     const count = (tour.students && tour.students.length > 0) ? tour.students.length : (this.editSelected.length || 1);
-                    return Math.round((tour.costo_total_arbitraje || 0) / count);
+                    return Math.round((tour.costo_arbitraje_partido || tour.costo_total_arbitraje || 0) / count);
                 },
 
                 get selectedTournament() {

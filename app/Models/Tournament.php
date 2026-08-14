@@ -11,7 +11,7 @@ class Tournament extends Model
 {
     use HasFactory, SoftDeletes, BelongsToClub;
 
-    protected $fillable = ['club_id', 'name', 'description', 'category', 'status', 'costo_total_inscripcion', 'costo_total_arbitraje'];
+    protected $fillable = ['club_id', 'name', 'description', 'category', 'status', 'costo_total_inscripcion', 'costo_total_arbitraje', 'costo_arbitraje_partido'];
 
     public function programmings()
     {

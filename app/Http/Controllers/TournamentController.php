@@ -40,6 +40,7 @@ class TournamentController extends Controller
             'category' => 'nullable|string',
             'costo_total_inscripcion' => 'nullable|numeric|min:0',
             'costo_total_arbitraje' => 'nullable|numeric|min:0',
+            'costo_arbitraje_partido' => 'nullable|numeric|min:0',
         ]);
 
         if (!auth()->user()->is_super_admin) {
@@ -70,6 +71,7 @@ class TournamentController extends Controller
             'status' => 'required|in:activo,finalizado',
             'costo_total_inscripcion' => 'nullable|numeric|min:0',
             'costo_total_arbitraje' => 'nullable|numeric|min:0',
+            'costo_arbitraje_partido' => 'nullable|numeric|min:0',
         ]);
 
         if (!auth()->user()->is_super_admin) {
@@ -116,7 +118,7 @@ class TournamentController extends Controller
         // Mapa para llevar el seguimiento de la deuda acumulada por estudiante
         $debtTracker = [];
         
-        // Inicializar deuda con el costo equitativo de inscripción para cada estudiante
+        // Inicializar deuda con el costo equitativo de inscripción para cada estudiante (el arbitraje se sumará por cada partido al que asista)
         foreach ($tournament->students as $student) {
             $debtTracker[$student->id] = $individualInscription;
         }
@@ -136,11 +138,11 @@ class TournamentController extends Controller
                     $pagado_ins = $payment ? (float)$payment->pagado_inscripcion : 0;
                     $pagado_arb = $payment ? (float)$payment->pagado_arbitraje : 0;
                     
-                    // Costo total de este partido
-                    $cost_this_match = (float)$prog->costo_inscripcion + (float)$prog->costo_arbitraje;
+                    // Costo de arbitraje para este partido (por convocado)
+                    $cost_this_match = (float)$prog->costo_arbitraje;
                     
                     // Actualizar el rastreador de deuda para el siguiente partido
-                    // Nueva Deuda = Deuda Anterior + Costo Match - Pagado Match
+                    // Nueva Deuda = Deuda Anterior + Costo Arbitraje Partido - Pagado Match
                     $new_debt = $previous_debt + $cost_this_match - ($pagado_ins + $pagado_arb);
                     $debtTracker[$student->id] = $new_debt;
 
