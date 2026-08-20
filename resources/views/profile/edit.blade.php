@@ -63,13 +63,42 @@
                     const linkInput = document.getElementById('registration-link');
                     linkInput.select();
                     linkInput.setSelectionRange(0, 99999);
-                    navigator.clipboard.writeText(linkInput.value).then(() => {
+                    
+                    const showMessage = () => {
                         const msg = document.getElementById('copy-message');
                         msg.classList.remove('hidden');
                         setTimeout(() => {
                             msg.classList.add('hidden');
                         }, 3000);
-                    });
+                    };
+
+                    if (navigator.clipboard && window.isSecureContext) {
+                        // Utilizar API moderna si está disponible y el entorno es seguro (HTTPS o localhost)
+                        navigator.clipboard.writeText(linkInput.value)
+                            .then(showMessage)
+                            .catch(err => {
+                                console.error('Error al copiar con Clipboard API: ', err);
+                                fallbackCopy(linkInput, showMessage);
+                            });
+                    } else {
+                        // Fallback para entornos no seguros (HTTP en producción)
+                        fallbackCopy(linkInput, showMessage);
+                    }
+                }
+
+                function fallbackCopy(inputElement, callback) {
+                    try {
+                        inputElement.select();
+                        inputElement.setSelectionRange(0, 99999);
+                        const successful = document.execCommand('copy');
+                        if (successful) {
+                            callback();
+                        } else {
+                            console.error('No se pudo copiar el enlace.');
+                        }
+                    } catch (err) {
+                        console.error('Error usando execCommand como fallback: ', err);
+                    }
                 }
             </script>
             @endif
