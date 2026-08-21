@@ -48,7 +48,7 @@
         </div>
     </x-slot>
 
-    <div class="py-8" x-data="{ 
+    <div class="py-8" x-data="{
         type: 'income',
         category: 'monthly_payment',
         amount: '',
@@ -127,6 +127,8 @@
                                 <th
                                     class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">
                                     Monto</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">
+                                    Acción</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
@@ -168,10 +170,18 @@
                                             ${{ number_format($t->amount, 0, ',', '.') }}
                                         </span>
                                     </td>
+                                    <td class="px-8 py-5 text-center">
+                                        <button type="button"
+                                            @click="$dispatch('open-edit-transaction-modal', { transaction: @js(['id' => $t->id, 'type' => $t->type, 'category' => $t->category, 'custom_category' => $t->custom_category, 'amount' => $t->amount, 'date' => $t->date, 'description' => $t->description, 'product_id' => $t->product_id, 'quantity' => $t->quantity, 'user_id' => $t->user_id]) })"
+                                            class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-gray-400 hover:text-club-primary hover:bg-indigo-50 transition-colors"
+                                            title="Editar registro">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-8 py-20 text-center">
+                                    <td colspan="6" class="px-8 py-20 text-center">
                                         <i class="bi bi-clipboard2-x text-5xl text-gray-200 mb-4 block"></i>
                                         <p class="text-gray-400 font-bold italic">No hay movimientos registrados este mes.
                                         </p>
@@ -201,6 +211,7 @@
                 <div class="p-10">
                     <div class="flex items-center justify-between mb-8">
                         <div>
+
                             <h2 class="text-2xl font-black text-black">Nuevo Registro</h2>
                             <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Tesorería y Caja
                             </p>
@@ -384,6 +395,85 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Editar Registro -->
+    <div x-data="{ open: false, loading: false, transaction: {} }"
+        @open-edit-transaction-modal.window="transaction = $event.detail.transaction; open = true; loading = false"
+        x-cloak x-show="open" class="fixed inset-0 z-[105] overflow-y-auto">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="open = false"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden" @click.away="open = false">
+                <div class="p-10">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h2 class="text-2xl font-black text-black">Editar Registro</h2>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Movimiento #<span x-text="transaction.id"></span></p>
+                        </div>
+                        <button type="button" @click="open = false" class="text-gray-400 hover:text-black transition-colors">
+                            <i class="bi bi-x-lg text-xl"></i>
+                        </button>
+                    </div>
+
+                    <form method="POST" class="space-y-6" :action="'{{ url('/treasury') }}/' + transaction.id" @submit="loading = true">
+                        @csrf
+                        @method('PUT')
+                        <div class="flex p-1 bg-gray-50 rounded-2xl border border-gray-100">
+                            <button type="button" @click="transaction.type = 'income'" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest" :class="transaction.type == 'income' ? 'bg-white text-green-600 shadow-sm border border-green-100' : 'text-gray-400'">Ingreso</button>
+                            <button type="button" @click="transaction.type = 'expense'" class="flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest" :class="transaction.type == 'expense' ? 'bg-white text-red-600 shadow-sm border border-red-100' : 'text-gray-400'">Egreso</button>
+                            <input type="hidden" name="type" :value="transaction.type">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Categoría</label>
+                                <select name="category" x-model="transaction.category" class="w-full border-gray-200 rounded-2xl p-4 text-xs font-black text-gray-700 bg-gray-50" required>
+                                    <option value="monthly_payment">Mensualidad</option><option value="sporting_goods">Artículos</option><option value="loan_repayment">Abono préstamo</option><option value="rent">Arriendo</option><option value="teacher_salary">Salario profesor</option><option value="teacher_loan">Préstamo profesor</option><option value="supplies">Insumos</option><option value="other">Otro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Monto ($)</label>
+                                <input type="number" name="amount" x-model="transaction.amount" min="0" class="w-full border-gray-200 rounded-2xl p-4 text-sm font-black text-gray-900 bg-gray-50" required>
+                            </div>
+                        </div>
+
+                        <div x-show="transaction.category == 'other'">
+                            <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest ml-2 mb-2 block">Categoría personalizada</label>
+                            <input type="text" name="custom_category" x-model="transaction.custom_category" maxlength="100" class="w-full border-blue-200 rounded-2xl p-4 text-xs font-bold bg-blue-50/30">
+                        </div>
+
+                        <div x-show="transaction.category == 'teacher_loan' || transaction.category == 'loan_repayment' || transaction.category == 'teacher_salary'">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Profesor asociado</label>
+                            <select name="user_id" x-model="transaction.user_id" class="w-full border-gray-200 rounded-2xl p-4 text-xs font-black text-gray-700 bg-gray-50">
+                                <option value="">-- Seleccionar Profesor --</option>
+                                @foreach($teachers as $teacher)<option value="{{ $teacher->id }}">{{ $teacher->name }}</option>@endforeach
+                            </select>
+                        </div>
+
+                        <div x-show="transaction.category == 'sporting_goods'" class="grid grid-cols-2 gap-4">
+                            <select name="product_id" x-model="transaction.product_id" class="w-full border-gray-200 rounded-2xl p-4 text-xs font-black text-gray-700 bg-gray-50">
+                                <option value="">-- Producto --</option>
+                                @foreach($products as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach
+                            </select>
+                            <input type="number" name="quantity" x-model="transaction.quantity" min="1" class="w-full border-gray-200 rounded-2xl p-4 text-xs font-black bg-gray-50" placeholder="Cantidad">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="date" name="date" x-model="transaction.date" class="w-full border-gray-200 rounded-2xl p-4 text-xs font-bold bg-gray-50" required>
+                            <input type="text" name="description" x-model="transaction.description" maxlength="255" class="w-full border-gray-200 rounded-2xl p-4 text-xs font-bold bg-gray-50" placeholder="Referencia">
+                        </div>
+
+                        <div class="flex gap-3 mt-8">
+                            <button type="button" @click="open = false" class="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl uppercase text-[10px] tracking-widest">Cancelar</button>
+                            <button type="submit" :disabled="loading" class="flex-[2] py-4 bg-club-primary text-white font-black rounded-2xl shadow-lg uppercase text-[10px] tracking-widest disabled:opacity-50">
+                                <span x-show="!loading">Guardar Cambios</span><span x-show="loading"><i class="bi bi-arrow-repeat animate-spin mr-2"></i> Procesando...</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Configuración de Facturación -->
     <div x-data="{ open: false }" @open-settings-modal.window="open = true" x-cloak x-show="open"
         class="fixed inset-0 z-[110] overflow-y-auto">

@@ -139,6 +139,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::prefix('treasury')->name('treasury.')->group(function () {
                     Route::get('/', [TreasuryController::class, 'index'])->name('index');
                     Route::post('/', [TreasuryController::class, 'store'])->name('store');
+                    Route::put('/{transaction}', [TreasuryController::class, 'update'])->name('update');
                     Route::get('/salaries', [TreasuryController::class, 'salaries'])->name('salaries');
                     Route::post('/salaries/pay', [TreasuryController::class, 'payTeacher'])->name('pay_teacher');
                     Route::get('/teacher-history/{teacher}', [TreasuryController::class, 'teacherHistory'])->name('teacher_history');

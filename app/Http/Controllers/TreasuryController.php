@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 
 use App\Models\Transaction;
 use App\Models\User;
-use App\Models\Attendance;
-use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
 
 class TreasuryController extends Controller
@@ -18,7 +16,7 @@ class TreasuryController extends Controller
         $year = $request->get('year', date('Y'));
 
         $query = Transaction::query();
-        
+
         if ($request->has('type') && $request->type != 'all') {
             $query->where('type', $request->type);
         }
@@ -58,7 +56,7 @@ class TreasuryController extends Controller
 
         $settings = \App\Models\InvoiceSetting::first();
         if (!$settings) $settings = new \App\Models\InvoiceSetting();
-        
+
         $settings->fill($request->all());
         $settings->save();
 
@@ -107,6 +105,51 @@ class TreasuryController extends Controller
         return back()->with('success', 'Transacción registrada correctamente.');
     }
 
+    public function update(Request $request, Transaction $transaction)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:income,expense',
+            'category' => 'required|string',
+            'custom_category' => 'nullable|string|max:100',
+            'amount' => 'required|numeric|min:0',
+            'date' => 'required|date',
+            'description' => 'nullable|string|max:255',
+            'product_id' => 'nullable|exists:products,id',
+            'quantity' => 'nullable|integer|min:1',
+            'user_id' => 'nullable|exists:users,id',
+        ]);
+
+        DB::transaction(function () use ($transaction, $validated) {
+            $this->adjustProductStock($transaction->type, $transaction->category, $transaction->product_id, $transaction->quantity, true);
+            $transaction->update($validated);
+            $this->adjustProductStock($validated['type'], $validated['category'], $validated['product_id'] ?? null, $validated['quantity'] ?? null);
+        });
+
+        return back()->with('success', 'Transacción actualizada correctamente.');
+    }
+
+    private function adjustProductStock(string $type, string $category, ?int $productId, ?int $quantity, bool $reverse = false): void
+    {
+        if ($category !== 'sporting_goods' || !$productId) {
+            return;
+        }
+
+        $product = \App\Models\Product::find($productId);
+        if (!$product) {
+            return;
+        }
+
+        $quantity = $quantity ?: 1;
+        $isSale = $type === 'income';
+        $shouldIncrement = $reverse ? $isSale : !$isSale;
+
+        if ($shouldIncrement) {
+            $product->increment('stock', $quantity);
+        } else {
+            $product->decrement('stock', $quantity);
+        }
+    }
+
     public function salaries(Request $request)
     {
         $month = $request->get('month', date('n'));
@@ -126,10 +169,10 @@ class TreasuryController extends Controller
                 ->get();
 
             $sessionsCount = $sessions->count();
-            
+
             $payRate = $teacher->pay_per_session > 0 ? $teacher->pay_per_session : config('app.default_teacher_pay_per_session', 30000);
             $totalEarned = $sessionsCount * $payRate;
-            
+
             $paid = Transaction::where('user_id', $teacher->id)
                 ->where('category', 'teacher_salary')
                 ->whereMonth('date', $month)
@@ -140,7 +183,7 @@ class TreasuryController extends Controller
             $totalLoans = Transaction::where('user_id', $teacher->id)
                 ->where('category', 'teacher_loan')
                 ->sum('amount');
-            
+
             $totalRepayments = Transaction::where('user_id', $teacher->id)
                 ->where('category', 'loan_repayment')
                 ->sum('amount');
@@ -184,7 +227,7 @@ class TreasuryController extends Controller
         $sessionsCount = $sessions->count();
         $payRate = $teacher->pay_per_session > 0 ? $teacher->pay_per_session : config('app.default_teacher_pay_per_session', 30000);
         $totalEarned = $sessionsCount * $payRate;
-        
+
         $paid = Transaction::where('user_id', $teacher->id)
             ->where('category', 'teacher_salary')
             ->whereMonth('date', $request->month)
