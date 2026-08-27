@@ -447,8 +447,13 @@
                                                     class="text-[10px] text-indigo-600 font-black uppercase tracking-widest leading-tight">
                                                     <i class="bi bi-info-circle-fill mr-1"></i> Inscripción Protegida
                                                 </p>
-                                                <p class="text-[9px] text-indigo-500 font-medium mt-1">El costo de
-                                                    inscripción se gestiona desde el panel del torneo.</p>
+                                                <p class="text-[9px] text-indigo-500 font-medium mt-1 mb-2">Valor por
+                                                    deportista definido en el torneo.</p>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-black text-indigo-900">$</span>
+                                                    <input type="text" :value="calculatedInscrip" readonly
+                                                        class="block w-full rounded-lg border-indigo-100 bg-indigo-50 text-indigo-900 font-black cursor-not-allowed">
+                                                </div>
                                                 <input type="hidden" name="costo_inscripcion" value="0">
                                             </div>
                                         </div>
@@ -467,10 +472,10 @@
                                             <span><i class="bi bi-calculator mr-1"></i> Sugerido según Torneo (<span
                                                     x-text="selectedTournament ? selectedTournament.students.length : selected.length"></span> jugadores):</span>
                                             <div class="flex gap-4">
-                                                <span x-show="selectedTournament.costo_total_inscripcion > 0">Inscrip:
+                                                <span x-show="selectedTournament.costo_total_inscripcion > 0">Inscripción:
                                                     $<span
                                                         x-text="calculatedInscrip"></span></span>
-                                                <span x-show="selectedTournament.costo_total_arbitraje > 0">Arbitr:
+                                                <span x-show="selectedTournament.costo_total_arbitraje > 0">Arbitraje:
                                                     $<span
                                                         x-text="calculatedArbitr"></span></span>
                                             </div>
@@ -731,7 +736,7 @@
                                 <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 md:col-span-2">
                                     <div class="grid grid-cols-2 gap-4">
                                         <div x-show="!selectedTournamentEdit">
-                                            <label class="block text-sm font-bold text-indigo-900 mb-1">Inscrip.
+                                            <label class="block text-sm font-bold text-indigo-900 mb-1">Inscripción
                                                 (Indiv.)</label>
                                             <input type="number" name="costo_inscripcion"
                                                 :value="editingItem.costo_inscripcion"
@@ -743,13 +748,18 @@
                                                     class="text-[10px] text-indigo-600 font-black uppercase tracking-widest leading-tight">
                                                     <i class="bi bi-info-circle-fill mr-1"></i> Inscripción de Torneo
                                                 </p>
-                                                <p class="text-[9px] text-indigo-500 font-medium mt-1">Costo
-                                                    centralizado en el módulo de torneos.</p>
+                                                <p class="text-[9px] text-indigo-500 font-medium mt-1 mb-2">Valor por
+                                                    deportista definido en el torneo.</p>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-black text-indigo-900">$</span>
+                                                    <input type="text" :value="calculatedInscripEdit" readonly
+                                                        class="block w-full rounded-lg border-indigo-100 bg-indigo-50 text-indigo-900 font-black cursor-not-allowed">
+                                                </div>
                                                 <input type="hidden" name="costo_inscripcion" value="0">
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-bold text-indigo-900 mb-1">Arbitr.
+                                            <label class="block text-sm font-bold text-indigo-900 mb-1">Arbitraje
                                                 (Indiv.)</label>
                                             <input type="number" name="costo_arbitraje" :value="calculatedArbitrEdit"
                                                 class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition-all font-black">
@@ -763,10 +773,10 @@
                                                     x-text="selectedTournamentEdit ? selectedTournamentEdit.students.length : editSelected.length"></span> jugadores):</span>
                                             <div class="flex gap-4">
                                                 <span
-                                                    x-show="selectedTournamentEdit.costo_total_inscripcion > 0">Inscrip:
+                                                    x-show="selectedTournamentEdit.costo_total_inscripcion > 0">Inscripción:
                                                     $<span
                                                         x-text="calculatedInscripEdit"></span></span>
-                                                <span x-show="selectedTournamentEdit.costo_total_arbitraje > 0">Arbitr:
+                                                <span x-show="selectedTournamentEdit.costo_total_arbitraje > 0">Arbitraje:
                                                     $<span
                                                         x-text="calculatedArbitrEdit"></span></span>
                                             </div>
@@ -1129,13 +1139,13 @@
                         <div
                             class="mb-4 flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
                             <div>
-                                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Inscrip. (Indiv.)
+                                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Inscripción (Individual)
                                 </p>
                                 <p class="text-lg font-black text-gray-900"
                                     x-text="'$' + (paymentItem.costo_inscripcion || 0)"></p>
                             </div>
                             <div class="text-right">
-                                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Arbitr. (Indiv.)</p>
+                                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Arbitraje (Individual)</p>
                                 <p class="text-lg font-black text-gray-900"
                                     x-text="'$' + (paymentItem.costo_arbitraje || 0)"></p>
                             </div>
@@ -1150,10 +1160,10 @@
                                             Deportista</th>
                                         <th
                                             class="px-4 py-3 text-center text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                            Inscrip.</th>
+                                            Inscripción</th>
                                         <th
                                             class="px-4 py-3 text-center text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                            Arbitr.</th>
+                                            Arbitraje</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
@@ -1395,7 +1405,10 @@
                     const tour = this.selectedTournament;
                     const count = tour ? tour.students.length : this.selected.length;
                     if (!tour || count === 0) return 0;
-                    return Math.round((tour.costo_arbitraje_partido || tour.costo_total_arbitraje || 0) / count);
+                    if (tour.costo_arbitraje_partido > 0) {
+                        return Math.round(tour.costo_arbitraje_partido);
+                    }
+                    return Math.round((tour.costo_total_arbitraje || 0) / count);
                 },
 
                 get calculatedInscripEdit() {
@@ -1413,7 +1426,10 @@
                         return this.editingItem.costo_arbitraje;
                     }
                     const count = (tour.students && tour.students.length > 0) ? tour.students.length : (this.editSelected.length || 1);
-                    return Math.round((tour.costo_arbitraje_partido || tour.costo_total_arbitraje || 0) / count);
+                    if (tour.costo_arbitraje_partido > 0) {
+                        return Math.round(tour.costo_arbitraje_partido);
+                    }
+                    return Math.round((tour.costo_total_arbitraje || 0) / count);
                 },
 
                 get selectedTournament() {
