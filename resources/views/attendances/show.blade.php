@@ -249,11 +249,16 @@
                     @endforeach
                 </div>
 
-                <div class="mt-12 sticky bottom-8 flex justify-center">
-                    <button type="submit" form="attendance-form" class="px-12 py-5 bg-club-primary text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:opacity-90 transition-all shadow-2xl shadow-blue-200 flex items-center border-b-4 border-club-secondary group">
+                <div class="mt-12 sticky bottom-8 flex flex-col items-center gap-3">
+                    <button type="submit" form="attendance-form" {{ $eligibleStudentCount === 0 ? 'disabled' : '' }}
+                        title="{{ $eligibleStudentCount === 0 ? 'No hay alumnos habilitados sin deuda para registrar asistencia' : 'Guardar asistencia' }}"
+                        class="px-12 py-5 bg-club-primary text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:opacity-90 transition-all shadow-2xl shadow-blue-200 flex items-center border-b-4 border-club-secondary group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:opacity-50">
                         <i class="bi {{ $existingAttendances->count() > 0 ? 'bi-pencil-square' : 'bi-cloud-arrow-up' }} mr-3 text-lg group-hover:scale-110 transition-transform"></i>
                         {{ $existingAttendances->count() > 0 ? 'Actualizar Asistencia' : 'Guardar Asistencia de Hoy' }}
                     </button>
+                    @if($eligibleStudentCount === 0)
+                        <p class="text-xs font-bold text-red-500">No hay alumnos habilitados sin deuda para registrar la asistencia.</p>
+                    @endif
                 </div>
             </form>
 

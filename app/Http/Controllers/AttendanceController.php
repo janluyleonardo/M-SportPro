@@ -36,10 +36,10 @@ class AttendanceController extends Controller
     {
         // Buscar estudiantes que pertenecen a la categoría de esta clase
         $students = Student::where('Categoria', $schedule->category)->orderBy('nomDeportista')->get();
-        
+
         // Sincronizar saldos antes de mostrar la lista
         $students->each->updateBalance();
-        
+
         // Verificar si ya se tomó asistencia hoy para esta clase
         $existingAttendances = Attendance::where('class_schedule_id', $schedule->id)
             ->where('date', $schedule->date)
@@ -52,13 +52,29 @@ class AttendanceController extends Controller
             ->get()
             ->keyBy('student_id');
 
-        return view('attendances.show', compact('schedule', 'students', 'existingAttendances', 'overrides'));
+        $eligibleStudentCount = $students->filter(function ($student) use ($overrides) {
+            return $student->balance <= 0 || $overrides->has($student->id);
+        })->count();
+
+        return view('attendances.show', compact('schedule', 'students', 'existingAttendances', 'overrides', 'eligibleStudentCount'));
     }
 
     public function store(StoreAttendanceRequest $request)
     {
         $validated = $request->validated();
         $schedule = ClassSchedule::findOrFail($request->class_schedule_id);
+
+        $students = Student::where('Categoria', $schedule->category)->get();
+        $students->each->updateBalance();
+        $overriddenStudentIds = AttendanceOverride::where('class_schedule_id', $schedule->id)
+            ->pluck('student_id');
+        $eligibleStudentIds = $students
+            ->filter(fn ($student) => $student->balance <= 0 || $overriddenStudentIds->contains($student->id))
+            ->pluck('id');
+
+        if ($eligibleStudentIds->isEmpty()) {
+            return back()->with('error', 'No hay alumnos habilitados y sin deuda para registrar la asistencia.');
+        }
 
         $date = $schedule->date;
         $month = \Carbon\Carbon::parse($date)->month;
