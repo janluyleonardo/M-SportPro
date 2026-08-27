@@ -61,6 +61,11 @@ class StudentsController extends Controller
   public function store(StoreStudentRequest $request)
   {
     $validated = $request->validated();
+    if (!auth()->user()->hasRole('Admin')) {
+      unset($validated['becado']);
+    } else {
+      $validated['becado'] = $request->boolean('becado');
+    }
     $newStudent = new Student($validated);
 
     if ($request->hasfile('Photo')) {
@@ -166,6 +171,11 @@ class StudentsController extends Controller
   public function update(UpdateStudentRequest $request, Student $student)
   {
     $validated = $request->validated();
+    if (!auth()->user()->hasRole('Admin')) {
+      unset($validated['becado']);
+    } else {
+      $validated['becado'] = $request->boolean('becado');
+    }
     $student->fill($validated);
 
     if ($request->hasFile('Photo')) {

@@ -48,7 +48,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($students as $student)
                         @php
-                            $hasPaid = \App\Models\Payment::where('student_id', $student->id)
+                            $hasPaid = $student->becado || \App\Models\Payment::where('student_id', $student->id)
                                 ->where('month', now()->month)
                                 ->where('year', now()->year)
                                 ->first();
@@ -74,8 +74,8 @@
                                                 ->first();
                                             $used = $slot ? $slot->classes_used : 0;
                                         @endphp
-                                        <span class="text-[9px] font-black bg-green-50 text-green-600 px-2 py-0.5 rounded-full border border-green-100 uppercase mt-1 inline-block">
-                                            <i class="bi bi-check-circle-fill mr-1"></i> Al Día ({{ $used }}/8)
+                                        <span class="text-[9px] font-black {{ $student->becado ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-green-50 text-green-600 border-green-100' }} px-2 py-0.5 rounded-full border uppercase mt-1 inline-block">
+                                            <i class="bi {{ $student->becado ? 'bi-award-fill' : 'bi-check-circle-fill' }} mr-1"></i> {{ $student->becado ? 'Becado' : 'Al Día' }} ({{ $used }}/8)
                                         </span>
                                         @if($student->balance > 0)
                                             <span class="text-[9px] font-black bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full border border-orange-100 uppercase mt-1 inline-block ml-1">

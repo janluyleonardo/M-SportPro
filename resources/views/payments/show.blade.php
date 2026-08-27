@@ -61,6 +61,11 @@
                                 class="text-[9px] font-bold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100 uppercase">
                                 ID: {{ $student->numDocumento }}
                             </span>
+                            @if($student->becado)
+                                <span class="text-[9px] font-black text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 uppercase tracking-widest">
+                                    <i class="bi bi-award-fill mr-1"></i> Becado
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -111,8 +116,8 @@
                                     <div class="flex items-center">
                                         @if ($status['is_paid'])
                                             <div class="flex flex-col gap-0.5">
-                                                <span class="text-[9px] font-bold text-green-600 uppercase tracking-wider">
-                                                    {{ __('Fully Paid') }}
+                                                    <span class="text-[9px] font-bold text-green-600 uppercase tracking-wider">
+                                                        {{ $student->becado ? 'Becado - Sin cobro' : __('Fully Paid') }}
                                                 </span>
                                                 @if($status['paid_at'])
                                                     <span class="text-[8px] font-medium text-gray-400 italic">

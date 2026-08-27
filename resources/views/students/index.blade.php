@@ -202,6 +202,9 @@
                       </div>
                       <div class="ml-4">
                         <div class="text-sm font-semibold text-gray-900">{{ Str::title($student->nomDeportista) }}</div>
+                        @if($student->becado)
+                          <span class="text-[9px] font-black text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md uppercase">Becado</span>
+                        @endif
                         <div class="text-xs text-gray-500">{{ $student->correoMama ?? $student->correoPapa ?? 'Sin correo' }}</div>
                       </div>
                     </div>
@@ -271,6 +274,9 @@
                   </div>
                   <div class="ml-3">
                     <div class="text-sm font-bold text-gray-900 leading-tight">{{ Str::title($student->nomDeportista) }}</div>
+                    @if($student->becado)
+                      <span class="text-[9px] font-black text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Becado</span>
+                    @endif
                     <div class="text-[10px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Categoría {{ __($student->Categoria) }}</div>
                   </div>
                 </div>

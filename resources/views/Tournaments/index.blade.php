@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-6">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
                     <i class="bi bi-flag text-xl"></i>
@@ -21,7 +21,7 @@
 
     <div class="py-12" x-data="tournamentApp(@js($studentList))">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($tournaments as $tournament)
                     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
@@ -52,10 +52,10 @@
                                     @endhasanyrole
                                 </div>
                             </div>
-                            
+
                             <h3 class="text-xl font-black text-gray-900 mb-2 group-hover:text-club-primary transition-colors">{{ $tournament->name }}</h3>
                             <p class="text-sm text-gray-500 line-clamp-2 mb-6">{{ $tournament->description ?? 'Sin descripción.' }}</p>
-                            
+
                             <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-auto">
                                 <div class="flex flex-col">
                                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Programaciones</span>
@@ -75,7 +75,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="bg-gray-50 px-6 py-4 border-t border-gray-50 flex gap-2">
                             <a href="{{ route('tournaments.payments', $tournament) }}" class="flex-1 inline-flex justify-center items-center px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-bold text-xs text-gray-700 hover:bg-gray-100 transition-all shadow-sm">
                                 <i class="bi bi-cash-coin mr-2 text-green-500"></i> Control de Pagos
@@ -83,7 +83,7 @@
                         </div>
                     </div>
                 @endforeach
-                
+
                 @if($tournaments->isEmpty())
                     <div class="col-span-full bg-white rounded-3xl p-12 text-center border-2 border-dashed border-gray-100">
                         <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -104,7 +104,7 @@
             <form action="{{ route('tournaments.store') }}" method="POST" class="p-8" @submit="submitting = true">
                 @csrf
                 <h2 class="text-2xl font-black text-gray-900 mb-6">Nuevo Torneo</h2>
-                
+
                 <div class="space-y-6">
                     @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
                     <div>
@@ -122,7 +122,7 @@
                         <x-input-label for="name" value="Nombre del Torneo" class="font-bold text-gray-700 mb-1" />
                         <x-text-input id="name" name="name" type="text" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" placeholder="Ej: Copa Bogotanos 2024" required />
                     </div>
-                    
+
                     <div>
                         <x-category-select :categories="$categories" name="category" label="Categoría" placeholder="Ej: Sub-15 / Mayores" />
                     </div>
@@ -137,7 +137,7 @@
                             <x-text-input id="costo_arbitraje_partido" name="costo_arbitraje_partido" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" placeholder="Costo por fecha" />
                         </div>
                     </div>
-                    
+
                     <div>
                         <x-input-label for="description" value="Descripción" class="font-bold text-gray-700 mb-1" />
                         <textarea id="description" name="description" rows="3" class="block w-full rounded-2xl border-gray-200 focus:border-club-primary focus:ring-club-primary" placeholder="Detalles adicionales del torneo..."></textarea>
@@ -146,7 +146,7 @@
                     <!-- Students Transfer List (Create) -->
                     <div class="pt-6 border-t border-gray-100">
                         <label class="block text-sm font-bold text-gray-700 mb-3">Asociar Deportistas al Torneo</label>
-                        
+
                         <template x-for="id in selectedIds" :key="id">
                             <input type="hidden" name="student_ids[]" :value="id">
                         </template>
@@ -234,7 +234,7 @@
                 @csrf
                 @method('PUT')
                 <h2 class="text-2xl font-black text-gray-900 mb-6">Editar Torneo</h2>
-                
+
                 <div class="space-y-6">
                     @if(auth()->user()->is_super_admin && $clubs->isNotEmpty())
                     <div>
@@ -252,7 +252,7 @@
                         <x-input-label for="edit_name" value="Nombre del Torneo" class="font-bold text-gray-700 mb-1" />
                         <x-text-input id="edit_name" name="name" type="text" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" x-model="editingTournament.name" required />
                     </div>
-                    
+
                     <div>
                         <x-category-select :categories="$categories" name="category" label="Categoría" placeholder="Ej: Sub-15 / Mayores" modelName="editCategory" />
                     </div>
@@ -275,7 +275,7 @@
                             <x-text-input id="edit_costo_arbitraje_partido" name="costo_arbitraje_partido" type="number" step="0.01" class="block w-full rounded-2xl border-gray-200 focus:ring-club-primary" x-model="editingTournament.costo_arbitraje_partido" />
                         </div>
                     </div>
-                    
+
                     <div>
                         <x-input-label for="edit_description" value="Descripción" class="font-bold text-gray-700 mb-1" />
                         <textarea id="edit_description" name="description" rows="3" class="block w-full rounded-2xl border-gray-200 focus:border-club-primary focus:ring-club-primary" x-model="editingTournament.description"></textarea>
@@ -284,7 +284,7 @@
                     <!-- Students Transfer List (Edit) -->
                     <div class="pt-6 border-t border-gray-100">
                         <label class="block text-sm font-bold text-gray-700 mb-3">Gestionar Deportistas del Torneo</label>
-                        
+
                         <template x-for="id in editSelectedIds" :key="id">
                             <input type="hidden" name="student_ids[]" :value="id">
                         </template>
@@ -495,13 +495,13 @@
                     this.editCategory = tournament.category || '';
                     this.editSelectedClubId = tournament.club_id || '';
                     this.editSelected = this.allStudents.filter(s => studentIds.includes(s.id));
-                    
+
                     if (this.editSelectedClubId) {
                         this.editAvailable = this.allStudents.filter(s => !studentIds.includes(s.id) && s.clubId == this.editSelectedClubId);
                     } else {
                         this.editAvailable = this.allStudents.filter(s => !studentIds.includes(s.id));
                     }
-                    
+
                     this.submitting = false;
                     window.dispatchEvent(new CustomEvent('open-modal', { detail: 'edit-tournament' }));
                 }

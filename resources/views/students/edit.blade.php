@@ -14,8 +14,8 @@
   <div class="py-8">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
-        
-        <form action="{{ route('students.update', $student) }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8" x-data="{ 
+
+        <form action="{{ route('students.update', $student) }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8" x-data="{
             activeTab: 'athlete',
             submitting: false
         }" @submit="submitting = true">
@@ -41,17 +41,17 @@
           <!-- Tab Content: Athlete Information -->
           <div x-show="activeTab === 'athlete'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información Principal del Deportista</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              
+
               <!-- Foto -->
-              <div class="lg:col-span-3" x-data="{ 
+              <div class="lg:col-span-3" x-data="{
                   preview: '{{ $student->Photo ? asset($student->Photo) : '' }}',
                   fileName: '',
                   isNew: false
               }">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Foto del Deportista</label>
-                
+
                 <!-- Estado: Sin imagen -->
                 <div x-show="!preview || preview === ''" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-club-primary/50 transition-colors bg-gray-50 cursor-pointer" @click="$refs.photoInput.click()">
                   <div class="space-y-1 text-center">
@@ -89,7 +89,7 @@
                   </div>
                 </div>
 
-                <input x-ref="photoInput" name="Photo" type="file" accept="image/png, image/jpeg" class="hidden" 
+                <input x-ref="photoInput" name="Photo" type="file" accept="image/png, image/jpeg" class="hidden"
                        @change="
                           const file = $event.target.files[0];
                           if (file) {
@@ -137,7 +137,7 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Inscripción <span class="text-red-500">*</span></label>
                 <input type="date" name="fechaInscripcion" value="{{ old('fechaInscripcion', $student->fechaInscripcion) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
               </div>
-              
+
               <!-- Categoria -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría <span class="text-red-500">*</span></label>
@@ -150,6 +150,14 @@
                   @endfor
                 </select>
               </div>
+
+              @role('Admin')
+                <div class="flex items-center rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <input type="hidden" name="becado" value="0">
+                  <input type="checkbox" name="becado" value="1" id="becado" {{ old('becado', $student->becado) ? 'checked' : '' }} class="rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                  <label for="becado" class="ml-2 text-sm font-bold text-amber-800">Deportista becado</label>
+                </div>
+              @endrole
 
               <!-- Género -->
               <div>
@@ -188,7 +196,7 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Dirección <span class="text-red-500">*</span></label>
                 <input type="text" name="direccionDeportista" value="{{ old('direccionDeportista', $student->direccionDeportista) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
               </div>
-              
+
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Barrio <span class="text-red-500">*</span></label>
                 <input type="text" name="barrio" value="{{ old('barrio', $student->barrio) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
@@ -238,7 +246,7 @@
               </div>
 
             </div>
-            
+
             <div class="mt-8 flex justify-end">
               <button type="button" @click="activeTab = 'mother'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-gray-800 border border-transparent rounded-lg font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
                 Siguiente: Info Madre <i class="bi bi-arrow-right ml-2"></i>
@@ -249,18 +257,18 @@
           <!-- Tab Content: Mother Information -->
           <div x-show="activeTab === 'mother'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información de la Madre</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo <span class="text-red-500">*</span></label>
                 <input type="text" name="nombreMama" value="{{ old('nombreMama', $student->nombreMama) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 transition-all">
               </div>
-              
+
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nº Documento <span class="text-red-500">*</span></label>
                 <input type="number" name="documentoMama" value="{{ old('documentoMama', $student->documentoMama) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 transition-all">
               </div>
-              
+
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
                 <input type="number" name="telefonoMama" value="{{ old('telefonoMama', $student->telefonoMama) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 transition-all">
@@ -290,18 +298,18 @@
           <!-- Tab Content: Father Information -->
           <div x-show="activeTab === 'father'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información del Padre</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo <span class="text-red-500">*</span></label>
                 <input type="text" name="nombrePapa" value="{{ old('nombrePapa', $student->nombrePapa) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
               </div>
-              
+
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nº Documento <span class="text-red-500">*</span></label>
                 <input type="number" name="documentoPapa" value="{{ old('documentoPapa', $student->documentoPapa) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
               </div>
-              
+
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
                 <input type="number" name="telefonoPapa" value="{{ old('telefonoPapa', $student->telefonoPapa) }}" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all">
@@ -331,34 +339,34 @@
           <!-- Tab Content: Medical History -->
           <div x-show="activeTab === 'medical'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Historial Médico del Deportista</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-red-50 p-6 rounded-xl border border-red-100">
-              
+
               <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-800 mb-1">Enfermedades que padece <span class="text-red-500">*</span></label>
                 <input type="text" name="enfermedades" value="{{ old('enfermedades', $student->enfermedades) }}" placeholder="Ej: Asma, Ninguna..." required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
               </div>
-              
+
               <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-800 mb-1">Medicamentos actuales <span class="text-red-500">*</span></label>
                 <input type="text" name="medicamento" value="{{ old('medicamento', $student->medicamento) }}" placeholder="Ej: Inhalador, Ninguno..." required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
               </div>
-              
+
               <div>
                 <label class="block text-sm font-semibold text-gray-800 mb-1">¿Lesiones congénitas? <span class="text-red-500">*</span></label>
                 <input type="text" name="lesion" value="{{ old('lesion', $student->lesion) }}" placeholder="Ej: Sí (Especificar), No" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
               </div>
-              
+
               <div>
                 <label class="block text-sm font-semibold text-gray-800 mb-1">¿Cirugías previas? <span class="text-red-500">*</span></label>
                 <input type="text" name="Cirugia" value="{{ old('Cirugia', $student->Cirugia) }}" placeholder="Ej: Apendicitis, No" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
               </div>
-              
+
               <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-800 mb-1">¿Impedimentos físicos para el deporte? <span class="text-red-500">*</span></label>
                 <input type="text" name="impedimento" value="{{ old('impedimento', $student->impedimento) }}" placeholder="Ej: Ninguno" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
               </div>
-              
+
               <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-800 mb-1">¿Lesiones óseo musculares? <span class="text-red-500">*</span></label>
                 <input type="text" name="lesionOM" value="{{ old('lesionOM', $student->lesionOM) }}" placeholder="Ej: Esguince tobillo derecho, Ninguna" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 transition-all">
@@ -370,7 +378,7 @@
               <button type="button" @click="activeTab = 'father'; window.scrollTo(0,0);" class="inline-flex items-center px-6 py-3 bg-white border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                 <i class="bi bi-arrow-left mr-2"></i> Atrás
               </button>
-              <button type="submit" 
+              <button type="submit"
                       :disabled="submitting"
                       :class="submitting ? 'opacity-75 cursor-not-allowed' : 'hover:scale-105'"
                       class="inline-flex items-center px-8 py-4 bg-gray-800 border border-transparent rounded-xl font-bold text-lg text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all shadow-lg">

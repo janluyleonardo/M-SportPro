@@ -20,7 +20,7 @@
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
 
         <form action="{{ route('students.store') }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8"
-          x-data="{ 
+          x-data="{
             activeTab: '{{ $errors->any() ? 'athlete' : 'athlete' }}',
             submitting: false,
             athleteComplete: false,
@@ -86,8 +86,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
               <!-- Foto -->
-              <div class="lg:col-span-3" x-data="{ 
-                  preview: '', 
+              <div class="lg:col-span-3" x-data="{
+                  preview: '',
                   fileName: '',
                   isNew: false
               }">
@@ -200,6 +200,14 @@
                   @endfor
                 </select>
               </div>
+
+              @role('Admin')
+                <div class="flex items-center rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <input type="hidden" name="becado" value="0">
+                  <input type="checkbox" name="becado" value="1" id="becado" {{ old('becado') ? 'checked' : '' }} class="rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                  <label for="becado" class="ml-2 text-sm font-bold text-amber-800">Deportista becado</label>
+                </div>
+              @endrole
 
               <!-- Género -->
               <div>
