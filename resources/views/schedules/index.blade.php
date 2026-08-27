@@ -18,22 +18,27 @@
             <div class="flex items-center space-x-4">
                 <!-- Filtro de Semana -->
                 <div class="flex items-center space-x-2 bg-white rounded-2xl p-1 shadow-sm border border-gray-100">
-                    <a href="{{ route('schedules.index', ['date' => $startOfWeek->copy()->subWeek()->toDateString()]) }}" 
+                    <a href="{{ route('schedules.index', ['date' => $startOfWeek->copy()->subWeek()->toDateString()]) }}"
                        class="p-2 hover:bg-gray-50 rounded-xl transition-colors text-gray-400" title="Semana Anterior">
                         <i class="bi bi-chevron-left"></i>
                     </a>
                     <form action="{{ route('schedules.index') }}" method="GET" class="flex items-center">
-                        <input type="date" name="date" value="{{ $selectedDate }}" 
+                        <input type="date" name="date" value="{{ $selectedDate }}"
                                onchange="this.form.submit()"
                                class="border-none bg-transparent font-bold text-[10px] text-gray-600 focus:ring-0 cursor-pointer uppercase tracking-widest">
                     </form>
-                    <a href="{{ route('schedules.index', ['date' => $startOfWeek->copy()->addWeek()->toDateString()]) }}" 
+                    <a href="{{ route('schedules.index', ['date' => $startOfWeek->copy()->addWeek()->toDateString()]) }}"
                        class="p-2 hover:bg-gray-50 rounded-xl transition-colors text-gray-400" title="Siguiente Semana">
                         <i class="bi bi-chevron-right"></i>
                     </a>
                 </div>
-                
+
                 @role('Admin|SubAdmin')
+                    <button type="button" id="merge-schedules-button" disabled
+                        onclick="window.dispatchEvent(new CustomEvent('open-merge-schedules', { detail: { ids: Array.from(document.querySelectorAll('.merge-schedule-checkbox:checked')).map(function (checkbox) { return checkbox.value; }) } })); window.dispatchEvent(new CustomEvent('open-modal', { detail: 'merge-schedules' }));"
+                        class="inline-flex items-center px-6 py-3 bg-amber-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-100 disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="bi bi-link-45deg mr-2"></i> Unir clases
+                    </button>
                     <button
                         onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'add-schedule' }))"
                         class="inline-flex items-center px-6 py-3 bg-club-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-indigo-100">
@@ -44,20 +49,24 @@
         </div>
     </x-slot>
 
-    <div class="py-8" x-data="{ 
-        editDay: '', 
+    <div class="py-8" @open-merge-schedules.window="selectedSchedules = $event.detail.ids" x-data="{
+        editDay: '',
         editDate: '',
-        editCategory: '', 
-        editStart: '', 
-        editEnd: '', 
-        editTeacher: '', 
+        editCategory: '',
+        editStart: '',
+        editEnd: '',
+        editTeacher: '',
         editLocation: '',
         editObservations: '',
         editClubId: '',
-        editUrl: ''
+        editUrl: '',
+        selectedSchedules: [],
+        mergeTeacher: '',
+        mergeLocation: '',
+        mergeObservations: ''
     }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
-            
+
             @php
                 $days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
             @endphp
@@ -68,13 +77,20 @@
                         <div class="bg-club-primary text-white p-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-[0.2em] shadow-sm border-b-4 border-club-secondary">
                             {{ $day }}
                         </div>
-                        
+
                         <div class="space-y-3">
                             @php $daySchedules = $schedules->where('day_of_week', $day); @endphp
-                            
+
                             @forelse($daySchedules as $schedule)
-                                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all relative group border-l-4 border-l-club-secondary">
-                                    <div class="text-[10px] font-black text-club-primary uppercase mb-1">{{ $schedule->category }}</div>
+                                <div class="bg-white p-4 pt-10 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all relative group border-l-4 border-l-club-secondary">
+                                    @role('Admin|SubAdmin')
+                                        <label class="absolute top-3 left-3 z-10 flex items-center gap-1.5 text-[8px] font-black text-gray-400 uppercase tracking-widest cursor-pointer">
+                                            <input type="checkbox" value="{{ $schedule->id }}" class="merge-schedule-checkbox rounded border-gray-300 text-club-primary focus:ring-club-primary"
+                                                onchange="document.getElementById('merge-schedules-button').disabled = document.querySelectorAll('.merge-schedule-checkbox:checked').length < 2">
+                                            Seleccionar
+                                        </label>
+                                    @endrole
+                                    <div class="text-[10px] font-black text-club-primary uppercase mb-1 pr-2">Categoría: {{ $schedule->category }}</div>
                                     <div class="text-sm font-bold text-gray-900">{{ date('g:i A', strtotime($schedule->start_time)) }}</div>
                                     <div class="text-[10px] text-gray-400 font-bold mt-1">
                                         <i class="bi bi-person-fill mr-1 text-club-secondary"></i> {{ $schedule->teacher->name }}
@@ -101,7 +117,7 @@
 
                                     <!-- Actions -->
                                     @role('Admin|SubAdmin')
-                                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2">
+                                        <div class="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2 bg-white/90 pl-2 rounded-lg">
                                             <button @click="
                                                 editUrl = '{{ route('schedules.update', $schedule) }}';
                                                 editDay = '{{ $schedule->day_of_week }}';
@@ -141,6 +157,71 @@
                 @endforeach
             </div>
         </div>
+
+        <!-- Modal Unir Clases -->
+        <x-modal name="merge-schedules" focusable>
+            <div class="p-8">
+                <h2 class="text-2xl font-black text-gray-900 mb-2 flex items-center">
+                    <i class="bi bi-link-45deg text-amber-500 mr-3"></i> Unir Clases
+                </h2>
+                <p class="text-xs text-gray-500 mb-8">Las clases seleccionadas quedarán desactivadas y se creará una nueva sesión conjunta.</p>
+
+                <form action="{{ route('schedules.merge') }}" method="POST" class="space-y-6"
+                    x-data="{ loading: false }" @submit="loading = true">
+                    @csrf
+                    <template x-for="scheduleId in selectedSchedules" :key="scheduleId">
+                        <input type="hidden" name="schedule_ids[]" :value="scheduleId">
+                    </template>
+
+                    <div class="bg-amber-50 border border-amber-100 rounded-2xl p-4">
+                        <p class="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-2">Clases seleccionadas</p>
+                        <p class="text-sm font-bold text-gray-700"><span x-text="selectedSchedules.length"></span> clases serán unificadas</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Profesor asignado</label>
+                        <select name="user_id" x-model="mergeTeacher" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700" required>
+                            <option value="">Seleccione el profesor...</option>
+                            @foreach($teachers as $teacher)
+                                <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Cancha / Ubicación</label>
+                        <select name="location" x-model="mergeLocation" class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700">
+                            <option value="">-- Sin asignar --</option>
+                            @foreach($locations as $loc)
+                                <option value="{{ $loc->name }}">{{ $loc->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Motivo de la unión <span class="text-red-500">*</span></label>
+                        <textarea name="observations" x-model="mergeObservations" rows="3" minlength="5" maxlength="1000" required
+                            placeholder="Ej: Se unifican por no alcanzar el mínimo de 12 jugadores..."
+                            class="w-full border-gray-100 bg-gray-50 rounded-2xl p-3 font-bold text-gray-700 focus:ring-amber-400 focus:border-amber-400"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 mt-10">
+                        <button type="button" @click="$dispatch('close-modal', 'merge-schedules'); loading = false"
+                            :disabled="loading" class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-all disabled:opacity-50">
+                            Cancelar
+                        </button>
+                        <button type="submit" :disabled="loading || selectedSchedules.length < 2"
+                            class="inline-flex items-center gap-2 px-10 py-4 bg-amber-500 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-100 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <svg x-show="loading" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 5.373 0 0 0 12h4z"></path>
+                            </svg>
+                            Unir clases
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </x-modal>
 
         <!-- Modal Programar Clase (Add) -->
         <x-modal name="add-schedule" focusable>

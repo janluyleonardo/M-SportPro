@@ -21,6 +21,7 @@ class AttendanceController extends Controller
         // Los profesores solo ven sus clases de hoy
         // Los Admin ven todas las clases de hoy
         $query = ClassSchedule::with('teacher')
+            ->where('active', true)
             ->whereDate('date', now()->toDateString());
 
         if (Auth::user()->hasRole('Profesor')) {
@@ -34,8 +35,15 @@ class AttendanceController extends Controller
 
     public function show(ClassSchedule $schedule)
     {
-        // Buscar estudiantes que pertenecen a la categoría de esta clase
-        $students = Student::where('Categoria', $schedule->category)->orderBy('nomDeportista')->get();
+        abort_unless($schedule->active, 404);
+
+        $categories = $schedule->categories()->pluck('category');
+        if ($categories->isEmpty()) {
+            $categories = collect([$schedule->category]);
+        }
+
+        // Una sesión unificada incluye los estudiantes de todas sus categorías.
+        $students = Student::whereIn('Categoria', $categories)->orderBy('nomDeportista')->get();
 
         // Sincronizar saldos antes de mostrar la lista
         $students->each->updateBalance();
@@ -64,7 +72,11 @@ class AttendanceController extends Controller
         $validated = $request->validated();
         $schedule = ClassSchedule::findOrFail($request->class_schedule_id);
 
-        $students = Student::where('Categoria', $schedule->category)->get();
+        $categories = $schedule->categories()->pluck('category');
+        if ($categories->isEmpty()) {
+            $categories = collect([$schedule->category]);
+        }
+        $students = Student::whereIn('Categoria', $categories)->get();
         $students->each->updateBalance();
         $overriddenStudentIds = AttendanceOverride::where('class_schedule_id', $schedule->id)
             ->pluck('student_id');

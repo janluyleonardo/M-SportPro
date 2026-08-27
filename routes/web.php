@@ -97,6 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::middleware(['module:classes'])->group(function () {
                 Route::post('schedules', [ClassScheduleController::class, 'store'])->name('schedules.store');
                 Route::put('schedules/{classSchedule}', [ClassScheduleController::class, 'update'])->name('schedules.update');
+                Route::post('schedules/merge', [ClassScheduleController::class, 'merge'])->name('schedules.merge');
             });
 
             Route::resource('users', UserController::class)->except(['destroy']);
