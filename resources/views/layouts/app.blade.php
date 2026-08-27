@@ -258,6 +258,7 @@
                 accept() {
                     this.show = false;
                     if (this.formToSubmit) {
+                        showFormLoading(this.formToSubmit);
                         this.formToSubmit.submit();
                     }
                     if (this.callbackFn) {
@@ -326,6 +327,41 @@
                 detail: { type, message }
             }));
         }
+
+        function showFormLoading(form) {
+            if (!form || form.dataset.noLoader === 'true' || form.dataset.loading === 'true') {
+                return;
+            }
+
+            form.dataset.loading = 'true';
+
+            form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach((button) => {
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+                button.classList.add('opacity-75', 'cursor-not-allowed');
+
+                if (!button.querySelector('.global-submit-spinner')) {
+                    const spinner = document.createElement('i');
+                    spinner.className = 'global-submit-spinner bi bi-arrow-repeat animate-spin mr-2';
+                    spinner.setAttribute('aria-hidden', 'true');
+                    button.prepend(spinner);
+                }
+            });
+
+            const loader = document.getElementById('global-loader');
+            if (loader) {
+                loader.classList.remove('pointer-events-none', 'opacity-0');
+                loader.classList.add('opacity-100');
+            }
+        }
+
+        document.addEventListener('submit', function (e) {
+            if (e.defaultPrevented) {
+                return;
+            }
+
+            showFormLoading(e.target);
+        });
 
         // Global Loader Logic
         // Eliminamos el listener de 'beforeunload' porque causaba que el cargador se quedara pegado en las descargas.
