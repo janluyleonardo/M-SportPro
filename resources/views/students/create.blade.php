@@ -19,15 +19,36 @@
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
 
-        <form action="{{ route('students.store') }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8"
+        <form action="{{ route('students.store') }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8" novalidate
           x-data="{
             activeTab: '{{ $errors->any() ? 'athlete' : 'athlete' }}',
             submitting: false,
             athleteComplete: false,
             motherComplete: false,
             fatherComplete: false,
-            medicalComplete: false
-        }" @submit="submitting = true">
+            medicalComplete: false,
+            handleSubmit(event) {
+              const invalidField = event.target.querySelector(':invalid');
+
+              if (!invalidField) {
+                this.submitting = true;
+                return;
+              }
+
+              event.preventDefault();
+              const section = invalidField.closest('[data-validation-tab]');
+              if (section) {
+                this.activeTab = section.dataset.validationTab;
+              }
+
+              showToast(invalidField.validationMessage || 'Completa este campo antes de continuar.', 'error');
+
+              this.$nextTick(() => {
+                invalidField.focus({ preventScroll: true });
+                invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              });
+            }
+        }" @submit="handleSubmit($event)">
           @csrf
 
           {{-- Mostrar errores de validación globales --}}
@@ -78,7 +99,7 @@
           </div>
 
           <!-- Tab Content: Athlete Information -->
-          <div x-show="activeTab === 'athlete'" x-transition:enter="transition ease-out duration-300"
+          <div x-show="activeTab === 'athlete'" data-validation-tab="athlete" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información Principal del Deportista</h3>
@@ -335,7 +356,7 @@
           </div>
 
           <!-- Tab Content: Mother Information -->
-          <div x-show="activeTab === 'mother'" x-transition:enter="transition ease-out duration-300"
+          <div x-show="activeTab === 'mother'" data-validation-tab="mother" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información del acudiente</h3>
@@ -390,7 +411,7 @@
           </div>
 
           <!-- Tab Content: Father Information -->
-          <div x-show="activeTab === 'father'" x-transition:enter="transition ease-out duration-300"
+          <div x-show="activeTab === 'father'" data-validation-tab="father" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información del acudiente 2</h3>
@@ -440,7 +461,7 @@
           </div>
 
           <!-- Tab Content: Medical History -->
-          <div x-show="activeTab === 'medical'" x-transition:enter="transition ease-out duration-300"
+          <div x-show="activeTab === 'medical'" data-validation-tab="medical" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Historial Médico del Deportista</h3>
