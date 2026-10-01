@@ -49,7 +49,23 @@ class StudentsController extends Controller
   public function create()
   {
     $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
-    return view('students.create', compact('clubs'));
+
+    $categoriesQuery = Student::query()
+        ->whereNotNull('Categoria')
+        ->where('Categoria', '!=', '');
+
+    if (!auth()->user()->is_super_admin) {
+        $categoriesQuery->where('club_id', auth()->user()->club_id);
+    }
+
+    $categories = $categoriesQuery
+        ->distinct()
+        ->orderBy('Categoria')
+        ->pluck('Categoria')
+        ->values()
+        ->all();
+
+    return view('students.create', compact('clubs', 'categories'));
   }
 
   /**
@@ -61,6 +77,11 @@ class StudentsController extends Controller
   public function store(StoreStudentRequest $request)
   {
     $validated = $request->validated();
+    if (!auth()->user()->hasRole('Admin')) {
+      unset($validated['becado']);
+    } else {
+      $validated['becado'] = $request->boolean('becado');
+    }
     $newStudent = new Student($validated);
 
     if ($request->hasfile('Photo')) {
@@ -153,7 +174,23 @@ class StudentsController extends Controller
     $hoy = now()->format('Y-m-d');
     $id = $student->id;
     $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
-    return view('students.edit', compact('student', 'hoy', 'clubs'));
+
+    $categoriesQuery = Student::query()
+        ->whereNotNull('Categoria')
+        ->where('Categoria', '!=', '');
+
+    if (!auth()->user()->is_super_admin) {
+        $categoriesQuery->where('club_id', auth()->user()->club_id);
+    }
+
+    $categories = $categoriesQuery
+        ->distinct()
+        ->orderBy('Categoria')
+        ->pluck('Categoria')
+        ->values()
+        ->all();
+
+    return view('students.edit', compact('student', 'hoy', 'clubs', 'categories'));
   }
 
   /**
@@ -166,6 +203,11 @@ class StudentsController extends Controller
   public function update(UpdateStudentRequest $request, Student $student)
   {
     $validated = $request->validated();
+    if (!auth()->user()->hasRole('Admin')) {
+      unset($validated['becado']);
+    } else {
+      $validated['becado'] = $request->boolean('becado');
+    }
     $student->fill($validated);
 
     if ($request->hasFile('Photo')) {

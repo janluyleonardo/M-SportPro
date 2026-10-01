@@ -39,7 +39,7 @@
                     @endrole
 
                     {{-- Dropdown de Gestión: visible para Admin, Profesor y SuperAdmin --}}
-                    @if(auth()->user()->hasAnyRole(['Admin', 'Profesor']) || auth()->user()->is_super_admin)
+                    @if(auth()->user()->hasAnyRole(['Admin', 'SubAdmin', 'Profesor']) || auth()->user()->is_super_admin)
                         <div class="relative" x-data="{ openGestion: false }" @click.outside="openGestion = false">
                             <button
                                 @click="openGestion = !openGestion"
@@ -105,7 +105,7 @@
                                     </a>
                                     @endmodule
 
-                                    @role('Admin')
+                                    @role('Admin|SubAdmin')
                                         <div class="border-t border-gray-100 my-1.5"></div>
                                         <a href="{{ route('users.index') }}"
                                            class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
@@ -117,6 +117,7 @@
                                             {{ __('Usuarios') }}
                                             <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">Admin</span>
                                         </a>
+                                        @module('locations')
                                         <a href="{{ route('locations.index') }}"
                                            class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
                                                   {{ request()->routeIs('locations.*') ? 'bg-yellow-50 text-gray-900' : 'text-gray-700 hover:bg-gray-50' }}">
@@ -127,8 +128,9 @@
                                             {{ __('Canchas') }}
                                             <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">Admin</span>
                                         </a>
+                                        @endmodule
 
-                                        @module('financial')
+                                        @module('inventory')
                                         <div class="border-t border-gray-100 my-1.5"></div>
                                         <a href="{{ route('products.index') }}"
                                            class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
@@ -140,7 +142,9 @@
                                             {{ __('Inventario') }}
                                             <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase tracking-tighter">Stock</span>
                                         </a>
+                                        @endmodule
 
+                                        @module('treasury')
                                         <a href="{{ route('treasury.index') }}"
                                            class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
                                                   {{ request()->routeIs('treasury.index') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50' }}">
@@ -151,6 +155,9 @@
                                             {{ __('Tesorería') }}
                                             <span class="ml-auto text-[9px] font-black bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase">Caja</span>
                                         </a>
+                                        @endmodule
+
+                                        @module('payroll')
                                         <a href="{{ route('treasury.salaries') }}"
                                            class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
                                                   {{ request()->routeIs('treasury.salaries') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50' }}">
@@ -303,7 +310,7 @@
             </div>
 
             {{-- Sección de Gestión en móvil --}}
-            @if(auth()->user()->hasAnyRole(['Admin', 'Profesor']) || auth()->user()->is_super_admin)
+            @if(auth()->user()->hasAnyRole(['Admin', 'SubAdmin', 'Profesor']) || auth()->user()->is_super_admin)
                 <div class="mt-4 px-3">
                     <div class="px-3 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center border-t border-gray-100 pt-4">
                         <i class="bi bi-shield-lock-fill mr-1.5 text-club-primary"></i> Gestión
@@ -329,31 +336,37 @@
                         </a>
                         @endmodule
 
-                        @role('Admin')
+                        @role('Admin|SubAdmin')
                             <a href="{{ route('users.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('users.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                                 <i class="bi bi-people-fill mr-3 text-base {{ request()->routeIs('users.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Usuarios') }}
                                 <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">Admin</span>
                             </a>
 
+                            @module('locations')
                             <a href="{{ route('locations.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('locations.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                                  <i class="bi bi-geo-alt-fill mr-3 text-base {{ request()->routeIs('locations.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Canchas') }}
                                 <span class="ml-auto text-[9px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-full uppercase">Admin</span>
                             </a>
+                            @endmodule
 
-                            @module('financial')
+                            @module('inventory')
                             <a href="{{ route('products.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('products.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                                 <i class="bi bi-box-seam mr-3 text-base {{ request()->routeIs('products.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Inventario') }}
                             </a>
+                            @endmodule
 
+                            @module('treasury')
                             <div class="border-t border-gray-100 my-2"></div>
                             <a href="{{ route('treasury.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('treasury.index') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                                 <i class="bi bi-bank2 mr-3 text-base {{ request()->routeIs('treasury.index') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Tesorería') }}
                             </a>
+                            @endmodule
 
+                            @module('payroll')
                             <a href="{{ route('treasury.salaries') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('treasury.salaries') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
                                 <i class="bi bi-cash-stack mr-3 text-base {{ request()->routeIs('treasury.salaries') ? 'text-club-primary' : 'text-gray-400' }}"></i>
                                 {{ __('Nómina') }}

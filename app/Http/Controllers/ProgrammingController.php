@@ -41,6 +41,12 @@ class ProgrammingController extends Controller
         $studentNames = Student::pluck('nomDeportista', 'id')->toArray();
 
         $pdf = Pdf::loadView('Programming.pdf', compact('programming', 'date', 'studentNames', 'base64Logo', 'clubName'));
+        $pdf->setPaper('letter', 'portrait');
+        $pdf->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'Arial'
+        ]);
         return $pdf->stream('Programacion_'.$date.'.pdf');
     }
 
@@ -105,14 +111,6 @@ class ProgrammingController extends Controller
     public function store(StoreProgrammingRequest $request)
     {
       $validated = $request->validated();
-      // Si hay un torneo seleccionado, cargar automáticamente a todos sus deportistas asociados
-      if (!empty($validated['tournament_id'])) {
-          $tournament = \App\Models\Tournament::with('students')->find($validated['tournament_id']);
-          if ($tournament) {
-              $validated['jugadores_convocados'] = $tournament->students->pluck('id')->toArray();
-          }
-      }
-
       // Manejar la conversión de array a string para la DB
       if (isset($validated['jugadores_convocados']) && is_array($validated['jugadores_convocados'])) {
           $validated['jugadores_convocados'] = implode(',', $validated['jugadores_convocados']);
@@ -168,16 +166,10 @@ class ProgrammingController extends Controller
       $programming = programming::findOrFail($id);
       $validated = $request->validated();
 
-      // Si hay un torneo seleccionado, cargar automáticamente a todos sus deportistas asociados
-      if (!empty($validated['tournament_id'])) {
-          $tournament = \App\Models\Tournament::with('students')->find($validated['tournament_id']);
-          if ($tournament) {
-              $validated['jugadores_convocados'] = $tournament->students->pluck('id')->toArray();
-          }
-      }
-
       if (isset($validated['jugadores_convocados']) && is_array($validated['jugadores_convocados'])) {
           $validated['jugadores_convocados'] = implode(',', $validated['jugadores_convocados']);
+      } else {
+          $validated['jugadores_convocados'] = $validated['jugadores_convocados'] ?? '';
       }
 
       try {

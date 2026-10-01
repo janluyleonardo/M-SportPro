@@ -19,13 +19,13 @@ class PaymentController extends Controller
         $search = $request->get('search');
         $user = auth()->user();
 
-        // Seguridad y UX: Si no es Admin ni Profesor, manejar redirección directa
-        if (!$user->hasRole(['Admin', 'Profesor'])) {
+        // Seguridad y UX: Si no es Admin, SubAdmin ni Profesor, manejar redirección directa
+        if (!$user->hasRole(['Admin', 'SubAdmin', 'Profesor'])) {
             $doc = $user->documento_deportista;
-            
+
             if (!$doc) {
                 return view('payments.index', [
-                    'students' => Student::where('id', 0)->paginate(6), 
+                    'students' => Student::where('id', 0)->paginate(6),
                     'search' => $search,
                     'error_message' => 'Tu cuenta no tiene un número de documento vinculado. Contacta al administrador.'
                 ]);
@@ -35,7 +35,7 @@ class PaymentController extends Controller
 
             if (!$student) {
                 return view('payments.index', [
-                    'students' => Student::where('id', 0)->paginate(6), 
+                    'students' => Student::where('id', 0)->paginate(6),
                     'search' => $search,
                     'error_message' => "No se encontró ningún deportista con el documento $doc. Verifica la información con el club."
                 ]);
@@ -64,8 +64,8 @@ class PaymentController extends Controller
     {
         $user = auth()->user();
 
-        // Seguridad: Si no es Admin ni Profesor, verificar que sea su registro vinculado
-        if (!$user->hasRole(['Admin', 'Profesor'])) {
+        // Seguridad: Si no es Admin, SubAdmin ni Profesor, verificar que sea su registro vinculado
+        if (!$user->hasRole(['Admin', 'SubAdmin', 'Profesor'])) {
             if ((string)$user->documento_deportista !== (string)$student->numDocumento) {
                 abort(403, 'No tienes permiso para ver esta información.');
             }

@@ -32,6 +32,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Primero, actualizar valores NULL a strings vacíos para evitar error de restricción
+        \DB::table('students')->whereNull('nombrePapa')->update(['nombrePapa' => '']);
+        \DB::table('students')->whereNull('documentoPapa')->update(['documentoPapa' => 0]);
+        \DB::table('students')->whereNull('telefonoPapa')->update(['telefonoPapa' => '']);
+        \DB::table('students')->whereNull('direccionPapa')->update(['direccionPapa' => '']);
+        \DB::table('students')->whereNull('Departamento')->update(['Departamento' => '']);
+        \DB::table('students')->whereNull('EPS')->update(['EPS' => '']);
+        \DB::table('students')->whereNull('Colegio')->update(['Colegio' => '']);
+        \DB::table('students')->whereNull('Curso')->update(['Curso' => '']);
+
         Schema::table('students', function (Blueprint $table) {
             $table->string('nombrePapa')->nullable(false)->change();
             $table->bigInteger('documentoPapa')->nullable(false)->change();

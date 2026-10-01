@@ -46,7 +46,7 @@
         </div>
 
         <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-2" x-data="{ exporting: false, showImport: false }">
-          @role('Admin')
+          @role('Admin|SubAdmin')
           <!-- Botón Exportar -->
           <a href="#" data-no-loader="true"
              @click.prevent="if (!exporting) { exporting = true; window.location.href = '{{ route('export') }}'; setTimeout(() => exporting = false, 3000); }"
@@ -202,6 +202,9 @@
                       </div>
                       <div class="ml-4">
                         <div class="text-sm font-semibold text-gray-900">{{ Str::title($student->nomDeportista) }}</div>
+                        @if($student->becado)
+                          <span class="text-[9px] font-black text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md uppercase">Becado</span>
+                        @endif
                         <div class="text-xs text-gray-500">{{ $student->correoMama ?? $student->correoPapa ?? 'Sin correo' }}</div>
                       </div>
                     </div>
@@ -271,6 +274,9 @@
                   </div>
                   <div class="ml-3">
                     <div class="text-sm font-bold text-gray-900 leading-tight">{{ Str::title($student->nomDeportista) }}</div>
+                    @if($student->becado)
+                      <span class="text-[9px] font-black text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Becado</span>
+                    @endif
                     <div class="text-[10px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Categoría {{ __($student->Categoria) }}</div>
                   </div>
                 </div>

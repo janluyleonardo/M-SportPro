@@ -17,15 +17,39 @@ class ModuleSeeder extends Seeder
                 'is_active' => true,
             ],
             [
-                'name' => 'Módulo Financiero',
+                'name' => 'Módulo de Mensualidades',
                 'slug' => 'financial',
-                'description' => 'Gestión de pagos, transacciones y facturación',
+                'description' => 'Gestión de pagos, cuotas y facturación mensual',
                 'is_active' => true,
             ],
             [
                 'name' => 'Módulo de Clases',
                 'slug' => 'classes',
                 'description' => 'Programación de clases y control de asistencia',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Módulo de Inventario',
+                'slug' => 'inventory',
+                'description' => 'Gestión de productos, stock e inventario',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Módulo de Tesorería',
+                'slug' => 'treasury',
+                'description' => 'Control de caja, movimientos y tesorería',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Módulo de Nómina',
+                'slug' => 'payroll',
+                'description' => 'Gestión de pagos a profesores y historial de nómina',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Módulo de Canchas',
+                'slug' => 'locations',
+                'description' => 'Gestión de canchas y disponibilidad para clases y partidos',
                 'is_active' => true,
             ],
         ];

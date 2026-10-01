@@ -57,6 +57,7 @@ class UpdateStudentRequest extends FormRequest
             'Cirugia' => 'nullable|string',
             'impedimento' => 'nullable|string',
             'lesionOM' => 'nullable|string',
+            'becado' => 'sometimes|boolean',
         ];
     }
 }

@@ -91,7 +91,7 @@
                                     $individualInscription = $studentCount > 0 ? (float)$tournament->costo_total_inscripcion / $studentCount : 0;
                                     
                                     $allStudentsData = [];
-                                    // Inicializar con la inscripción individual
+                                    // Inicializar con la inscripción individual (el arbitraje se acumulará por partido)
                                     foreach($tournament->students as $student) {
                                         $allStudentsData[$student->id] = [
                                             'name' => $student->nomDeportista, 
@@ -104,7 +104,8 @@
                                         foreach($prog->summoned_data as $data) {
                                             $sid = $data['student_id'];
                                             if(isset($allStudentsData[$sid])) {
-                                                $allStudentsData[$sid]['total_cost'] += ($prog->costo_inscripcion + $prog->costo_arbitraje);
+                                                // Sumamos el costo de arbitraje del partido al total del jugador
+                                                $allStudentsData[$sid]['total_cost'] += (float)$prog->costo_arbitraje;
                                                 $allStudentsData[$sid]['total_paid'] += ($data['pagado_inscripcion'] + $data['pagado_arbitraje']);
                                             }
                                         }
@@ -244,7 +245,7 @@
                                                                 <input type="number" x-model.number="p.pagado_inscripcion" 
                                                                     class="w-full text-center text-xs font-black rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 py-1.5 pl-2 pr-2 transition-all"
                                                                     :class="p.pagado_inscripcion >= {{ $prog->costo_inscripcion }} ? 'bg-green-50 text-green-700 border-green-200' : (p.pagado_inscripcion > 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-gray-50 text-gray-400')">
-                                                                <button @click="p.pagado_inscripcion = {{ $prog->costo_inscripcion }}" x-show="p.pagado_inscripcion < {{ $prog->costo_inscripcion }}" class="absolute -right-2 -top-2 bg-white shadow-sm border border-gray-100 rounded-full p-1 text-green-600 hover:scale-110 transition-transform">
+                                                                <button @click="p.pagado_inscripcion = {{ $prog->costo_inscripcion }}" x-show="p.pagado_inscripcion < {{ $prog->costo_inscripcion }}" title="Marcar la totalidad de la inscripción para este encuentro (${{ number_format($prog->costo_inscripcion, 0) }})" class="absolute -right-2 -top-2 bg-white shadow-sm border border-gray-100 rounded-full p-1 text-green-600 hover:scale-110 transition-transform">
                                                                     <i class="bi bi-check-all text-[10px]"></i>
                                                                 </button>
                                                             </div>
@@ -258,7 +259,7 @@
                                                                 <input type="number" x-model.number="p.pagado_arbitraje" 
                                                                     class="w-full text-center text-xs font-black rounded-xl border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 py-1.5 pl-2 pr-2 transition-all"
                                                                     :class="p.pagado_arbitraje >= {{ $prog->costo_arbitraje }} ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : (p.pagado_arbitraje > 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-gray-50 text-gray-400')">
-                                                                <button @click="p.pagado_arbitraje = {{ $prog->costo_arbitraje }}" x-show="p.pagado_arbitraje < {{ $prog->costo_arbitraje }}" class="absolute -right-2 -top-2 bg-white shadow-sm border border-gray-100 rounded-full p-1 text-indigo-600 hover:scale-110 transition-transform">
+                                                                <button @click="p.pagado_arbitraje = {{ $prog->costo_arbitraje }}" x-show="p.pagado_arbitraje < {{ $prog->costo_arbitraje }}" title="Marcar la totalidad del arbitraje para este encuentro (${{ number_format($prog->costo_arbitraje, 0) }})" class="absolute -right-2 -top-2 bg-white shadow-sm border border-gray-100 rounded-full p-1 text-indigo-600 hover:scale-110 transition-transform">
                                                                     <i class="bi bi-check-all text-[10px]"></i>
                                                                 </button>
                                                             </div>
@@ -267,10 +268,9 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-right">
-                                                        @php $matchCost = (float)$prog->costo_inscripcion + (float)$prog->costo_arbitraje; @endphp
                                                         <span class="text-sm font-black" 
-                                                            :class="(parseFloat(p.previous_debt) + {{ $matchCost }} - (parseFloat(p.pagado_inscripcion) || 0) - (parseFloat(p.pagado_arbitraje) || 0)) > 0 ? 'text-red-600' : 'text-green-600'" 
-                                                            x-text="'$' + new Intl.NumberFormat().format(parseFloat(p.previous_debt) + {{ $matchCost }} - (parseFloat(p.pagado_inscripcion) || 0) - (parseFloat(p.pagado_arbitraje) || 0))"></span>
+                                                            :class="(parseFloat(p.previous_debt) + {{ (float)$prog->costo_arbitraje }} - (parseFloat(p.pagado_inscripcion) || 0) - (parseFloat(p.pagado_arbitraje) || 0)) > 0 ? 'text-red-600' : 'text-green-600'" 
+                                                            x-text="'$' + new Intl.NumberFormat().format(parseFloat(p.previous_debt) + {{ (float)$prog->costo_arbitraje }} - (parseFloat(p.pagado_inscripcion) || 0) - (parseFloat(p.pagado_arbitraje) || 0))"></span>
                                                     </td>
                                                 </tr>
                                             </template>

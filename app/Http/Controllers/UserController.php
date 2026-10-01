@@ -7,6 +7,7 @@ use App\Models\Club;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -71,6 +72,8 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $rules = [
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'role' => 'required|exists:roles,name',
             'documento_deportista' => 'nullable|string',
             'pay_per_session' => 'nullable|numeric|min:0',
@@ -84,6 +87,8 @@ class UserController extends Controller
         $request->validate($rules);
 
         $updateData = [
+            'name' => $request->name,
+            'email' => $request->email,
             'documento_deportista' => $request->documento_deportista,
             'pay_per_session' => $request->pay_per_session ?? 0
         ];

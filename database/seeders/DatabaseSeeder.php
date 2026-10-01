@@ -8,6 +8,7 @@ use App\Models\Module;
 use Illuminate\Support\Str;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -49,26 +50,46 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Corregir canchas iniciales que quedaron sin club_id en bases antiguas
+        DB::table('locations')
+            ->whereNull('club_id')
+            ->update(['club_id' => $clubJackeline->id]);
+
         // Asociar módulos a los clubes
         $moduleTorneos = Module::where('slug', 'tournaments')->first();
         $moduleFinancial = Module::where('slug', 'financial')->first();
         $moduleClasses = Module::where('slug', 'classes')->first();
+        $moduleInventory = Module::where('slug', 'inventory')->first();
+        $moduleTreasury = Module::where('slug', 'treasury')->first();
+        $modulePayroll = Module::where('slug', 'payroll')->first();
+        $moduleLocations = Module::where('slug', 'locations')->first();
 
-        // Club Jackeline FS tiene Módulo Financiero y Módulo de Clases
-        if ($clubJackeline && $moduleFinancial && $moduleClasses) {
-            $clubJackeline->modules()->syncWithoutDetaching([
-                $moduleFinancial->id,
-                $moduleClasses->id,
-            ]);
+        // Club Jackeline FS tiene todos los módulos activos por defecto
+        if ($clubJackeline) {
+            $clubJackelineModules = [];
+            foreach ([$moduleFinancial, $moduleClasses, $moduleInventory, $moduleTreasury, $modulePayroll, $moduleTorneos, $moduleLocations] as $module) {
+                if ($module) {
+                    $clubJackelineModules[] = $module->id;
+                }
+            }
+
+            if (!empty($clubJackelineModules)) {
+                $clubJackeline->modules()->syncWithoutDetaching($clubJackelineModules);
+            }
         }
 
-        // Club Rodesa tiene Módulo de Torneos, Financiero y Clases
-        if ($clubRodesa && $moduleTorneos && $moduleFinancial && $moduleClasses) {
-            $clubRodesa->modules()->syncWithoutDetaching([
-                $moduleTorneos->id,
-                $moduleFinancial->id,
-                $moduleClasses->id,
-            ]);
+        // Club Rodesa tiene todos los módulos activos por defecto
+        if ($clubRodesa) {
+            $clubRodesaModules = [];
+            foreach ([$moduleTorneos, $moduleFinancial, $moduleClasses, $moduleInventory, $moduleTreasury, $modulePayroll, $moduleLocations] as $module) {
+                if ($module) {
+                    $clubRodesaModules[] = $module->id;
+                }
+            }
+
+            if (!empty($clubRodesaModules)) {
+                $clubRodesa->modules()->syncWithoutDetaching($clubRodesaModules);
+            }
         }
 
         // ── CREACIÓN DE USUARIOS DE PRUEBA ──────────────────────────────────

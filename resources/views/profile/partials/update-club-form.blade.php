@@ -20,7 +20,7 @@
             <!-- Left: Current Logo Display & Preview -->
             <div class="flex flex-col items-center justify-center p-5 bg-gray-50 rounded-2xl border border-gray-100 text-center">
                 <label class="block text-xs font-black text-gray-400 uppercase mb-3">{{ __('Logotipo Actual') }}</label>
-                
+
                 <div class="relative w-32 h-32 bg-white rounded-2xl border border-gray-200/60 shadow-sm flex items-center justify-center overflow-hidden group">
                     @if($user->club->logo && file_exists(public_path($user->club->logo)))
                         <img id="club-logo-preview" class="w-full h-full object-contain p-2" src="{{ asset($user->club->logo) }}" alt="Logo {{ $user->club->name }}">
@@ -47,10 +47,35 @@
                     <x-input-error class="mt-2" :messages="$errors->get('name')" />
                 </div>
 
+                <!-- Club Colors -->
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase mb-2">{{ __('Colores del Club') }}</label>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="primary_color" class="text-[11px] font-bold text-gray-500 uppercase">{{ __('Color Primario') }}</label>
+                            <div class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                                <input type="color" id="primary_color" name="primary_color" value="{{ old('primary_color', $user->club->primary_color ?: '#004aad') }}" class="h-10 w-12 cursor-pointer rounded-lg border border-gray-200 bg-transparent p-0" aria-label="Color primario" />
+                                <span class="text-xs font-semibold text-gray-600">{{ old('primary_color', $user->club->primary_color ?: '#004aad') }}</span>
+                            </div>
+                            <x-input-error class="mt-1" :messages="$errors->get('primary_color')" />
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="secondary_color" class="text-[11px] font-bold text-gray-500 uppercase">{{ __('Color Secundario') }}</label>
+                            <div class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                                <input type="color" id="secondary_color" name="secondary_color" value="{{ old('secondary_color', $user->club->secondary_color ?: '#ffde59') }}" class="h-10 w-12 cursor-pointer rounded-lg border border-gray-200 bg-transparent p-0" aria-label="Color secundario" />
+                                <span class="text-xs font-semibold text-gray-600">{{ old('secondary_color', $user->club->secondary_color ?: '#ffde59') }}</span>
+                            </div>
+                            <x-input-error class="mt-1" :messages="$errors->get('secondary_color')" />
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Logo File Upload -->
                 <div>
                     <x-input-label for="club_logo" :value="__('Subir Nuevo Logotipo')" class="text-xs font-black text-gray-400 uppercase mb-2" />
-                    
+
                     <div class="relative flex items-center justify-center w-full">
                         <label for="club_logo" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 border-dashed rounded-2xl cursor-pointer bg-gray-50 hover:bg-gray-100/50 hover:border-indigo-400 transition-all">
                             <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
@@ -90,10 +115,10 @@
         function previewClubLogo(input) {
             const preview = document.getElementById('club-logo-preview');
             const placeholder = document.getElementById('club-logo-placeholder');
-            
+
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                
+
                 reader.onload = function(e) {
                     if (preview) {
                         preview.src = e.target.result;
@@ -103,7 +128,7 @@
                         placeholder.classList.add('hidden');
                     }
                 }
-                
+
                 reader.readAsDataURL(input.files[0]);
             }
         }

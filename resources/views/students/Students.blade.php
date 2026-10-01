@@ -285,24 +285,24 @@
                                                                     <div class="col-md-12" style="background-color: rgba(0, 0, 0, 0.068); border-bottom: 1px solid rgba(0, 0, 0, 0.5)"> {{ __('Informacion del Padre') }}</div>
                                                                     <div class="input-group">
                                                                         <div class="col-md-6">
-                                                                            <input class="form-control" type="text" name="nombrePapa"placeholder="Nombre completo" required>
+                                                                            <input class="form-control" type="text" name="nombrePapa"placeholder="Nombre completo">
                                                                             <div class="valid-feedback">Nombre field is valid!</div>
                                                                             <div class="invalid-feedback">Nombre field cannot be blank!</div>
                                                                         </div>
                                                                         <div class="col-md-1"></div>
                                                                         <div class="col-md-5">
-                                                                            <input class="form-control my-auto mt-3" type="number" name="documentoPapa"placeholder="Nº documento" required>
+                                                                            <input class="form-control my-auto mt-3" type="number" name="documentoPapa"placeholder="Nº documento">
                                                                             <div class="valid-feedback">Documento field is valid!</div>
                                                                             <div class="invalid-feedback">Documento field cannot be blank!</div>
                                                                         </div>
                                                                         <div class="col-md-4">
-                                                                            <input class="form-control my-auto mt-3" type="number" name="telefonoPapa" placeholder="Nº telefonico" required>
+                                                                            <input class="form-control my-auto mt-3" type="number" name="telefonoPapa" placeholder="Nº telefonico">
                                                                             <div class="valid-feedback">Telefono field is valid!</div>
                                                                             <div class="invalid-feedback">Telefono field cannot be blank!</div>
                                                                         </div>
                                                                         <div class="col-md-1"></div>
                                                                         <div class="col-md-7">
-                                                                            <input class="form-control" type="text" name="direccionPapa" placeholder="Direccion" required>
+                                                                            <input class="form-control" type="text" name="direccionPapa" placeholder="Direccion">
                                                                             <div class="valid-feedback">Direccion field is valid!</div>
                                                                             <div class="invalid-feedback">Direccion field cannot be blank! </div>
                                                                         </div>

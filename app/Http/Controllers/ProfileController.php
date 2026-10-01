@@ -55,6 +55,8 @@ class ProfileController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:clubs,name,' . $club->id,
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'primary_color' => ['nullable', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
+            'secondary_color' => ['nullable', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
         ]);
 
         $logoPath = $club->logo;
@@ -75,6 +77,8 @@ class ProfileController extends Controller
         $club->update([
             'name' => $request->name,
             'logo' => $logoPath,
+            'primary_color' => $request->primary_color,
+            'secondary_color' => $request->secondary_color,
         ]);
 
         return Redirect::route('profile.edit')->with('status', 'club-updated');

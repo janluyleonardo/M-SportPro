@@ -19,15 +19,36 @@
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
 
-        <form action="{{ route('students.store') }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8"
-          x-data="{ 
+        <form action="{{ route('students.store') }}" method="post" enctype="multipart/form-data" class="p-6 sm:p-8" novalidate
+          x-data="{
             activeTab: '{{ $errors->any() ? 'athlete' : 'athlete' }}',
             submitting: false,
             athleteComplete: false,
             motherComplete: false,
             fatherComplete: false,
-            medicalComplete: false
-        }" @submit="submitting = true">
+            medicalComplete: false,
+            handleSubmit(event) {
+              const invalidField = event.target.querySelector(':invalid');
+
+              if (!invalidField) {
+                this.submitting = true;
+                return;
+              }
+
+              event.preventDefault();
+              const section = invalidField.closest('[data-validation-tab]');
+              if (section) {
+                this.activeTab = section.dataset.validationTab;
+              }
+
+              showToast(invalidField.validationMessage || 'Completa este campo antes de continuar.', 'error');
+
+              this.$nextTick(() => {
+                invalidField.focus({ preventScroll: true });
+                invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              });
+            }
+        }" @submit="handleSubmit($event)">
           @csrf
 
           {{-- Mostrar errores de validación globales --}}
@@ -78,7 +99,7 @@
           </div>
 
           <!-- Tab Content: Athlete Information -->
-          <div x-show="activeTab === 'athlete'" x-transition:enter="transition ease-out duration-300"
+          <div x-show="activeTab === 'athlete'" data-validation-tab="athlete" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información Principal del Deportista</h3>
@@ -86,8 +107,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
               <!-- Foto -->
-              <div class="lg:col-span-3" x-data="{ 
-                  preview: '', 
+              <div class="lg:col-span-3" x-data="{
+                  preview: '',
                   fileName: '',
                   isNew: false
               }">
@@ -186,20 +207,26 @@
 
               <!-- Categoria -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría <span
-                    class="text-red-500">*</span></label>
-                <select name="Categoria" required
-                  class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-sm">
-                  <option value="">Seleccione...</option>
-                  <option value="Mayores" {{ old('Categoria') == 'Mayores' ? 'selected' : '' }}>Mayores (18+ años)
-                  </option>
-                  @php $currentYear = date('Y'); @endphp
-                  @for ($year = ($currentYear - 5); $year >= ($currentYear - 17); $year--)
-                    <option value="{{ $year }}" {{ old('Categoria') == $year ? 'selected' : '' }}>Categoría {{ $year }}
-                    </option>
-                  @endfor
-                </select>
+                <x-category-select
+                    :categories="$categories"
+                    name="Categoria"
+                    label="Categoría"
+                    required="true"
+                    value="{{ old('Categoria') }}"
+                    placeholder="Buscar o elegir categoría..."
+                    inputClass="focus:border-blue-500 focus:ring focus:ring-blue-200"
+                    hoverBgClass="hover:bg-blue-50 hover:text-blue-500"
+                    selectedBgClass="bg-blue-50 text-blue-500"
+                />
               </div>
+
+              @role('Admin')
+                <div class="flex items-center rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <input type="hidden" name="becado" value="0">
+                  <input type="checkbox" name="becado" value="1" id="becado" {{ old('becado') ? 'checked' : '' }} class="rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                  <label for="becado" class="ml-2 text-sm font-bold text-amber-800">Deportista becado</label>
+                </div>
+              @endrole
 
               <!-- Género -->
               <div>
@@ -329,7 +356,7 @@
           </div>
 
           <!-- Tab Content: Mother Information -->
-          <div x-show="activeTab === 'mother'" x-transition:enter="transition ease-out duration-300"
+          <div x-show="activeTab === 'mother'" data-validation-tab="mother" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información del acudiente</h3>
@@ -384,7 +411,7 @@
           </div>
 
           <!-- Tab Content: Father Information -->
-          <div x-show="activeTab === 'father'" x-transition:enter="transition ease-out duration-300"
+          <div x-show="activeTab === 'father'" data-validation-tab="father" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Información del acudiente 2</h3>
@@ -434,7 +461,7 @@
           </div>
 
           <!-- Tab Content: Medical History -->
-          <div x-show="activeTab === 'medical'" x-transition:enter="transition ease-out duration-300"
+          <div x-show="activeTab === 'medical'" data-validation-tab="medical" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             style="display: none;" class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Historial Médico del Deportista</h3>
