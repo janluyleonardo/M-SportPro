@@ -19,7 +19,13 @@ class ClassSchedule extends Model
         'category',
         'user_id',
         'location',
-        'observations'
+        'observations',
+        'active'
+    ];
+
+    protected $casts = [
+        'date' => 'date',
+        'active' => 'boolean',
     ];
 
     public function teacher()
@@ -30,5 +36,10 @@ class ClassSchedule extends Model
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function categories()
+    {
+        return $this->hasMany(ClassScheduleCategory::class);
     }
 }

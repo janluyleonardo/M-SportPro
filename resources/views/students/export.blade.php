@@ -5,6 +5,7 @@
           <th scope="col"><b>Categoría</b></th>
           <th scope="col"><b>Fecha Inscripción</b></th>
           <th scope="col"><b>Nombre Deportista</b></th>
+          <th scope="col"><b>Estado</b></th>
           <th scope="col"><b>Documento</b></th>
           <th scope="col"><b>Género</b></th>
           <th scope="col"><b>Peso</b></th>
@@ -48,6 +49,7 @@
           <td>{{ $Student->Categoria }}</td>
           <td>{{ $Student->fechaInscripcion }}</td>
           <td>{{ $Student->nomDeportista }}</td>
+          <td>{{ $Student->activo ? 'Activo' : 'Inactivo' }}</td>
           <td>{{ $Student->numDocumento }}</td>
           <td>{{ $Student->genero }}</td>
           <td>{{ $Student->PesoDeportista }}</td>

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Traits\BelongsToClub;
 
 class Student extends Model
@@ -54,8 +57,19 @@ class Student extends Model
     'Cirugia',
     'impedimento',
     'lesionOM',
-    'balance',
+        'balance',
+        'becado',
   ];
+
+    protected $casts = [
+        'becado' => 'boolean',
+        'activo' => 'boolean',
+    ];
+
+  public function scopeActive(Builder $query): Builder
+  {
+      return $query->where('activo', true);
+  }
 
   public function payments()
   {
@@ -72,12 +86,24 @@ class Student extends Model
       return $this->belongsToMany(Tournament::class, 'student_tournament');
   }
 
+  public function psychologicalEvaluations(): HasMany
+  {
+      return $this->hasMany(PsychologicalEvaluation::class);
+  }
+
+  public function latestPsychologicalEvaluation(): HasOne
+  {
+      return $this->hasOne(PsychologicalEvaluation::class)->latestOfMany('evaluated_on');
+  }
+
   /**
    * Calcula la deuda total del estudiante mes a mes con carry-forward.
    * El excedente de un mes (pago de más) se arrastra como crédito al mes siguiente.
    */
   public function calculateDebt()
   {
+      if ($this->becado) return 0;
+
       if (!$this->fechaInscripcion) return 0;
 
       $startDate = \Carbon\Carbon::parse($this->fechaInscripcion)->startOfMonth();
@@ -166,6 +192,30 @@ class Student extends Model
       $currentDate = $startDate->copy();
       $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+      if ($this->becado) {
+          while ($currentDate <= $endDate) {
+              $statusList[] = [
+                  'month_name' => $meses[$currentDate->month - 1],
+                  'year' => $currentDate->year,
+                  'month_num' => $currentDate->month,
+                  'is_paid' => true,
+                  'amount' => 0,
+                  'threshold' => 0,
+                  'covered' => 0,
+                  'pending' => 0,
+                  'is_late' => false,
+                  'paid_at' => null,
+                  'carry_used' => 0,
+                  'surplus_generated' => 0,
+                  'waive_late_fee' => false,
+                  'is_scholarship' => true,
+              ];
+              $currentDate->addMonth();
+          }
+
+          return array_reverse($statusList);
+      }
+
       while ($currentDate <= $endDate) {
           $amountDue = $baseAmount;
           $isLate    = ($currentDate < $endDate) ||
@@ -221,7 +271,7 @@ class Student extends Model
     public function syncAttendanceSlots()
     {
         $statuses = $this->getPaymentStatusByMonth();
-        
+
         foreach ($statuses as $status) {
             if ($status['is_paid']) {
                 AttendanceSlot::firstOrCreate(

@@ -6,23 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('programmings', function (Blueprint $table) {
-            //
+        Schema::table('students', function (Blueprint $table) {
+            $table->boolean('becado')->default(false)->after('balance');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('programmings', function (Blueprint $table) {
-            //
+        Schema::table('students', function (Blueprint $table) {
+            $table->dropColumn('becado');
         });
     }
 };

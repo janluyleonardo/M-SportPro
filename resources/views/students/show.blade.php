@@ -14,6 +14,7 @@
                 <div class="row">
                   <div class="col-md-8 mx-auto my-auto text-center">
                     <b>{{ Str::upper($student->nomDeportista)}}</b>
+                    <span class="badge {{ $student->activo ? 'bg-success' : 'bg-secondary' }}">{{ $student->activo ? 'Activo' : 'Inactivo' }}</span>
                   </div>
                   <div class="col-md-2">
                     <a title="Regresar" href="{{ route('imprimir', $student) }}" class="sombra btn btn-info mx-auto">imprimir</a>

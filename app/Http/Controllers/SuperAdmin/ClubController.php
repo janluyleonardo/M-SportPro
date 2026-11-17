@@ -74,6 +74,16 @@ class ClubController extends Controller
 
         $club->modules()->toggle($request->module_id);
 
+        $module = Module::find($request->module_id);
+
+        if ($module && in_array($module->slug, ['classes', 'tournaments'], true)) {
+            $locationsModule = Module::where('slug', 'locations')->first();
+
+            if ($locationsModule && ($club->fresh()->hasModule('classes') || $club->fresh()->hasModule('tournaments'))) {
+                $club->modules()->syncWithoutDetaching([$locationsModule->id]);
+            }
+        }
+
         return back()->with('success', 'Módulos actualizados para el club ' . $club->name);
     }
 

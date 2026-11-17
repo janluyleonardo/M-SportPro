@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tournament;
+use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use App\Services\CustomLogger;
 
 class TournamentController extends Controller
@@ -14,9 +17,22 @@ class TournamentController extends Controller
     public function index()
     {
         $tournaments = Tournament::with(['students'])->withCount('programmings')->orderByDesc('created_at')->get();
-        $studentList = \App\Models\Student::select('id', 'nomDeportista', 'Categoria', 'club_id')->orderBy('nomDeportista')->get();
+        $studentList = Student::active()->select('id', 'nomDeportista', 'Categoria', 'club_id')->orderBy('nomDeportista')->get();
         $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
-        return view('Tournaments.index', compact('tournaments', 'studentList', 'clubs'));
+
+        $categoriesQuery = Student::query()
+            ->active()
+            ->whereNotNull('Categoria')
+            ->where('Categoria', '!=', '');
+        if (!auth()->user()->is_super_admin) {
+            $categoriesQuery->where('club_id', auth()->user()->club_id);
+        }
+        $categories = $categoriesQuery
+            ->distinct()
+            ->orderBy('Categoria')
+            ->pluck('Categoria');
+
+        return view('Tournaments.index', compact('tournaments', 'studentList', 'clubs', 'categories'));
     }
 
     public function store(Request $request)
@@ -28,20 +44,31 @@ class TournamentController extends Controller
             'category' => 'nullable|string',
             'costo_total_inscripcion' => 'nullable|numeric|min:0',
             'costo_total_arbitraje' => 'nullable|numeric|min:0',
+            'costo_arbitraje_partido' => 'nullable|numeric|min:0',
+            'student_ids' => 'nullable|array',
+            'student_ids.*' => 'integer|distinct',
         ]);
 
         if (!auth()->user()->is_super_admin) {
             unset($validated['club_id']);
         }
 
-        try {
-            $tournament = Tournament::create($validated);
+        $syncStudents = array_key_exists('student_ids', $validated);
+        $studentIds = $validated['student_ids'] ?? [];
+        unset($validated['student_ids']);
 
-            if ($request->has('student_ids')) {
-                $tournament->students()->sync($request->input('student_ids'));
-            }
+        try {
+            DB::transaction(function () use ($validated, $syncStudents, $studentIds) {
+                $tournament = Tournament::create($validated);
+
+                if ($syncStudents) {
+                    $this->syncActiveStudents($tournament, $studentIds);
+                }
+            });
 
             return redirect()->route('tournaments.index')->with('success', 'Torneo creado correctamente.');
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (\Throwable $th) {
             CustomLogger::logException($th);
             return back()->withInput()->with('error', 'No se pudo crear el torneo: ' . $th->getMessage());
@@ -58,20 +85,31 @@ class TournamentController extends Controller
             'status' => 'required|in:activo,finalizado',
             'costo_total_inscripcion' => 'nullable|numeric|min:0',
             'costo_total_arbitraje' => 'nullable|numeric|min:0',
+            'costo_arbitraje_partido' => 'nullable|numeric|min:0',
+            'student_ids' => 'nullable|array',
+            'student_ids.*' => 'integer|distinct',
         ]);
 
         if (!auth()->user()->is_super_admin) {
             unset($validated['club_id']);
         }
 
-        try {
-            $tournament->update($validated);
+        $syncStudents = array_key_exists('student_ids', $validated);
+        $studentIds = $validated['student_ids'] ?? [];
+        unset($validated['student_ids']);
 
-            if ($request->has('student_ids')) {
-                $tournament->students()->sync($request->input('student_ids'));
-            }
+        try {
+            DB::transaction(function () use ($tournament, $validated, $syncStudents, $studentIds) {
+                $tournament->update($validated);
+
+                if ($syncStudents) {
+                    $this->syncActiveStudents($tournament, $studentIds);
+                }
+            });
 
             return redirect()->route('tournaments.index')->with('success', 'Torneo actualizado correctamente.');
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (\Throwable $th) {
             CustomLogger::logException($th);
             return back()->withInput()->with('error', 'No se pudo actualizar el torneo: ' . $th->getMessage());
@@ -89,6 +127,31 @@ class TournamentController extends Controller
         }
     }
 
+    private function syncActiveStudents(Tournament $tournament, array $studentIds): void
+    {
+        $query = Student::active()->whereIn('id', $studentIds);
+
+        if ($tournament->club_id) {
+            $query->where('club_id', $tournament->club_id);
+        }
+
+        if ($query->count() !== count($studentIds)) {
+            throw ValidationException::withMessages([
+                'student_ids' => 'Solo se pueden asignar deportistas activos de la escuela del torneo.',
+            ]);
+        }
+
+        $inactiveStudentIdsQuery = $tournament->students()
+            ->where('students.activo', false);
+
+        if ($tournament->club_id) {
+            $inactiveStudentIdsQuery->where('students.club_id', $tournament->club_id);
+        }
+
+        $inactiveStudentIds = $inactiveStudentIdsQuery->pluck('students.id')->all();
+        $tournament->students()->sync(array_unique(array_merge($studentIds, $inactiveStudentIds)));
+    }
+
     public function payments(Tournament $tournament)
     {
         $programmings = $tournament->programmings()
@@ -104,7 +167,7 @@ class TournamentController extends Controller
         // Mapa para llevar el seguimiento de la deuda acumulada por estudiante
         $debtTracker = [];
         
-        // Inicializar deuda con el costo equitativo de inscripción para cada estudiante
+        // Inicializar deuda con el costo equitativo de inscripción para cada estudiante (el arbitraje se sumará por cada partido al que asista)
         foreach ($tournament->students as $student) {
             $debtTracker[$student->id] = $individualInscription;
         }
@@ -124,11 +187,11 @@ class TournamentController extends Controller
                     $pagado_ins = $payment ? (float)$payment->pagado_inscripcion : 0;
                     $pagado_arb = $payment ? (float)$payment->pagado_arbitraje : 0;
                     
-                    // Costo total de este partido
-                    $cost_this_match = (float)$prog->costo_inscripcion + (float)$prog->costo_arbitraje;
+                    // Costo de arbitraje para este partido (por convocado)
+                    $cost_this_match = (float)$prog->costo_arbitraje;
                     
                     // Actualizar el rastreador de deuda para el siguiente partido
-                    // Nueva Deuda = Deuda Anterior + Costo Match - Pagado Match
+                    // Nueva Deuda = Deuda Anterior + Costo Arbitraje Partido - Pagado Match
                     $new_debt = $previous_debt + $cost_this_match - ($pagado_ins + $pagado_arb);
                     $debtTracker[$student->id] = $new_debt;
 

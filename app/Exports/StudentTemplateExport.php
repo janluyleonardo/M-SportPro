@@ -23,15 +23,15 @@ class StudentTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
                 'Masculino',            // genero
                 '2010-05-15',           // fecha_nacimiento
                 '2024-01-01',           // fecha_inscripcion
+                '3101234567',           // telefono
+                'Calle 123 #45-67',     // direccion
+                'Barrio Ejemplo',       // barrio
+                'Kennedy',              // localidad
+                'Bogotá',               // ciudad
+                'No',                   // becado
                 'O+',                   // rh
                 '45',                   // peso
                 '1.55',                 // estatura
-                'Bogotá',               // ciudad
-                'Cundinamarca',         // departamento
-                'Sura',                 // eps
-                'Colegio Ejemplo',      // colegio
-                '501',                  // curso
-                '3101234567',           // telefono
                 'Maria Lopez',          // nombre_mama
                 '52123456',             // documento_mama
                 '3107654321',           // telefono_mama
@@ -42,9 +42,6 @@ class StudentTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
                 '3109876543',           // telefono_papa
                 'Calle 123 #45-67',     // direccion_papa
                 'papa@example.com',     // correo_papa
-                'Calle 123 #45-67',     // direccion
-                'Barrio Ejemplo',       // barrio
-                'Kennedy',              // localidad
                 'Ninguna',              // enfermedades
                 'Ninguno',              // medicamento
                 'Ninguna',              // lesion
@@ -64,15 +61,15 @@ class StudentTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
             'genero',
             'fecha_nacimiento',
             'fecha_inscripcion',
+            'telefono',
+            'direccion',
+            'barrio',
+            'localidad',
+            'ciudad',
+            'becado',
             'rh',
             'peso',
             'estatura',
-            'ciudad',
-            'departamento',
-            'eps',
-            'colegio',
-            'curso',
-            'telefono',
             'nombre_mama',
             'documento_mama',
             'telefono_mama',
@@ -83,9 +80,6 @@ class StudentTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
             'telefono_papa',
             'direccion_papa',
             'correo_papa',
-            'direccion',
-            'barrio',
-            'localidad',
             'enfermedades',
             'medicamento',
             'lesion',

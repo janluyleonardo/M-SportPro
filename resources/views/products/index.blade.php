@@ -107,7 +107,7 @@
                                                     <i class="bi bi-pencil-fill"></i>
                                                 </a>
                                                 <form action="{{ route('products.destroy', $p) }}" method="POST"
-                                                    onsubmit="return confirm('¿Eliminar producto?')">
+                                                    onsubmit="event.preventDefault(); confirmAction(this, 'Eliminar producto', '¿Estás seguro de eliminar el producto &quot;{{ $p->name }}&quot;? Esta acción no se puede deshacer.')">
                                                     @csrf @method('DELETE')
                                                     <button type="submit"
                                                         class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">

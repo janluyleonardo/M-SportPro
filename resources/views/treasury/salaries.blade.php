@@ -101,13 +101,37 @@
                             </div>
                         </div>
 
+                        @if($data['pending_loan'] > 0)
+                            <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl mb-6 flex justify-between items-center text-xs text-amber-800">
+                                <span class="font-bold flex items-center">
+                                    <i class="bi bi-exclamation-triangle-fill mr-2 text-amber-600"></i> Deuda Préstamo Pendiente:
+                                </span>
+                                <span class="font-black">${{ number_format($data['pending_loan'], 0, ',', '.') }}</span>
+                            </div>
+                        @endif
+
                         @if($data['pending'] > 0)
-                            <form action="{{ route('treasury.pay_teacher') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                            <form action="{{ route('treasury.pay_teacher') }}" method="POST" enctype="multipart/form-data" class="space-y-3" x-data="{ 
+                                pendingSalary: {{ (float)$data['pending'] }},
+                                pendingLoan: {{ (float)$data['pending_loan'] }},
+                                deduction: 0,
+                                get netToPay() {
+                                    return Math.max(0, this.pendingSalary - (parseFloat(this.deduction) || 0));
+                                }
+                            }">
                                 @csrf
                                 <input type="hidden" name="user_id" value="{{ $data['teacher']->id }}">
-                                <input type="hidden" name="amount" value="{{ $data['pending'] }}">
                                 <input type="hidden" name="month" value="{{ $month }}">
                                 <input type="hidden" name="year" value="{{ $year }}">
+                                
+                                @if($data['pending_loan'] > 0)
+                                    <div class="bg-amber-50/50 border border-amber-100/50 p-4 rounded-2xl mb-2">
+                                        <div class="relative group">
+                                            <label class="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-1 block ml-2">Descontar de esta Nómina</label>
+                                            <input type="number" name="loan_deduction" x-model.number="deduction" min="0" :max="Math.min(pendingSalary, pendingLoan)" class="w-full text-xs font-black rounded-xl border-amber-200 focus:ring-amber-500 focus:border-amber-500 py-1.5 px-3 bg-white" placeholder="Ej: 50000">
+                                        </div>
+                                    </div>
+                                @endif
                                 
                                 <div class="relative group">
                                     <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 block ml-2">{{ __('Support Attachment') }} ({{ __('Optional') }})</label>
@@ -115,7 +139,7 @@
                                 </div>
 
                                 <button type="submit" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-club-primary transition-all active:scale-[0.98]">
-                                    {{ __('Register Payment of') }} ${{ number_format($data['pending'], 0, ',', '.') }}
+                                    {{ __('Register Payment of') }} $<span x-text="new Intl.NumberFormat().format(netToPay)"></span>
                                 </button>
                             </form>
                         @else

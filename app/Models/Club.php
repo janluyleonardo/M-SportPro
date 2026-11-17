@@ -9,6 +9,8 @@ class Club extends Model
     protected $fillable = [
         'name',
         'logo',
+        'primary_color',
+        'secondary_color',
         'is_active',
     ];
 

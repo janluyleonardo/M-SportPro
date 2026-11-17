@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProgrammingRequest extends FormRequest
 {
@@ -23,6 +24,10 @@ class StoreProgrammingRequest extends FormRequest
             'hora' => 'required',
             'fecha' => 'required|date',
             'jugadores_convocados' => 'nullable|array',
+            'jugadores_convocados.*' => [
+                'integer',
+                Rule::exists('students', 'id')->where('activo', true),
+            ],
             'costo_inscripcion' => 'nullable|numeric|min:0',
             'costo_arbitraje' => 'nullable|numeric|min:0',
             'tournament_id' => 'nullable|exists:tournaments,id',

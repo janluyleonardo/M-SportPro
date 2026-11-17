@@ -4,7 +4,9 @@ namespace App\Services;
 
 use Throwable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Str;
 
 class CustomLogger
 {
@@ -18,7 +20,7 @@ class CustomLogger
     {
         // Check if a user is authenticated
         $user = Auth::user();
-        
+
         $userId = $user ? $user->id : 'guest';
         $userEmail = $user ? $user->email : 'guest';
         $userName = $user ? $user->name : 'Guest';
@@ -52,9 +54,16 @@ class CustomLogger
         // Format as JSON or a pretty string
         $formattedLog = json_encode($logData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL . str_repeat('=', 80) . PHP_EOL;
 
+        // Also log daily through Laravel's logging system so errors are stored in the daily log file
+        // and the captured exception is attached to the log context.
+        Log::channel('daily')->error('Captured exception: ' . $e->getMessage(), [
+            'exception' => $e,
+            'details' => $logData,
+        ]);
+
         // Log to school (club) directory if club_id exists
         if ($clubId) {
-            $clubLogDir = storage_path("logs/clubs/club_{$clubId}");
+            $clubLogDir = storage_path('logs/clubs/' . self::buildClubLogFolderName($club, $clubId));
             if (!file_exists($clubLogDir)) {
                 mkdir($clubLogDir, 0755, true);
             }
@@ -63,7 +72,7 @@ class CustomLogger
 
         // Log to user directory if it's an authenticated user
         if ($user) {
-            $userLogDir = storage_path("logs/users/user_{$userId}");
+            $userLogDir = storage_path('logs/users/' . self::buildUserLogFolderName($user, $userId));
             if (!file_exists($userLogDir)) {
                 mkdir($userLogDir, 0755, true);
             }
@@ -89,7 +98,7 @@ class CustomLogger
     public static function logMessage(string $level, string $message, array $context = []): void
     {
         $user = Auth::user();
-        
+
         $userId = $user ? $user->id : 'guest';
         $userEmail = $user ? $user->email : 'guest';
         $userName = $user ? $user->name : 'Guest';
@@ -118,7 +127,7 @@ class CustomLogger
         $formattedLog = json_encode($logData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL . str_repeat('=', 80) . PHP_EOL;
 
         if ($clubId) {
-            $clubLogDir = storage_path("logs/clubs/club_{$clubId}");
+            $clubLogDir = storage_path('logs/clubs/' . self::buildClubLogFolderName($club, $clubId));
             if (!file_exists($clubLogDir)) {
                 mkdir($clubLogDir, 0755, true);
             }
@@ -126,7 +135,7 @@ class CustomLogger
         }
 
         if ($user) {
-            $userLogDir = storage_path("logs/users/user_{$userId}");
+            $userLogDir = storage_path('logs/users/' . self::buildUserLogFolderName($user, $userId));
             if (!file_exists($userLogDir)) {
                 mkdir($userLogDir, 0755, true);
             }
@@ -138,5 +147,23 @@ class CustomLogger
             }
             file_put_contents("{$guestLogDir}/activity.log", $formattedLog, FILE_APPEND);
         }
+    }
+
+    private static function buildClubLogFolderName($club, int|string $clubId): string
+    {
+        $clubName = $club && !empty($club->name)
+            ? Str::slug($club->name)
+            : 'club';
+
+        return sprintf('club_%s_%s', $clubName, $clubId);
+    }
+
+    private static function buildUserLogFolderName($user, int|string $userId): string
+    {
+        $userName = $user && !empty($user->name)
+            ? Str::slug($user->name)
+            : 'user';
+
+        return sprintf('user_%s_%s', $userName, $userId);
     }
 }

@@ -38,7 +38,7 @@
                 <!-- Tarjetas de Estadísticas Globales -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Tarjeta: Total Clubes -->
-                    <div class="bg-white/95 backdrop-blur-sm border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between">
+                    <div class="dashboard-stat-card bg-white/95 backdrop-blur-sm border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between">
                         <div class="space-y-1">
                             <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ __('Total Clubes') }}</span>
                             <div class="text-3xl font-extrabold text-slate-800">{{ $clubs->count() }}</div>
@@ -53,7 +53,7 @@
                     </div>
 
                     <!-- Tarjeta: Total Usuarios -->
-                    <div class="bg-white/95 backdrop-blur-sm border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between">
+                    <div class="dashboard-stat-card bg-white/95 backdrop-blur-sm border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between">
                         <div class="space-y-1">
                             <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ __('Total Usuarios') }}</span>
                             <div class="text-3xl font-extrabold text-slate-800">{{ $clubs->sum('users_count') }}</div>
@@ -67,7 +67,7 @@
                     </div>
 
                     <!-- Tarjeta: Módulos Activos -->
-                    <div class="bg-white/95 backdrop-blur-sm border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between">
+                    <div class="dashboard-stat-card bg-white/95 backdrop-blur-sm border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between">
                         <div class="space-y-1">
                             <span class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ __('Suscripciones Activas') }}</span>
                             <div class="text-3xl font-extrabold text-slate-800">
@@ -84,7 +84,7 @@
                 </div>
 
                 <!-- Buscador Interactivo -->
-                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+                <div class="dashboard-search-panel bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5">
                             <i class="bi bi-search text-slate-400"></i>
@@ -106,7 +106,7 @@
                                 }
                             }
                         @endphp
-                        <div class="club-card bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between" data-search="{{ $searchTerms }}">
+                        <div class="club-card dashboard-club-card bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between" data-search="{{ $searchTerms }}">
                             <div>
                                 <!-- Encabezado de Tarjeta -->
                                 <div class="flex items-start justify-between pb-4 border-b border-slate-100 mb-4">
@@ -245,7 +245,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="col-span-full bg-white border border-slate-100 rounded-3xl p-12 text-center text-slate-500 shadow-sm flex flex-col items-center justify-center space-y-3">
+                        <div class="col-span-full dashboard-empty-state bg-white border border-slate-100 rounded-3xl p-12 text-center text-slate-500 shadow-sm flex flex-col items-center justify-center space-y-3">
                             <div class="p-4 bg-slate-50 rounded-full text-slate-400">
                                 <i class="bi bi-building-x text-3xl"></i>
                             </div>
@@ -270,6 +270,60 @@
                     }
                     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                         background: #94a3b8;
+                    }
+
+                    html[data-theme='dark'] .dashboard-stat-card,
+                    html[data-theme='dark'] .dashboard-search-panel,
+                    html[data-theme='dark'] .dashboard-club-card,
+                    html[data-theme='dark'] .dashboard-empty-state {
+                        background-color: #0f172a !important;
+                        border-color: rgba(148, 163, 184, 0.35) !important;
+                    }
+
+                    html[data-theme='dark'] .dashboard-stat-card .text-slate-400,
+                    html[data-theme='dark'] .dashboard-search-panel .text-slate-400,
+                    html[data-theme='dark'] .dashboard-club-card .text-slate-400,
+                    html[data-theme='dark'] .dashboard-club-card .text-slate-500,
+                    html[data-theme='dark'] .dashboard-club-card .text-slate-700,
+                    html[data-theme='dark'] .dashboard-club-card .text-slate-800,
+                    html[data-theme='dark'] .dashboard-empty-state .text-slate-500,
+                    html[data-theme='dark'] .dashboard-empty-state .text-slate-400,
+                    html[data-theme='dark'] .dashboard-empty-state .text-slate-800 {
+                        color: #e2e8f0 !important;
+                    }
+
+                    html[data-theme='dark'] .dashboard-stat-card .text-slate-800,
+                    html[data-theme='dark'] .dashboard-club-card h3,
+                    html[data-theme='dark'] .dashboard-club-card .font-bold,
+                    html[data-theme='dark'] .dashboard-club-card .text-slate-800,
+                    html[data-theme='dark'] .dashboard-empty-state h3 {
+                        color: #f8fafc !important;
+                    }
+
+                    html[data-theme='dark'] .dashboard-search-panel input {
+                        background-color: #0f172a !important;
+                        border-color: rgba(148, 163, 184, 0.35) !important;
+                        color: #f8fafc !important;
+                    }
+
+                    html[data-theme='dark'] .dashboard-search-panel input::placeholder {
+                        color: #cbd5e1 !important;
+                    }
+
+                    html[data-theme='dark'] .dashboard-club-card thead th,
+                    html[data-theme='dark'] .dashboard-club-card thead th.bg-slate-50 {
+                        background-color: #111827 !important;
+                        color: #cbd5e1 !important;
+                    }
+
+                    html[data-theme='dark'] .dashboard-club-card tbody tr {
+                        background-color: #0f172a !important;
+                    }
+
+                    html[data-theme='dark'] .dashboard-club-card tbody td,
+                    html[data-theme='dark'] .dashboard-club-card tbody td .text-slate-500,
+                    html[data-theme='dark'] .dashboard-club-card tbody td .text-slate-700 {
+                        color: #e2e8f0 !important;
                     }
                 </style>
 
@@ -315,6 +369,58 @@
                     });
                 </script>
             @else
+                @php
+                    $clubModules = auth()->user()->club?->modules ?? collect();
+                @endphp
+
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                            <i class="bi bi-puzzle-fill text-club-primary mr-2"></i>
+                            {{ __('Módulos contratados') }}
+                        </h3>
+                        <span class="text-xs font-black text-gray-500 uppercase tracking-wider">
+                            {{ $clubModules->count() }} {{ __('activos') }}
+                        </span>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        @forelse($clubModules as $mod)
+                            @php
+                                $colorClass = match($mod->slug) {
+                                    'financial' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                    'classes' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                    'tournaments' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                    'inventory' => 'bg-violet-50 text-violet-700 border-violet-200',
+                                    'treasury' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                    'payroll' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                    default => 'bg-slate-50 text-slate-700 border-slate-200',
+                                };
+
+                                $iconClass = match($mod->slug) {
+                                    'financial' => 'bi-cash-coin',
+                                    'classes' => 'bi-calendar-check',
+                                    'tournaments' => 'bi-trophy',
+                                    'inventory' => 'bi-box-seam',
+                                    'treasury' => 'bi-bank2',
+                                    'payroll' => 'bi-cash-stack',
+                                    'locations' => 'bi-geo-alt-fill',
+                                    default => 'bi-plugin',
+                                };
+                            @endphp
+
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold border {{ $colorClass }}">
+                                <i class="bi {{ $iconClass }} mr-1.5"></i>
+                                {{ $mod->name }}
+                            </span>
+                        @empty
+                            <span class="text-sm text-gray-400 italic">
+                                {{ __('Sin módulos contratados') }}
+                            </span>
+                        @endforelse
+                    </div>
+                </div>
+
                 <!-- Sección de Fotos -->
                 <div
                     class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100 hover:shadow-md transition-shadow duration-300">

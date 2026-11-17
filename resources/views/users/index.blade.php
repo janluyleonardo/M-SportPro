@@ -56,7 +56,9 @@
                                             {{ strtoupper(substr($user->name, 0, 1)) }}
                                         </div>
                                         <div class="ml-4">
-                                            <div class="text-sm font-bold text-gray-900 leading-tight">{{ $user->name }}</div>
+                                            <input type="text" name="name" value="{{ $user->name }}" form="form-user-{{ $user->id }}"
+                                                   class="w-48 text-sm font-bold text-gray-900 leading-tight rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 px-2 bg-gray-50"
+                                                   aria-label="Nombre de {{ $user->name }}" required>
                                             <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
                                                 @foreach($user->roles as $role)
                                                     {{ $role->name }}@if(!$loop->last), @endif
@@ -66,7 +68,9 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {{ $user->email }}
+                                    <input type="email" name="email" value="{{ $user->email }}" form="form-user-{{ $user->id }}"
+                                           class="w-56 text-sm text-gray-600 rounded-lg border-gray-200 focus:ring-club-primary focus:border-club-primary py-1 px-2 bg-gray-50"
+                                           aria-label="Correo de {{ $user->name }}" required>
                                 </td>
                                 @if(auth()->user()->is_super_admin)
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -186,6 +190,14 @@
                             <form action="{{ route('users.update', $user) }}" method="POST" class="flex flex-col gap-2">
                                 @csrf
                                 @method('PATCH')
+                                <div class="grid grid-cols-1 gap-2">
+                                    <input type="text" name="name" value="{{ $user->name }}" required
+                                           class="w-full text-[11px] font-black rounded-xl border-gray-200 bg-white focus:ring-club-primary focus:border-club-primary py-2.5 px-3 transition-all"
+                                           placeholder="Nombre completo">
+                                    <input type="email" name="email" value="{{ $user->email }}" required
+                                           class="w-full text-[11px] font-black rounded-xl border-gray-200 bg-white focus:ring-club-primary focus:border-club-primary py-2.5 px-3 transition-all"
+                                           placeholder="Correo electrónico">
+                                </div>
                                 @if(auth()->user()->is_super_admin)
                                     <div class="mb-2">
                                         <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Club / Equipo</label>

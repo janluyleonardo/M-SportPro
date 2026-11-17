@@ -24,7 +24,7 @@ class StudentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
 
         $numDocumento = $row['documento'] ?? $row['numero_documento'] ?? null;
 
-        // Si no hay documento, generamos uno temporal para evitar errores, 
+        // Si no hay documento, generamos uno temporal para evitar errores,
         // aunque lo ideal es que siempre venga en la plantilla.
         $searchKey = ['numDocumento' => $numDocumento ?? rand(10000000, 99999999)];
 
@@ -43,6 +43,7 @@ class StudentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
             'Colegio'             => $row['colegio'] ?? 'No especificado',
             'Curso'               => $row['curso'] ?? 'No especificado',
             'numTelefonico'       => $row['telefono'] ?? $row['celular'] ?? '0000000000',
+            'becado'              => $this->parseBoolean($row['becado'] ?? null),
             'nombreMama'          => $row['nombre_mama'] ?? 'No especificado',
             'documentoMama'       => $row['documento_mama'] ?? 0,
             'telefonoMama'        => $row['telefono_mama'] ?? '0000000000',
@@ -69,7 +70,7 @@ class StudentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
     private function transformDate($value)
     {
         if (empty($value)) return null;
-        
+
         try {
             if (is_numeric($value)) {
                 return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format('Y-m-d');
@@ -78,5 +79,20 @@ class StudentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    private function parseBoolean($value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return (int) $value === 1;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+
+        return in_array($normalized, ['1', 'si', 'sí', 's', 'true', 'yes', 'y'], true);
     }
 }

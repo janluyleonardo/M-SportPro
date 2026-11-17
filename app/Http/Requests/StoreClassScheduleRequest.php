@@ -22,7 +22,7 @@ class StoreClassScheduleRequest extends FormRequest
             'category' => 'required|string',
             'user_id' => 'required|exists:users,id',
             'location' => 'nullable|string',
-            'observations' => 'nullable|string',
+            'observations' => 'nullable|string|max:1000',
         ];
     }
 }
