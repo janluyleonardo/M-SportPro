@@ -34,6 +34,13 @@
                     </x-nav-link>
                     @endmodule
 
+                    @if(!auth()->user()->is_super_admin && auth()->user()->hasRole('Psicólogo'))
+                        @module('psychological-followup')
+                        <x-nav-link :href="route('psychological-followups.index')" :active="request()->routeIs('psychological-followups.*')">
+                            Seguimiento psicológico
+                        </x-nav-link>
+                        @endmodule
+                    @endif
 
                     @role('Admin')
                     @endrole
@@ -104,6 +111,20 @@
                                         {{ __('Torneos') }}
                                     </a>
                                     @endmodule
+
+                                    @if(!auth()->user()->is_super_admin && auth()->user()->hasRole('Admin'))
+                                        @module('psychological-followup')
+                                        <a href="{{ route('psychological-followups.index') }}"
+                                           class="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors
+                                                  {{ request()->routeIs('psychological-followups.*') ? 'bg-blue-50 text-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
+                                            <span class="w-7 h-7 rounded-lg flex items-center justify-center mr-3
+                                                         {{ request()->routeIs('psychological-followups.*') ? 'bg-club-primary text-white' : 'bg-gray-100 text-gray-500' }}">
+                                                <i class="bi bi-heart-pulse text-xs"></i>
+                                            </span>
+                                            Seguimiento psicológico
+                                        </a>
+                                        @endmodule
+                                    @endif
 
                                     @role('Admin|SubAdmin')
                                         <div class="border-t border-gray-100 my-1.5"></div>
@@ -301,6 +322,15 @@
                     {{ __('Partidos') }}
                 </a>
                 @endmodule
+
+                @if(!auth()->user()->is_super_admin && auth()->user()->hasAnyRole(['Admin', 'Psicólogo']))
+                    @module('psychological-followup')
+                    <a href="{{ route('psychological-followups.index') }}" class="flex items-center px-3 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('psychological-followups.*') ? 'bg-blue-50 text-club-primary border-l-4 border-club-primary' : 'text-gray-700 hover:bg-gray-50' }}">
+                        <i class="bi bi-heart-pulse mr-3 text-base {{ request()->routeIs('psychological-followups.*') ? 'text-club-primary' : 'text-gray-400' }}"></i>
+                        Seguimiento psicológico
+                    </a>
+                    @endmodule
+                @endif
 
                 @hasanyrole('Admin|Profesor')
                 @endhasanyrole

@@ -8,6 +8,14 @@
                 <h2 class="font-bold text-2xl text-gray-900 leading-tight tracking-tight">
                     {{ __('Mensualidades por Estudiante') }}
                 </h2>
+                @role('Admin|SubAdmin')
+                    <a href="{{ route('payments.pending-vouchers') }}"
+                        class="inline-flex items-center gap-2 mt-2 px-3 py-1.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl text-xs font-black hover:bg-amber-100 transition-colors">
+                        <i class="bi bi-receipt"></i>
+                        Comprobantes pendientes
+                        <span class="px-2 py-0.5 bg-amber-500 text-white rounded-full">{{ $pendingVouchersCount ?? 0 }}</span>
+                    </a>
+                @endrole
                 <p class="text-xs text-gray-500 font-bold tracking-wide mt-0.5">
                     @if(auth()->user()->club_id)
                         {{ auth()->user()->club->name ?? 'Mi Club' }} &bull;

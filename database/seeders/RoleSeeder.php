@@ -84,5 +84,7 @@ class RoleSeeder extends Seeder
             'view dashboard',
             'view programming',
         ]);
+
+        Role::firstOrCreate(['name' => 'Psicólogo']);
     }
 }

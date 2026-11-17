@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tournament;
+use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use App\Services\CustomLogger;
 
 class TournamentController extends Controller
@@ -14,10 +17,11 @@ class TournamentController extends Controller
     public function index()
     {
         $tournaments = Tournament::with(['students'])->withCount('programmings')->orderByDesc('created_at')->get();
-        $studentList = \App\Models\Student::select('id', 'nomDeportista', 'Categoria', 'club_id')->orderBy('nomDeportista')->get();
+        $studentList = Student::active()->select('id', 'nomDeportista', 'Categoria', 'club_id')->orderBy('nomDeportista')->get();
         $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
 
-        $categoriesQuery = \App\Models\Student::query()
+        $categoriesQuery = Student::query()
+            ->active()
             ->whereNotNull('Categoria')
             ->where('Categoria', '!=', '');
         if (!auth()->user()->is_super_admin) {
@@ -41,20 +45,30 @@ class TournamentController extends Controller
             'costo_total_inscripcion' => 'nullable|numeric|min:0',
             'costo_total_arbitraje' => 'nullable|numeric|min:0',
             'costo_arbitraje_partido' => 'nullable|numeric|min:0',
+            'student_ids' => 'nullable|array',
+            'student_ids.*' => 'integer|distinct',
         ]);
 
         if (!auth()->user()->is_super_admin) {
             unset($validated['club_id']);
         }
 
-        try {
-            $tournament = Tournament::create($validated);
+        $syncStudents = array_key_exists('student_ids', $validated);
+        $studentIds = $validated['student_ids'] ?? [];
+        unset($validated['student_ids']);
 
-            if ($request->has('student_ids')) {
-                $tournament->students()->sync($request->input('student_ids'));
-            }
+        try {
+            DB::transaction(function () use ($validated, $syncStudents, $studentIds) {
+                $tournament = Tournament::create($validated);
+
+                if ($syncStudents) {
+                    $this->syncActiveStudents($tournament, $studentIds);
+                }
+            });
 
             return redirect()->route('tournaments.index')->with('success', 'Torneo creado correctamente.');
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (\Throwable $th) {
             CustomLogger::logException($th);
             return back()->withInput()->with('error', 'No se pudo crear el torneo: ' . $th->getMessage());
@@ -72,20 +86,30 @@ class TournamentController extends Controller
             'costo_total_inscripcion' => 'nullable|numeric|min:0',
             'costo_total_arbitraje' => 'nullable|numeric|min:0',
             'costo_arbitraje_partido' => 'nullable|numeric|min:0',
+            'student_ids' => 'nullable|array',
+            'student_ids.*' => 'integer|distinct',
         ]);
 
         if (!auth()->user()->is_super_admin) {
             unset($validated['club_id']);
         }
 
-        try {
-            $tournament->update($validated);
+        $syncStudents = array_key_exists('student_ids', $validated);
+        $studentIds = $validated['student_ids'] ?? [];
+        unset($validated['student_ids']);
 
-            if ($request->has('student_ids')) {
-                $tournament->students()->sync($request->input('student_ids'));
-            }
+        try {
+            DB::transaction(function () use ($tournament, $validated, $syncStudents, $studentIds) {
+                $tournament->update($validated);
+
+                if ($syncStudents) {
+                    $this->syncActiveStudents($tournament, $studentIds);
+                }
+            });
 
             return redirect()->route('tournaments.index')->with('success', 'Torneo actualizado correctamente.');
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (\Throwable $th) {
             CustomLogger::logException($th);
             return back()->withInput()->with('error', 'No se pudo actualizar el torneo: ' . $th->getMessage());
@@ -101,6 +125,31 @@ class TournamentController extends Controller
             CustomLogger::logException($th);
             return redirect()->route('tournaments.index')->with('error', 'No se pudo eliminar el torneo: ' . $th->getMessage());
         }
+    }
+
+    private function syncActiveStudents(Tournament $tournament, array $studentIds): void
+    {
+        $query = Student::active()->whereIn('id', $studentIds);
+
+        if ($tournament->club_id) {
+            $query->where('club_id', $tournament->club_id);
+        }
+
+        if ($query->count() !== count($studentIds)) {
+            throw ValidationException::withMessages([
+                'student_ids' => 'Solo se pueden asignar deportistas activos de la escuela del torneo.',
+            ]);
+        }
+
+        $inactiveStudentIdsQuery = $tournament->students()
+            ->where('students.activo', false);
+
+        if ($tournament->club_id) {
+            $inactiveStudentIdsQuery->where('students.club_id', $tournament->club_id);
+        }
+
+        $inactiveStudentIds = $inactiveStudentIdsQuery->pluck('students.id')->all();
+        $tournament->students()->sync(array_unique(array_merge($studentIds, $inactiveStudentIds)));
     }
 
     public function payments(Tournament $tournament)

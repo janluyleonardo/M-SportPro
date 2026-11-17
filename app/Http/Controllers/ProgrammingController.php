@@ -71,7 +71,7 @@ class ProgrammingController extends Controller
     public function index(Request $request)
     {
 
-      $studentList = Student::select('id', 'nomDeportista', 'Categoria')
+      $studentList = Student::active()->select('id', 'nomDeportista', 'Categoria')
       ->orderByDesc('id')
       ->get();
       $texto = trim($request->get('texto'));

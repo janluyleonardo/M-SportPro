@@ -18,6 +18,9 @@ class PaymentController extends Controller
     {
         $search = $request->get('search');
         $user = auth()->user();
+        $pendingVouchersCount = Payment::whereNotNull('voucher')
+            ->where('voucher_status', 'pending')
+            ->count();
 
         // Seguridad y UX: Si no es Admin, SubAdmin ni Profesor, manejar redirección directa
         if (!$user->hasRole(['Admin', 'SubAdmin', 'Profesor'])) {
@@ -57,7 +60,18 @@ class PaymentController extends Controller
         $students = $query->orderBy('nomDeportista', 'asc')->paginate(6);
         $students->getCollection()->each->updateBalance();
 
-        return view('payments.index', compact('students', 'search'));
+        return view('payments.index', compact('students', 'search', 'pendingVouchersCount'));
+    }
+
+    public function pendingVouchers()
+    {
+        $payments = Payment::with('student')
+            ->whereNotNull('voucher')
+            ->where('voucher_status', 'pending')
+            ->orderBy('created_at')
+            ->paginate(10);
+
+        return view('payments.pending-vouchers', compact('payments'));
     }
 
     public function show(Student $student)

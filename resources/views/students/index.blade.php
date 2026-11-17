@@ -22,6 +22,7 @@
           <div>
             <p class="text-sm text-gray-500 font-medium">{{ __('Total Athletes') }}</p>
             <p class="text-2xl font-bold text-gray-900 leading-none">{{ $studentsCount }}</p>
+            <p class="text-xs text-gray-500 mt-1">Activos: {{ $activeStudentsCount }} · Inactivos: {{ $studentsCount - $activeStudentsCount }}</p>
           </div>
         </div>
 
@@ -180,12 +181,13 @@
                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{{ __('Name') }}</th>
                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{{ __('DocumentNumber') }}</th>
                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{{ __('Category') }}</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
                 <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-100">
               @forelse ($students as $index => $student)
-                <tr class="hover:bg-blue-50/30 transition-colors duration-200" x-data="{ showModal: false, deleteModal: false }">
+                <tr class="hover:bg-blue-50/30 transition-colors duration-200 {{ $student->activo ? '' : 'bg-gray-50' }}" x-data="{ showModal: false, deleteModal: false }">
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
                     {{ $students->firstItem() + $index }}
                   </td>
@@ -217,6 +219,11 @@
                       {{ __($student->Categoria) }}
                     </span>
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full {{ $student->activo ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' }}">
+                      {{ $student->activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div class="flex justify-end space-x-2">
                       <a href="{{ route('imprimir', $student) }}" target="_blank" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors border border-blue-100" title="{{__('Print')}}">
@@ -229,9 +236,19 @@
                         <i class="bi bi-pencil-fill"></i>
                       </a>
                       @role('Admin')
-                        <button @click="deleteModal = true" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors border border-red-100" title="{{__('Delete')}}">
-                          <i class="bi bi-trash-fill"></i>
-                        </button>
+                        @if($student->activo)
+                          <button @click="deleteModal = true" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors border border-red-100" title="Desactivar deportista">
+                            <i class="bi bi-person-dash-fill"></i>
+                          </button>
+                        @else
+                          <form action="{{ route('students.activate', $student) }}" method="POST" class="inline">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="text-green-700 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors border border-green-100" title="Reactivar deportista">
+                              <i class="bi bi-person-check-fill"></i>
+                            </button>
+                          </form>
+                        @endif
                       @endrole
                     </div>
                     @include('students.partials.modals')
@@ -239,7 +256,7 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="5" class="px-6 py-16 text-center text-gray-500">
+                  <td colspan="6" class="px-6 py-16 text-center text-gray-500">
                     <div class="flex flex-col items-center justify-center">
                       <div class="bg-gray-100 rounded-full p-4 mb-4">
                         <i class="bi bi-inbox text-4xl text-gray-400"></i>
@@ -278,6 +295,7 @@
                       <span class="text-[9px] font-black text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Becado</span>
                     @endif
                     <div class="text-[10px] font-black bg-club-secondary text-gray-900 px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block">Categoría {{ __($student->Categoria) }}</div>
+                    <div class="text-[10px] font-black px-1.5 py-0.5 rounded-md uppercase mt-1 inline-block {{ $student->activo ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' }}">{{ $student->activo ? 'Activo' : 'Inactivo' }}</div>
                   </div>
                 </div>
                 <div class="text-right">
@@ -302,9 +320,19 @@
                     <i class="bi bi-pencil-fill"></i>
                   </a>
                   @role('Admin')
-                    <button @click="deleteModal = true" class="w-8 h-8 flex items-center justify-center text-red-600 bg-white hover:bg-red-50 rounded-lg transition-colors shadow-sm border border-gray-100">
-                      <i class="bi bi-trash-fill"></i>
-                    </button>
+                    @if($student->activo)
+                      <button @click="deleteModal = true" class="w-8 h-8 flex items-center justify-center text-red-600 bg-white hover:bg-red-50 rounded-lg transition-colors shadow-sm border border-gray-100" title="Desactivar deportista">
+                        <i class="bi bi-person-dash-fill"></i>
+                      </button>
+                    @else
+                      <form action="{{ route('students.activate', $student) }}" method="POST" class="inline">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="w-8 h-8 flex items-center justify-center text-green-700 bg-white hover:bg-green-50 rounded-lg transition-colors shadow-sm border border-gray-100" title="Reactivar deportista">
+                          <i class="bi bi-person-check-fill"></i>
+                        </button>
+                      </form>
+                    @endif
                   @endrole
                 </div>
               </div>

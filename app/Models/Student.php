@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Traits\BelongsToClub;
 
 class Student extends Model
@@ -60,7 +63,13 @@ class Student extends Model
 
     protected $casts = [
         'becado' => 'boolean',
+        'activo' => 'boolean',
     ];
+
+  public function scopeActive(Builder $query): Builder
+  {
+      return $query->where('activo', true);
+  }
 
   public function payments()
   {
@@ -75,6 +84,16 @@ class Student extends Model
   public function tournaments()
   {
       return $this->belongsToMany(Tournament::class, 'student_tournament');
+  }
+
+  public function psychologicalEvaluations(): HasMany
+  {
+      return $this->hasMany(PsychologicalEvaluation::class);
+  }
+
+  public function latestPsychologicalEvaluation(): HasOne
+  {
+      return $this->hasOne(PsychologicalEvaluation::class)->latestOfMany('evaluated_on');
   }
 
   /**

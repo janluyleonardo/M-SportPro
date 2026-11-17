@@ -43,7 +43,7 @@ class AttendanceController extends Controller
         }
 
         // Una sesión unificada incluye los estudiantes de todas sus categorías.
-        $students = Student::whereIn('Categoria', $categories)->orderBy('nomDeportista')->get();
+        $students = Student::active()->whereIn('Categoria', $categories)->orderBy('nomDeportista')->get();
 
         // Sincronizar saldos antes de mostrar la lista
         $students->each->updateBalance();
@@ -76,7 +76,12 @@ class AttendanceController extends Controller
         if ($categories->isEmpty()) {
             $categories = collect([$schedule->category]);
         }
-        $students = Student::whereIn('Categoria', $categories)->get();
+        $students = Student::active()->whereIn('Categoria', $categories)->get();
+        $submittedStudentIds = collect(array_keys($validated['students']))->map(fn ($id) => (int) $id);
+        if ($submittedStudentIds->diff($students->pluck('id'))->isNotEmpty()) {
+            return back()->with('error', 'No se puede registrar asistencia para deportistas inactivos o fuera de las categorías de esta clase.');
+        }
+
         $students->each->updateBalance();
         $overriddenStudentIds = AttendanceOverride::where('class_schedule_id', $schedule->id)
             ->pluck('student_id');
@@ -185,4 +190,3 @@ class AttendanceController extends Controller
             ->with('success', 'Habilitación revocada.');
     }
 }
-

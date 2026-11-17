@@ -14,6 +14,7 @@ use App\Http\Controllers\TreasuryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PasswordChangeController;
 use App\Http\Controllers\TournamentController;
+use App\Http\Controllers\PsychologicalFollowupController;
 use App\Http\Controllers\SuperAdmin\ClubController;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
@@ -45,12 +46,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 return view('dashboard', compact('clubs'));
             }
 
-            if (!auth()->user()->hasAnyRole(['Admin', 'SubAdmin', 'Profesor', 'Padre', 'Deportista'])) {
+            if (!auth()->user()->hasAnyRole(['Admin', 'SubAdmin', 'Profesor', 'Padre', 'Deportista', 'Psicólogo'])) {
                 abort(403, 'Acción no autorizada.');
             }
 
             return view('dashboard');
         })->name('dashboard');
+
+        Route::middleware(['role:Admin|Psicólogo', 'module:psychological-followup'])
+            ->prefix('psychological-followups')
+            ->name('psychological-followups.')
+            ->controller(PsychologicalFollowupController::class)
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+                Route::get('/students/{student}', 'show')->name('show');
+            });
 
         // 2. Módulo de Estudiantes (Solo Admin y Profesor)
         Route::middleware(['role:Admin|SubAdmin|Profesor'])->group(function () {
@@ -90,6 +102,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // ── Rutas de Gestión: Admin y SubAdmin (crear / editar) ────────────────
         Route::middleware(['role:Admin|SubAdmin'])->group(function () {
             Route::middleware(['module:financial'])->group(function () {
+                Route::get('payments/pending-vouchers', [PaymentController::class, 'pendingVouchers'])->name('payments.pending-vouchers');
                 Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
                 Route::put('payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
                 Route::post('payments/{payment}/verify', [PaymentController::class, 'verifyVoucher'])->name('payments.verify');
@@ -129,6 +142,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::delete('locations/{location}', [LocationController::class, 'destroy'])->name('locations.destroy');
             });
             Route::delete('/students/{student}', [StudentsController::class, 'destroy'])->name('students.destroy');
+            Route::patch('/students/{student}/activate', [StudentsController::class, 'activate'])->name('students.activate');
             Route::delete('/programming/{programming}', [ProgrammingController::class, 'destroy'])->name('programming.destroy');
         });
 
@@ -208,6 +222,7 @@ Route::get('/index', [generalController::class, 'index'])->name('index');
 Route::get('/Programming', [generalController::class, 'Programming'])->name('Programming');
 Route::get('/Announcements', [generalController::class, 'Announcements'])->name('Announcements');
 
+
 require __DIR__ . '/auth.php';
 
 
@@ -216,6 +231,12 @@ class TestMail extends Mailable
     public function build()
     {
         return $this->subject('Prueba de correo')
-                    ->view('emails.test');
+        ->view('emails.test');
     }
 }
+
+Route::get('/test-email', function () {
+    Mail::to('janluy.moreno@gmail.com')->send(new TestMail());
+
+    return 'Correo de prueba enviado.';
+});

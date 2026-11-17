@@ -52,6 +52,12 @@ class ModuleSeeder extends Seeder
                 'description' => 'Gestión de canchas y disponibilidad para clases y partidos',
                 'is_active' => true,
             ],
+            [
+                'name' => 'Seguimiento psicológico',
+                'slug' => 'psychological-followup',
+                'description' => 'Evaluación y seguimiento confidencial del proceso de los deportistas',
+                'is_active' => true,
+            ],
         ];
 
         foreach ($modules as $module) {

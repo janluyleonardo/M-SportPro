@@ -6,3 +6,14 @@
 .collapse.show {
     visibility: visible;
 }
+
+.psychological-rating:checked + span {
+    background-color: var(--club-primary);
+    border-color: var(--club-primary);
+    color: #fff;
+}
+
+.psychological-rating:focus-visible + span {
+    outline: 2px solid var(--club-primary);
+    outline-offset: 2px;
+}

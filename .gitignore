@@ -26,4 +26,5 @@ yarn-error.log
 Thumbs.db
 backup_legacy/
 /public/images/Photos/
+/public/images/vouchers/
 /public/images/logos/

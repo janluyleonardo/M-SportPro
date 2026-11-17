@@ -41,6 +41,7 @@ class ClassScheduleController extends Controller
         $clubs = auth()->user()->is_super_admin ? \App\Models\Club::all() : collect();
 
         $categoriesQuery = Student::query()
+            ->active()
             ->whereNotNull('Categoria')
             ->where('Categoria', '!=', '');
         if (!auth()->user()->is_super_admin) {
